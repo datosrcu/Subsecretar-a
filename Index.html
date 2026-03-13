@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secretaría de Innovación y Transformación Digital - GCBA</title>
+
+    <!-- Tipografía Inter de Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS (Simulando clases de Obelisco V2) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        obelisco: {
+                            yellow: '#009DE0',
+                            yellowHover: '#0088C4',
+                            dark: '#212529',
+                            gray: '#495057',
+                            light: '#F8F9FA',
+                            border: '#DEE2E6',
+                            blue: '#0072BB'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilos base adicionales para simular Obelisco */
+        body {
+            background-color: #ffffff;
+            color: #212529;
+            line-height: 1.5;
+        }
+
+        .obelisco-card {
+            transition: box-shadow 0.3s ease;
+        }
+
+        .obelisco-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+    </style>
+</head>
+
+<body class="antialiased flex flex-col min-h-screen">
+
+    <!-- CABECERA PRINCIPAL -->
+    <header class="bg-white text-obelisco-dark py-3 border-b border-obelisco-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <!-- Escudo -->
+                <img src="Escudo.png" alt="Escudo" class="h-16">
+            </div>
+            <div class="flex items-center space-x-4">
+
+                <button
+                    class="flex items-center space-x-2 bg-transparent text-obelisco-dark border border-obelisco-dark rounded-lg px-4 py-2 hover:bg-gray-100 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <span class="font-medium">Buscar</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- LÍNEA DECORATIVA AZÚL -->
+    <div class="h-1 w-full" style="background-color: #009DE0;"></div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-grow">
+        <!-- Cabecera de Contenido -->
+        <div style="background-color: #f3f6f9;">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <!-- Breadcrumb -->
+                <nav class="mb-6">
+                    <a href="#" class="text-obelisco-blue flex items-center font-medium hover:underline text-sm gap-1">
+                        Río Cuarto
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        Secretaría de Gestión y Participación Ciudadana
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        Subsecretaría de Estadística
+                    </a>
+                </nav>
+
+                <!-- Título y Bajada -->
+                <section class="mb-10">
+                    <h1 class="text-4xl md:text-5xl font-bold text-obelisco-dark mb-4 leading-tight">Subsecretaría de
+                        Estadística</h1>
+                    <p class="text-lg md:text-xl text-obelisco-gray max-w-4xl">
+                        Generamos datos precisos y análisis estratégicos para impulsar el desarrollo de Río Cuarto y
+                        mejorar el bienestar de cada vecino.
+                    </p>
+                </section>
+
+                <!-- Tabs de navegación -->
+                <div class="flex space-x-6">
+                    <!-- Tab Institucional -->
+                    <button
+                        class="bg-white text-obelisco-dark font-medium px-4 py-2 rounded-xl shadow-sm border border-gray-100 flex items-center hover:bg-gray-50 transition">
+                        Institucional
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 mt-1" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <!-- Tab Transparencia activa -->
+                    <button
+                        class="bg-white text-obelisco-dark font-medium px-4 py-2 rounded-xl shadow-sm border border-gray-100 flex items-center hover:bg-gray-50 transition">
+                        Transparencia activa
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2 mt-1" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <!-- Sección: TecBA Hero -->
+            <section
+                class="mb-16 bg-obelisco-light rounded-2xl overflow-hidden flex flex-col md:flex-row items-center obelisco-card border border-obelisco-border">
+                <div class="w-full md:w-1/2">
+                    <!-- Espacio para Imagen/Logo TecBA -->
+                    <img src="https://placehold.co/800x600/1C3440/FFFFFF?text=Banner+tecBA" alt="tecBA logo"
+                        class="w-full h-full object-cover">
+                </div>
+                <div class="w-full md:w-1/2 p-8 md:p-12">
+                    <h2 class="text-3xl font-bold text-obelisco-dark mb-4">¿Qué es R/O4 Data?</h2>
+                    <p class="text-obelisco-gray mb-8 text-lg">
+                        Es un evento donde todos los referentes de datos, tanto internos como externos de la ciudad de
+                        Río Cuarto y la región, se encuentran para compartir información, experiencias, procesos de
+                        trabajo e innovación.
+                    </p>
+                    <button
+                        class="bg-obelisco-yellow hover:bg-obelisco-yellowHover text-white font-bold py-3 px-6 rounded-lg transition shadow-sm">
+                        Conocé más
+                    </button>
+                </div>
+            </section>
+
+            <!-- Sección: Proyectos TecBA -->
+            <section class="mb-16">
+                <h2 class="text-3xl font-bold text-obelisco-dark mb-8">Conocé los proyectos de la Subsecretaría de
+                    Estadística</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                    <!-- Card 1 -->
+                    <a href="observatorio-gestion.html"
+                        class="obelisco-card bg-white border border-obelisco-border rounded-xl p-6 flex flex-col h-full hover:bg-gray-50 transition block">
+                        <div
+                            class="mb-4 h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" style="color: #009DE0;" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-obelisco-dark mb-2">Observatorio de Gestión</h3>
+                        <p class="text-obelisco-gray flex-grow">Monitoreamos y analizamos de forma continua los
+                            indicadores clave de la gestión municipal para asegurar la eficiencia en la toma de
+                            decisiones.</p>
+                    </a>
+
+                    <!-- Card 2 -->
+                    <div
+                        class="obelisco-card bg-white border border-obelisco-border rounded-xl p-6 flex flex-col h-full">
+                        <div
+                            class="mb-4 h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" style="color: #FF3CB2;" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-obelisco-dark mb-2">Observatorio de Seguridad</h3>
+                        <p class="text-obelisco-gray flex-grow">Análisis estratégico de datos delictivos y de prevención
+                            para el diseño de políticas públicas orientadas a mejorar la seguridad en nuestra ciudad.
+                        </p>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div
+                        class="obelisco-card bg-white border border-obelisco-border rounded-xl p-6 flex flex-col h-full">
+                        <div
+                            class="mb-4 h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" style="color: #F2C100;" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-obelisco-dark mb-2">Mesa de Ciberseguridad</h3>
+                        <p class="text-obelisco-gray flex-grow">Espacio de coordinación técnica para fortalecer la
+                            infraestructura digital municipal y proteger la información de los ciudadanos.</p>
+                    </div>
+
+                    <!-- Card 4 -->
+                    <div
+                        class="obelisco-card bg-white border border-obelisco-border rounded-xl p-6 flex flex-col h-full">
+                        <div
+                            class="mb-4 h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" style="color: #F27C00;"
+                                fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-obelisco-dark mb-2">@datosrcu</h3>
+                        <p class="text-obelisco-gray flex-grow">Nuestra plataforma de comunicación y divulgación
+                            estadística donde compartimos insights relevantes sobre la realidad de Río Cuarto.</p>
+                    </div>
+
+                    <!-- Card 5 -->
+                    <div
+                        class="obelisco-card bg-white border border-obelisco-border rounded-xl p-6 flex flex-col h-full">
+                        <div
+                            class="mb-4 h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" style="color: #00C96B;" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 21a9.003 9.003 0 008.341-5.647 9.003 9.003 0 00-8.341-5.647 9.003 9.003 0 00-8.341 5.647A9.003 9.003 0 0012 21z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 11c0 3.333-1 6-4 9 3 0 6-2.667 6-9s-3-9-6-9c3 3 4 5.667 4 9z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-obelisco-dark mb-2">Observatorio de Ambiente</h3>
+                        <p class="text-obelisco-gray flex-grow">Seguimiento detallado de indicadores ambientales y
+                            climáticos para promover un desarrollo sostenible y responsable en la región.</p>
+                    </div>
+
+                    <!-- Card 6 -->
+                    <div
+                        class="obelisco-card bg-white border border-obelisco-border rounded-xl p-6 flex flex-col h-full">
+                        <div
+                            class="mb-4 h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" style="color: #FF3CB2;" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-obelisco-dark mb-2">Sistema Único de Atención al Vecino</h3>
+                        <p class="text-obelisco-gray flex-grow">Centralizamos todos los reclamos, solicitudes y
+                            consultas de los vecinos para brindar una respuesta ágil, trazable y efectiva.</p>
+                    </div>
+
+                    <!-- Card 7 -->
+                    <div
+                        class="obelisco-card bg-white border border-obelisco-border rounded-xl p-6 flex flex-col h-full">
+                        <div
+                            class="mb-4 h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" style="color: #009DE0;" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-obelisco-dark mb-2">Plan de Inteligencia Artificial Río Cuarto
+                        </h3>
+                        <p class="text-obelisco-gray flex-grow">Estrategia municipal para integrar soluciones de IA que
+                            optimicen los servicios públicos y mejoren la interacción con la ciudadanía.</p>
+                    </div>
+
+                    <!-- Card 8 -->
+                    <div
+                        class="obelisco-card bg-white border border-obelisco-border rounded-xl p-6 flex flex-col h-full">
+                        <div
+                            class="mb-4 h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" style="color: #F2C100;" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-obelisco-dark mb-2">Datos Abiertos Río Cuarto</h3>
+                        <p class="text-obelisco-gray flex-grow">Portal de transparencia donde ponemos a disposición de
+                            la comunidad datos públicos en formatos abiertos para su libre uso y análisis.</p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Sección: Trámites y servicios digitales -->
+            <section class="mb-16">
+                <h2 class="text-3xl font-bold text-obelisco-dark mb-8">Trámites y servicios digitales</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <a href="#"
+                        class="obelisco-card bg-white border border-obelisco-border rounded-xl p-6 flex flex-col h-full hover:bg-obelisco-light transition">
+                        <h3 class="text-lg font-bold text-obelisco-blue mb-2 underline">Plataforma de Trámites a
+                            Distancia (TAD)</h3>
+                        <p class="text-obelisco-gray text-sm flex-grow">Gestioná todos tus trámites de manera virtual.
+                        </p>
+                    </a>
+                    <a href="#"
+                        class="obelisco-card bg-white border border-obelisco-border rounded-xl p-6 flex flex-col h-full hover:bg-obelisco-light transition">
+                        <h3 class="text-lg font-bold text-obelisco-blue mb-2 underline">BA Colaborativa</h3>
+                        <p class="text-obelisco-gray text-sm flex-grow">Hacé solicitudes y reclamos de manera rápida y
+                            sencilla, desde cualquier lugar.</p>
+                    </a>
+                    <a href="#"
+                        class="obelisco-card bg-white border border-obelisco-border rounded-xl p-6 flex flex-col h-full hover:bg-obelisco-light transition">
+                        <h3 class="text-lg font-bold text-obelisco-blue mb-2 underline">Datos BA</h3>
+                        <p class="text-obelisco-gray text-sm flex-grow">Accedé a los todos los datos del Gobierno de la
+                            Ciudad.</p>
+                    </a>
+                    <a href="#"
+                        class="obelisco-card bg-white border border-obelisco-border rounded-xl p-6 flex flex-col h-full hover:bg-obelisco-light transition">
+                        <h3 class="text-lg font-bold text-obelisco-blue mb-2 underline">Firma Digital Ciudad</h3>
+                        <p class="text-obelisco-gray text-sm flex-grow">Generá certificados digitales de forma segura y
+                            confiable.</p>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Sección: Dalcar Data Lake -->
+            <section
+                class="mb-16 bg-obelisco-light border border-obelisco-border rounded-2xl p-8 md:p-12 text-center obelisco-card relative overflow-hidden">
+                <div
+                    class="mx-auto w-20 h-20 mb-6 flex items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-[#009DE0]" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 7v10c0 1.105 3.582 2 8 2s8-.895 8-2V7m-16 0c0 1.105 3.582 2 8 2s8-.895 8-2M4 7c0-1.105 3.582-2 8-2s8 .895 8 2m-16 5c0 1.105 3.582 2 8 2s8-.895 8-2M20 12v5" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M12 12v6M8 11.5v3.5M16 11.5v3.5" opacity="0.5" />
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-obelisco-dark mb-4">"Dalcar", el data lake del Gobierno de Río Cuarto
+                </h2>
+                <p class="text-obelisco-gray text-lg mb-8 max-w-3xl mx-auto">
+                    Centralizamos y procesamos grandes volúmenes de datos municipales para convertirlos en conocimiento
+                    estratégico, facilitando la transparencia y la innovación tecnológica.
+                </p>
+                <button
+                    class="bg-white border border-obelisco-border hover:bg-gray-50 text-obelisco-dark font-bold py-3 px-6 rounded-lg transition shadow-sm">
+                    Conocé más sobre "Dalcar"
+                </button>
+            </section>
+
+            <!-- Sección: Noticias -->
+            <section class="mb-16">
+                <div class="flex justify-between items-end mb-8">
+                    <h2 class="text-3xl font-bold text-obelisco-dark">Noticias</h2>
+                    <a href="#" class="text-obelisco-blue font-semibold hover:underline hidden md:block">Ir a todas las
+                        noticias</a>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Noticia 1 -->
+                    <div
+                        class="obelisco-card bg-white border border-obelisco-border rounded-xl overflow-hidden flex flex-col h-full">
+                        <div class="h-48 w-full bg-gray-200">
+                            <!-- Espacio Imagen Noticia -->
+                            <img src="https://placehold.co/600x400?text=Noticia+1" alt="Cybercity"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <span
+                                class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">CIBERSEGURIDAD</span>
+                            <h3 class="text-xl font-bold text-obelisco-dark mb-3">Cybercity: VI Jornada de
+                                Ciberseguridad Ciudadana</h3>
+                            <p class="text-obelisco-gray text-sm mb-4 flex-grow">Vuelve el evento sobre seguridad
+                                informática de la Ciudad que en 2025 reunió a más de mil....</p>
+                            <span class="text-sm text-gray-500 font-medium">Fecha de publicación: 03/03/2026</span>
+                        </div>
+                    </div>
+
+                    <!-- Noticia 2 -->
+                    <div
+                        class="obelisco-card bg-white border border-obelisco-border rounded-xl overflow-hidden flex flex-col h-full">
+                        <div class="h-48 w-full bg-gray-200">
+                            <!-- Espacio Imagen Noticia -->
+                            <img src="https://placehold.co/600x400?text=Noticia+2" alt="BA DATA"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">DATOS
+                                ABIERTOS</span>
+                            <h3 class="text-xl font-bold text-obelisco-dark mb-3">BA DATA incorpora nuevos datasets
+                                sobre higiene urbana y transporte público</h3>
+                            <p class="text-obelisco-gray text-sm mb-4 flex-grow">Estas incorporaciones fortalecen el
+                                acceso a datos públicos clave y promueven su uso para...</p>
+                            <span class="text-sm text-gray-500 font-medium">Fecha de publicación: 27/01/2026</span>
+                        </div>
+                    </div>
+
+                    <!-- Noticia 3 -->
+                    <div
+                        class="obelisco-card bg-white border border-obelisco-border rounded-xl overflow-hidden flex flex-col h-full">
+                        <div class="h-48 w-full bg-gray-200">
+                            <!-- Espacio Imagen Noticia -->
+                            <img src="https://placehold.co/600x400?text=Noticia+3" alt="Tecweek Play"
+                                class="w-full h-full object-cover">
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">GAMING</span>
+                            <h3 class="text-xl font-bold text-obelisco-dark mb-3">Tecweek Play - TDJ Fest: el evento que
+                                reunió a la comunidad gamer en Costa Salguero</h3>
+                            <p class="text-obelisco-gray text-sm mb-4 flex-grow">Con charlas, paneles, showmatches,
+                                cosplay y shows musicales, la Ciudad realizó una jornad.....</p>
+                            <span class="text-sm text-gray-500 font-medium">Fecha de publicación: 17/11/2025</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 md:hidden">
+                    <a href="#" class="text-obelisco-blue font-semibold hover:underline">Ir a todas las noticias</a>
+                </div>
+            </section>
+
+            <!-- Sección: Institucional y Ubicación -->
+            <section class="mb-16 border-t border-obelisco-border pt-12">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+
+                    <!-- Información Institucional -->
+                    <div>
+                        <h2 class="text-3xl font-bold text-obelisco-dark mb-6">Información institucional</h2>
+
+                        <!-- Tarjetas de Autoridades -->
+                        <div class="space-y-4 mb-8">
+                            <!-- Roger Fabre -->
+                            <div
+                                class="flex items-center p-4 bg-white border border-obelisco-border rounded-xl shadow-sm">
+                                <div
+                                    class="w-20 h-20 rounded-lg bg-gray-100 overflow-hidden border border-obelisco-border mr-4 flex-shrink-0">
+                                    <img src="https://placehold.co/80x80/f3f6f9/212529?text=RF" alt="Roger Fabre"
+                                        class="w-full h-full object-cover">
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold text-obelisco-dark">Roger Fabre</h3>
+                                    <p class="text-obelisco-gray text-sm">Subsecretario de Estadística</p>
+                                    <p class="text-obelisco-blue text-xs mt-1">rfabre@riocuarto.gov.ar</p>
+                                </div>
+                            </div>
+
+                            <!-- Mónica Anelo -->
+                            <div
+                                class="flex items-center p-4 bg-white border border-obelisco-border rounded-xl shadow-sm">
+                                <div
+                                    class="w-20 h-20 rounded-lg bg-gray-100 overflow-hidden border border-obelisco-border mr-4 flex-shrink-0">
+                                    <img src="https://placehold.co/80x80/f3f6f9/212529?text=MA" alt="Mónica Anelo"
+                                        class="w-full h-full object-cover">
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-bold text-obelisco-dark">Mónica Anelo</h4>
+                                    <p class="text-obelisco-gray text-sm">Dir.ª de Estadística, Control de Calidad y
+                                        Procesos</p>
+                                    <p class="text-obelisco-blue text-xs mt-1">manelo@riocuarto.gov.ar</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contacto General -->
+                        <div class="bg-obelisco-light p-6 rounded-xl border border-obelisco-border mb-8">
+                            <h3 class="text-xl font-bold text-obelisco-dark mb-4">Contacto de la oficina</h3>
+                            <ul class="text-obelisco-gray space-y-3">
+                                <li class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-obelisco-blue"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    </svg>
+                                    <span><strong>Teléfono:</strong> 0800-444-5454 (Int. 808)</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-obelisco-blue"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    <span><strong>Email:</strong> <a href="mailto:datos@riocuarto.gov.ar"
+                                            class="text-obelisco-blue hover:underline">datos@riocuarto.gov.ar</a></span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl font-bold text-obelisco-dark mb-3">Seguinos en</h3>
+                            <div class="flex space-x-4">
+                                <a href="#"
+                                    class="text-obelisco-blue hover:text-blue-800 transition underline">Facebook</a>
+                                <a href="#"
+                                    class="text-obelisco-blue hover:text-blue-800 transition underline">Instagram</a>
+                                <a href="#"
+                                    class="text-obelisco-blue hover:text-blue-800 transition underline">Twitter</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ubicación y Mapa -->
+                    <div>
+                        <h2 class="text-3xl font-bold text-obelisco-dark mb-6">Ubicación</h2>
+                        <p class="text-obelisco-gray font-medium mb-4 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Dirección: Pje. de la Concepción 650
+                        </p>
+
+                        <div
+                            class="w-full h-64 bg-gray-200 rounded-xl overflow-hidden mb-4 border border-obelisco-border">
+                            <!-- Mapa Interactivo -->
+                            <iframe width="100%" height="100%" style="border:0" loading="lazy" allowfullscreen
+                                src="https://maps.google.com/maps?q=Pje.%20de%20la%20Concepci%C3%B3n%20650,%20R%C3%ADo%20Cuarto,%20Argentina&t=&z=15&ie=UTF8&iwloc=&output=embed">
+                            </iframe>
+                        </div>
+
+                        <button
+                            class="w-full bg-obelisco-yellow hover:bg-obelisco-yellowHover text-white font-bold py-3 px-6 rounded-lg transition shadow-sm text-center">
+                            Cómo llego
+                        </button>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Sección: Feedback (Útil) -->
+            <section
+                class="bg-obelisco-light border border-obelisco-border rounded-xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between mb-8">
+                <h3 class="text-xl font-bold text-obelisco-dark mb-4 md:mb-0">¿Te fue útil esta página?</h3>
+                <div class="flex space-x-4 w-full md:w-auto">
+                    <button
+                        class="flex-1 md:flex-none bg-white border border-obelisco-border hover:bg-gray-50 text-obelisco-dark font-semibold py-2 px-6 rounded-lg transition">
+                        No me sirvió
+                    </button>
+                    <button
+                        class="flex-1 md:flex-none bg-obelisco-dark hover:bg-gray-800 text-white font-semibold py-2 px-6 rounded-lg transition">
+                        Sí, me fue útil
+                    </button>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- FOOTER GCBA -->
+    <footer class="bg-obelisco-dark text-white pt-12 pb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="mb-10">
+                <h3 class="text-lg font-bold mb-4">Teléfonos útiles</h3>
+                <div class="flex flex-wrap gap-x-6 gap-y-3 text-sm text-gray-300">
+                    <span><strong>102</strong> - Niñez y Adolescencia</span>
+                    <span><strong>103</strong> - Emergencias</span>
+                    <span><strong>107</strong> - SAME</span>
+                    <span><strong>911</strong> - Policía</span>
+                    <span><strong>144</strong> - Violencia de género</span>
+                    <span><strong>147</strong> - Atención ciudadana</span>
+                    <a href="#"
+                        class="text-obelisco-yellow hover:underline ml-auto block w-full mt-2 md:w-auto md:mt-0">Ver
+                        todos los teléfonos</a>
+                </div>
+            </div>
+
+            <div
+                class="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-start md:items-center">
+
+                <div class="flex flex-col mb-6 md:mb-0 space-y-4">
+                    <!-- Espacio Logos Footer -->
+                    <div class="flex items-center space-x-4">
+                        <img src="https://placehold.co/120x40/212529/FFFFFF?text=Vamos+BA" alt="Vamos Buenos Aires"
+                            class="h-10">
+                        <img src="https://placehold.co/120x40/212529/FFFFFF?text=BA+Ciudad" alt="Buenos Aires Ciudad"
+                            class="h-10">
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-start md:items-end">
+                    <div class="mb-4">
+                        <h4 class="text-sm font-bold mb-2">Redes de la ciudad</h4>
+                        <div class="flex space-x-3 text-sm text-gray-300">
+                            <a href="#" class="hover:text-white transition">Facebook</a>
+                            <a href="#" class="hover:text-white transition">Instagram</a>
+                            <a href="#" class="hover:text-white transition">Twitter</a>
+                            <a href="#" class="hover:text-white transition">YouTube</a>
+                            <a href="#" class="hover:text-white transition">LinkedIn</a>
+                            <a href="#" class="hover:text-white transition">TikTok</a>
+                            <a href="#" class="hover:text-white transition">Pinterest</a>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-x-4 gap-y-2 text-xs text-gray-400">
+                        <a href="#" class="hover:text-white transition">Boletín oficial</a>
+                        <a href="#" class="hover:text-white transition">Términos y condiciones</a>
+                        <a href="#" class="hover:text-white transition">Política de privacidad</a>
+                        <a href="#" class="hover:text-white transition">Oficios Judiciales</a>
+                        <a href="#" class="hover:text-white transition">Transparencia</a>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="border-t border-gray-700 mt-8 pt-6 text-xs text-gray-500 text-center md:text-left">
+                Los contenidos de buenosaires.gob.ar están licenciados bajo Creative Commons Reconocimiento 2.5
+                Argentina License.
+            </div>
+
+        </div>
+    </footer>
+
+    <!-- BOTÓN FLOTANTE SUAV (WHATSAPP) -->
+    <a href="#"
+        class="fixed bottom-6 right-6 flex items-center bg-white border border-gray-200 rounded-full shadow-lg p-2 pr-6 hover:shadow-xl transition z-50 group cursor-pointer">
+        <div class="w-12 h-12 bg-[#25D366] rounded-full flex items-center justify-center text-white mr-3 shadow-inner">
+            <img src="Digital_Glyph_White.svg" alt="WhatsApp" class="w-7 h-7 object-contain">
+        </div>
+        <span
+            class="text-obelisco-dark font-bold text-lg group-hover:text-[#25D366] transition tracking-tight">SUAV</span>
+    </a>
+
+</body>
+
+</html>
