@@ -171,6 +171,7 @@ async function loadData() {
 
 // --- USERS LISTING & SELECTOR ---
 async function loadUsers() {
+    console.log("Admin JS v1.1 - Loading users...");
     try {
         const snapshot = await getDocs(collection(db, "users"));
         allUsersFetched = [];

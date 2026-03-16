@@ -210,7 +210,10 @@ function checkUserAccess(user, buttonData) {
     if (currentUserRole === 'lector') return true;
 
     // Check if user is an admin by default
-    if (ADMIN_EMAILS.includes(userEmail)) return true;
+    if (ADMIN_EMAILS.includes(userEmail)) {
+        console.log("Access granted: Admin user");
+        return true;
+    }
     
     const allowedUsers = buttonData.allowedUsers || [];
     return allowedUsers.map(email => email.toLowerCase()).includes(userEmail);
