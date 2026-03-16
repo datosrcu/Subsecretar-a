@@ -67,6 +67,10 @@ const fieldCatType = document.getElementById('field-cat-type');
 const fieldCatColorPicker = document.getElementById('field-cat-color-picker');
 const fieldCatColorText = document.getElementById('field-cat-color');
 
+// Search & Filter Listeners for Requests (Added here)
+document.getElementById('filter-request-user')?.addEventListener('input', filterAndRenderRequests);
+document.getElementById('filter-request-status')?.addEventListener('change', filterAndRenderRequests);
+
 // --- State ---
 let isSubmitting = false;
 let globalCategories = []; // to populate dropdowns
@@ -311,7 +315,7 @@ function renderRequests(requests) {
             </td>
         `;
         
-        if (status !== 'approved') {
+        if (status !== 'approved' && status !== 'rejected' && status !== 'restricted') {
             tr.querySelector('.btn-approve').addEventListener('click', () => approveRequest(req.id, req.userEmail, req.buttonId));
         }
         if (status === 'pending') {
@@ -687,17 +691,16 @@ boardForm.addEventListener('submit', async (e) => {
                 const removedUsers = oldUsers.filter(u => !currentUsersLower.includes(u));
                 
                 if (removedUsers.length > 0) {
-                    // Update related requests
-                    for (const email of removedUsers) {
-                        const relatedReqs = allRequestsFetched.filter(r => 
-                            r.buttonId === docId && 
-                            r.userEmail.toLowerCase() === email && 
-                            r.status === 'approved'
-                        );
-                        for (const req of relatedReqs) {
-                            await updateDoc(doc(db, "requests", req.id), { status: 'restricted' });
+                    // Update related requests by querying Firestore (more robust than local cache)
+                    const reqSnap = await getDocs(collection(db, "requests"));
+                    reqSnap.forEach(async (rDoc) => {
+                        const rData = rDoc.data();
+                        if (rData.buttonId === docId && 
+                            removedUsers.includes(rData.userEmail.toLowerCase()) && 
+                            rData.status === 'approved') {
+                            await updateDoc(doc(db, "requests", rDoc.id), { status: 'restricted' });
                         }
-                    }
+                    });
                 }
             }
             await updateDoc(doc(db, "buttons", docId), boardData);

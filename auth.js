@@ -17,6 +17,17 @@ let allCategories = [];
 let currentUserRole = 'usuario';
 let currentUserRequests = [];
 
+// Registration Modal Elements
+const registrationModal = document.getElementById('registration-modal');
+const registrationForm = document.getElementById('registration-form');
+
+const ADMIN_EMAILS = [
+    'datos@riocuarto.gov.ar',
+    'pablofabbroni@gmail.com',
+    'p.fabbroni@riocuarto.gov.ar',
+    'pfabbroni@riocuarto.gov.ar'
+];
+
 // Navigation State
 let currentViewLevel = 'categories'; // 'categories' or 'boards'
 let currentSelectedCategory = null; // ID of the category being viewed
@@ -142,10 +153,19 @@ async function loadUserPermissions(user) {
         ]);
         
         // Cache role
+        let hasProfileInfo = false;
         if (userDoc.exists()) {
-            currentUserRole = userDoc.data().role || 'usuario';
+            const userData = userDoc.data();
+            currentUserRole = userData.role || 'usuario';
+            hasProfileInfo = !!(userData.orgType && userData.orgName && userData.orgRole);
         } else {
             currentUserRole = 'usuario';
+        }
+
+        // Show registration modal if missing info
+        if (!hasProfileInfo && registrationModal) {
+            registrationModal.classList.remove('hidden');
+            registrationModal.classList.add('flex');
         }
 
         // Cache user requests (filtered by email)
@@ -190,7 +210,6 @@ function checkUserAccess(user, buttonData) {
     if (currentUserRole === 'lector') return true;
 
     // Check if user is an admin by default
-    const ADMIN_EMAILS = ['datos@riocuarto.gov.ar', 'pablofabbroni@gmail.com', 'p.fabbroni@riocuarto.gov.ar'];
     if (ADMIN_EMAILS.includes(userEmail)) return true;
     
     const allowedUsers = buttonData.allowedUsers || [];
@@ -383,6 +402,10 @@ async function handleAccessRequest(e) {
         });
 
         document.getElementById('ogb-form-ok').classList.remove('hidden');
+        
+        // Refresh local state to show "En revisión" immediately
+        await loadUserPermissions(auth.currentUser);
+        
         setTimeout(() => {
             document.getElementById('ogb-form-ok').classList.add('hidden');
             document.getElementById('ogb-form').reset();
@@ -720,3 +743,39 @@ function closeTermsModal() {
 openTermsBtn?.addEventListener('click', openTermsModal);
 closeTermsBtn?.addEventListener('click', closeTermsModal);
 closeTermsOverlay?.addEventListener('click', closeTermsModal);
+// --- Registration Form Submission ---
+if (registrationForm) {
+    registrationForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const orgType = document.getElementById('reg-org-type').value;
+        const orgName = document.getElementById('reg-org-name').value;
+        const orgRole = document.getElementById('reg-org-role').value;
+
+        try {
+            const userEmail = user.email.toLowerCase();
+            const userRef = doc(db, "users", userEmail);
+            console.log("Saving profile for:", userEmail);
+            
+            await setDoc(userRef, {
+                email: user.email.toLowerCase(),
+                name: user.displayName || user.email.split('@')[0],
+                photoURL: user.photoURL || '',
+                orgType,
+                orgName,
+                orgRole,
+                profileCompleted: true,
+                updatedAt: new Date().toISOString()
+            }, { merge: true });
+
+            registrationModal.classList.add('hidden');
+            registrationModal.classList.remove('flex');
+            alert("¡Perfil completado con éxito!");
+        } catch (error) {
+            console.error("Error updating profile:", error);
+            alert("Hubo un error al guardar tu información: " + (error.code || error.message));
+        }
+    });
+}
