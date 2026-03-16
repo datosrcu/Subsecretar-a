@@ -160,6 +160,7 @@
                                 <th class="py-3 px-4 font-semibold">Usuario</th>
                                 <th class="py-3 px-4 font-semibold">Email Institucional</th>
                                 <th class="py-3 px-4 font-semibold">Último Acceso</th>
+                                <th class="py-3 px-4 font-semibold">Rol</th>
                             </tr>
                         </thead>
                         <tbody id="users-tbody" class="divide-y divide-obelisco-border">
@@ -174,6 +175,24 @@
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold mb-1">Solicitudes de Acceso</h2>
                     <p class="text-obelisco-gray text-sm">Gestioná las peticiones de los usuarios para visualizar tableros restringidos.</p>
+                </div>
+
+                <!-- Filtros de Solicitudes -->
+                <div class="mb-6 flex flex-wrap gap-4 items-end bg-gray-50 p-4 rounded-xl border border-obelisco-border">
+                    <div class="flex-grow">
+                        <label class="block text-[10px] uppercase font-bold text-obelisco-gray mb-1">Filtrar por Usuario / Email</label>
+                        <input type="text" id="filter-request-user" class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-obelisco-blue" placeholder="Buscar email...">
+                    </div>
+                    <div class="w-48">
+                        <label class="block text-[10px] uppercase font-bold text-obelisco-gray mb-1">Estado</label>
+                        <select id="filter-request-status" class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-obelisco-blue bg-white">
+                            <option value="all">Todos los estados</option>
+                            <option value="pending" selected>Pendientes</option>
+                            <option value="approved">Aprobadas</option>
+                            <option value="rejected">Rechazadas</option>
+                            <option value="restricted">Restringidas</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden">

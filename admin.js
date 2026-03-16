@@ -70,6 +70,7 @@ const fieldCatColorText = document.getElementById('field-cat-color');
 // --- State ---
 let isSubmitting = false;
 let globalCategories = []; // to populate dropdowns
+let allRequestsFetched = []; // Cache for filtering
 
 const ADMIN_EMAILS = [
     'datos@riocuarto.gov.ar',
@@ -179,8 +180,10 @@ async function loadUsers() {
             const data = doc.data();
             allUsersFetched.push(data);
             const tr = document.createElement('tr');
-            tr.className = "hover:bg-gray-50";
+            tr.className = "hover:bg-gray-50 transition";
             const dateStr = data.lastLogin ? new Date(data.lastLogin).toLocaleString() : 'N/A';
+            const role = data.role || 'usuario';
+            
             tr.innerHTML = `
                 <td class="py-3 px-4 flex items-center space-x-3">
                     <img src="${data.photoURL || `https://ui-avatars.com/api/?name=${data.name}&background=random`}" class="w-8 h-8 rounded-full border border-gray-200">
@@ -188,8 +191,26 @@ async function loadUsers() {
                 </td>
                 <td class="py-3 px-4 text-obelisco-gray">${data.email}</td>
                 <td class="py-3 px-4 text-xs text-obelisco-gray">${dateStr}</td>
+                <td class="py-3 px-4">
+                    <select class="role-select text-xs border border-gray-300 rounded px-2 py-1 bg-white outline-none focus:border-obelisco-blue" data-email="${data.email}">
+                        <option value="usuario" ${role === 'usuario' ? 'selected' : ''}>Usuario</option>
+                        <option value="lector" ${role === 'lector' ? 'selected' : ''}>Lector</option>
+                    </select>
+                </td>
             `;
             usersTbody.appendChild(tr);
+
+            // Role change listener
+            tr.querySelector('.role-select').addEventListener('change', async (e) => {
+                const newRole = e.target.value;
+                const email = e.target.getAttribute('data-email');
+                try {
+                    await updateDoc(doc.ref, { role: newRole });
+                } catch (err) {
+                    console.error("Error updating role:", err);
+                    alert("No se pudo actualizar el rol.");
+                }
+            });
         });
         renderUserChecklist();
     } catch (error) {
@@ -202,15 +223,15 @@ async function loadUsers() {
 async function loadRequests() {
     try {
         const querySnapshot = await getDocs(collection(db, "requests"));
-        const requests = [];
+        allRequestsFetched = [];
         querySnapshot.forEach((doc) => {
-            requests.push({ id: doc.id, ...doc.data() });
+            allRequestsFetched.push({ id: doc.id, ...doc.data() });
         });
         
         // Sort by date desc
-        requests.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        allRequestsFetched.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         
-        const pendingCount = requests.filter(r => r.status === 'pending').length;
+        const pendingCount = allRequestsFetched.filter(r => r.status === 'pending').length;
         if (pendingCount > 0) {
             requestsBadge.textContent = pendingCount;
             requestsBadge.classList.remove('hidden');
@@ -218,50 +239,96 @@ async function loadRequests() {
             requestsBadge.classList.add('hidden');
         }
 
-        renderRequests(requests);
+        filterAndRenderRequests();
     } catch (error) {
         console.error("Error loading requests:", error);
     }
 }
 
+function filterAndRenderRequests() {
+    const userSearch = document.getElementById('filter-request-user').value.toLowerCase();
+    const statusFilter = document.getElementById('filter-request-status').value;
+
+    const filtered = allRequestsFetched.filter(req => {
+        const matchesUser = req.userEmail.toLowerCase().includes(userSearch);
+        const matchesStatus = statusFilter === 'all' || req.status === statusFilter;
+        return matchesUser && matchesStatus;
+    });
+
+    renderRequests(filtered);
+}
+
+// Filter listeners
+document.getElementById('filter-request-user')?.addEventListener('input', filterAndRenderRequests);
+document.getElementById('filter-request-status')?.addEventListener('change', filterAndRenderRequests);
+
 function renderRequests(requests) {
     if (!requestsTbody) return;
     if (requests.length === 0) {
-        requestsTbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-obelisco-gray">No hay solicitudes pendientes.</td></tr>';
+        requestsTbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-obelisco-gray">No se encontraron solicitudes con esos filtros.</td></tr>';
         return;
     }
 
     requestsTbody.innerHTML = '';
     requests.forEach(req => {
         const date = req.createdAt ? new Date(req.createdAt).toLocaleDateString() : '-';
-        const isPending = req.status === 'pending';
+        const status = req.status || 'pending';
         
+        let statusBadge = '';
+        switch(status) {
+            case 'approved': statusBadge = '<span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-bold text-[10px] uppercase">Aprobada</span>'; break;
+            case 'rejected': statusBadge = '<span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full font-bold text-[10px] uppercase">Rechazada</span>'; break;
+            case 'restricted': statusBadge = '<span class="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full font-bold text-[10px] uppercase">Restringida</span>'; break;
+            default: statusBadge = '<span class="px-2 py-0.5 bg-obelisco-light text-obelisco-blue rounded-full font-bold text-[10px] uppercase">Pendiente</span>';
+        }
+
         const tr = document.createElement('tr');
         tr.className = "hover:bg-gray-50 transition-colors";
         tr.innerHTML = `
             <td class="py-4 px-4 whitespace-nowrap text-xs text-gray-500">${date}</td>
-            <td class="py-4 px-4 font-medium">${req.userEmail}</td>
-            <td class="py-4 px-4">${req.buttonName || 'ID: ' + req.buttonId}</td>
-            <td class="py-4 px-4 italic text-obelisco-gray">"${req.reason}"</td>
-            <td class="py-4 px-4 text-right space-x-2">
-                ${isPending ? `
-                <button class="btn-approve text-green-600 hover:text-green-800 font-bold p-2 bg-green-50 rounded" data-id="${req.id}" data-email="${req.userEmail}" data-button="${req.buttonId}" title="Aprobar">
+            <td class="py-4 px-4 font-medium flex flex-col">
+                <span>${req.userEmail}</span>
+                ${statusBadge}
+            </td>
+            <td class="py-4 px-4 text-xs font-semibold">${req.buttonName || 'ID: ' + req.buttonId}</td>
+            <td class="py-4 px-4 italic text-obelisco-gray text-xs">"${req.reason}"</td>
+            <td class="py-4 px-4 text-right space-x-2 whitespace-nowrap">
+                ${status !== 'approved' ? `
+                <button class="btn-approve text-green-600 hover:bg-green-100 p-2 rounded" data-id="${req.id}" data-email="${req.userEmail}" data-button="${req.buttonId}" title="Aprobar Acceso">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 </button>
-                ` : '<span class="text-green-500 font-bold px-2">Aprobado</span>'}
-                <button class="btn-del-req text-red-400 hover:text-red-600 p-2" data-id="${req.id}" title="Eliminar solicitud">
+                ` : ''}
+                
+                ${status === 'pending' ? `
+                <button class="btn-reject text-orange-500 hover:bg-orange-50 p-2 rounded" data-id="${req.id}" title="Rechazar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                ` : ''}
+
+                <button class="btn-del-req text-red-400 hover:text-red-600 p-2" data-id="${req.id}" title="Eliminar del historial">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 </button>
             </td>
         `;
         
-        if (isPending) {
+        if (status !== 'approved') {
             tr.querySelector('.btn-approve').addEventListener('click', () => approveRequest(req.id, req.userEmail, req.buttonId));
+        }
+        if (status === 'pending') {
+            tr.querySelector('.btn-reject').addEventListener('click', () => updateRequestStatus(req.id, 'rejected'));
         }
         tr.querySelector('.btn-del-req').addEventListener('click', () => deleteDocReq("requests", req.id));
         
         requestsTbody.appendChild(tr);
     });
+}
+
+async function updateRequestStatus(requestId, newStatus) {
+    if (!confirm(`¿Cambiar estado de solicitud a ${newStatus}?`)) return;
+    try {
+        await updateDoc(doc(db, "requests", requestId), { status: newStatus });
+        await loadRequests();
+    } catch (e) { console.error(e); }
 }
 
 async function approveRequest(requestId, email, buttonId) {
@@ -598,6 +665,7 @@ boardForm.addEventListener('submit', async (e) => {
     if (isSubmitting) return;
     isSubmitting = true;
     try {
+        const docId = fieldBoardId.value;
         const boardData = {
             enabled: fieldBoardEnabled.checked,
             title: fieldBoardTitle.value.trim(),
@@ -608,14 +676,39 @@ boardForm.addEventListener('submit', async (e) => {
             allowedUsers: currentlySelectedUsers,
             updatedAt: new Date().toISOString()
         };
-        const docId = fieldBoardId.value;
-        if (docId) await updateDoc(doc(db, "buttons", docId), boardData);
-        else {
+
+        // Logic to detect removed users and mark requests as "restricted"
+        if (docId) {
+            const oldDoc = await getDoc(doc(db, "buttons", docId));
+            if (oldDoc.exists()) {
+                const oldUsers = (oldDoc.data().allowedUsers || []).map(u => u.toLowerCase());
+                const currentUsersLower = currentlySelectedUsers.map(u => u.toLowerCase());
+                
+                const removedUsers = oldUsers.filter(u => !currentUsersLower.includes(u));
+                
+                if (removedUsers.length > 0) {
+                    // Update related requests
+                    for (const email of removedUsers) {
+                        const relatedReqs = allRequestsFetched.filter(r => 
+                            r.buttonId === docId && 
+                            r.userEmail.toLowerCase() === email && 
+                            r.status === 'approved'
+                        );
+                        for (const req of relatedReqs) {
+                            await updateDoc(doc(db, "requests", req.id), { status: 'restricted' });
+                        }
+                    }
+                }
+            }
+            await updateDoc(doc(db, "buttons", docId), boardData);
+        } else {
             boardData.createdAt = new Date().toISOString();
             await addDoc(collection(db, "buttons"), boardData);
         }
+        
         closeAllModals();
         await loadBoards(); 
+        await loadRequests(); // Reload to see status changes
     } catch (error) { 
         console.error("Error saving board:", error);
         alert("Error al guardar tablero: " + (error.code || error.message || "Error desconocido")); 

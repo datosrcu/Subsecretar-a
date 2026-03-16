@@ -217,8 +217,8 @@
 
             <!-- Sección de Tableros -->
             <section class="mb-16">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-                    <h2 class="text-3xl font-bold text-obelisco-dark">Tableros Temáticos</h2>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10">
+                    <h2 class="text-3xl font-bold text-obelisco-dark">Tableros</h2>
                 </div>
 
                 <!-- Group Filters (Hidden until login) -->
@@ -240,12 +240,14 @@
                 <div class="relative rounded-2xl">
 
                     <!-- Overlay for unauthenticated state -->
-                    <div id="unauth-overlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100 flex pb-10 pt-10">
-                        <svg class="w-16 h-16 text-obelisco-blue mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                        </svg>
+                    <div id="unauth-overlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-blue-50/90 backdrop-blur-sm rounded-2xl border border-blue-100 flex pb-12 pt-12 shadow-inner mb-12">
+                        <div class="bg-blue-100 p-4 rounded-full mb-4 shadow-sm">
+                            <svg class="w-10 h-10 text-obelisco-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                        </div>
                         <h3 class="text-2xl font-bold text-obelisco-dark mb-2">Acceso Restringido</h3>
-                        <p class="text-obelisco-gray mb-6 text-center max-w-md">Para visualizar los tableros debés iniciar sesión con tu cuenta institucional de @riocuarto.gov.ar</p>
+                        <p class="text-obelisco-gray mb-6 text-center max-w-md px-6">Para visualizar los tableros debés iniciar sesión con tu cuenta institucional de **@riocuarto.gov.ar**</p>
                     </div>
 
                     <!-- Cuadrícula de Tableros/Categorías -->

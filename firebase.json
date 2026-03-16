@@ -1,0 +1,18 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "php-buttons.code-snippets (1).php",
+      "Index.txt"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/Index.html"
+      }
+    ]
+  }
+}

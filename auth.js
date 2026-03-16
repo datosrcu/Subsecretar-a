@@ -14,6 +14,8 @@ const filtersContainer = document.getElementById('dashboard-filters');
 let currentFilterGroup = 'Gestores Internos';
 let allAccessibleBoards = [];
 let allCategories = [];
+let currentUserRole = 'usuario';
+let currentUserRequests = [];
 
 // Navigation State
 let currentViewLevel = 'categories'; // 'categories' or 'boards'
@@ -128,14 +130,33 @@ function showUserUI(user) {
 }
 
 async function loadUserPermissions(user) {
-    console.log("Loading permissions for user:", user.email);
+    const userEmail = user.email.toLowerCase();
+    console.log("Loading permissions for user:", userEmail);
     
     try {
-        const [buttonsSnapshot, catSnapshot] = await Promise.all([
+        const [buttonsSnapshot, catSnapshot, userDoc, reqSnapshot] = await Promise.all([
             getDocs(collection(db, "buttons")),
-            getDocs(collection(db, "categories"))
+            getDocs(collection(db, "categories")),
+            getDoc(doc(db, "users", userEmail)),
+            getDocs(collection(db, "requests")) // We fetch all for now, filter in memory for efficiency or query if large
         ]);
         
+        // Cache role
+        if (userDoc.exists()) {
+            currentUserRole = userDoc.data().role || 'usuario';
+        } else {
+            currentUserRole = 'usuario';
+        }
+
+        // Cache user requests (filtered by email)
+        currentUserRequests = [];
+        reqSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.userEmail && data.userEmail.toLowerCase() === userEmail) {
+                currentUserRequests.push({ id: doc.id, ...data });
+            }
+        });
+
         // Cache categories
         allCategories = [];
         catSnapshot.forEach(doc => allCategories.push({id: doc.id, ...doc.data()}));
@@ -161,13 +182,18 @@ async function loadUserPermissions(user) {
 
 function checkUserAccess(user, buttonData) {
     if (!buttonData.requireLogin) return true;
-    const allowedUsers = buttonData.allowedUsers || [];
+    if (!user) return false;
+    
     const userEmail = user.email.toLowerCase();
     
-    // Check if user is an admin by default (bypass all board-level restrictions)
+    // Role status check (Full access for Lectors)
+    if (currentUserRole === 'lector') return true;
+
+    // Check if user is an admin by default
     const ADMIN_EMAILS = ['datos@riocuarto.gov.ar', 'pablofabbroni@gmail.com', 'p.fabbroni@riocuarto.gov.ar'];
     if (ADMIN_EMAILS.includes(userEmail)) return true;
     
+    const allowedUsers = buttonData.allowedUsers || [];
     return allowedUsers.map(email => email.toLowerCase()).includes(userEmail);
 }
 
@@ -283,7 +309,7 @@ function getEmptyStateHtml(msg) {
 function renderCategoryCard(container, category, boardCount) {
     let hexColor = category.color || '#009DE0';
     let iconStr = category.icon || '';
-    let desc = category.description || 'Sin descripción adicional.';
+    let desc = category.description || ''; // Empty if not provided
     
     if (!iconStr) {
         iconStr = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" style="color: ${hexColor}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -300,9 +326,9 @@ function renderCategoryCard(container, category, boardCount) {
                 <div class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
                     ${iconStr}
                 </div>
-                <h3 class="text-xl font-bold text-obelisco-dark ml-4 truncate" title="${category.name}">${category.name}</h3>
+                <h3 class="text-xl font-bold text-obelisco-dark ml-4 leading-tight">${category.name}</h3>
             </div>
-            <p class="text-obelisco-gray text-sm flex-grow mb-6 line-clamp-3" title="${desc}">${desc}</p>
+            ${desc ? `<p class="text-obelisco-gray text-sm flex-grow mb-6 line-clamp-3" title="${desc}">${desc}</p>` : '<div class="flex-grow"></div>'}
             <div class="flex justify-between items-center w-full">
                 <span class="text-xs font-medium px-2 py-1 bg-gray-100 rounded text-gray-600">${boardCount} Tableros</span>
                 <span class="text-obelisco-blue font-bold text-sm flex items-center">
@@ -408,21 +434,30 @@ function renderButton(container, id, data) {
 
     const hasAccess = data.hasAccess !== false; // handle old data
     const restrictedClass = !hasAccess ? 'opacity-75 grayscale-[0.5] border-dashed border-red-200' : '';
-    const lockIcon = !hasAccess ? '<div class="absolute top-2 right-2 text-red-500 bg-red-50 p-1 rounded-full"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg></div>' : '';
+    
+    // Check pending request
+    const pendingRequest = currentUserRequests.find(r => r.buttonId === id && r.status === 'pending');
+    const isUnderReview = !!pendingRequest;
+
+    const lockIcon = !hasAccess 
+        ? (isUnderReview 
+            ? '<div class="absolute top-2 right-2 text-obelisco-blue bg-blue-50 px-2 py-0.5 rounded-full text-[10px] font-bold border border-blue-200 shadow-sm">En revisión</div>'
+            : '<div class="absolute top-2 right-2 text-red-500 bg-red-50 p-1.5 rounded-full border border-red-100"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg></div>')
+        : '<div class="absolute top-2 right-2 text-green-600 bg-green-50 p-1.5 rounded-full border border-green-100"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 016 0v2h2V7a5 5 0 00-5-5z"/></svg></div>';
                         
     const html = `
         <a href="#" data-button-id="${id}" data-iframe="${data.iframeUrl || ''}" data-heading="${data.title}" data-access="${hasAccess}"
             class="obelisco-card dashboard-btn bg-white border border-obelisco-border rounded-xl p-6 flex flex-col h-full hover:bg-gray-50 transition drop-shadow-sm relative ${restrictedClass}">
             ${lockIcon}
-            <div class="flex items-center mb-4 truncate w-full">
+            <div class="flex items-center mb-4 w-full">
                 <div class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
                     ${iconStr}
                 </div>
-                <h3 class="text-xl font-bold text-obelisco-dark ml-4 truncate" title="${data.title}">${data.title}</h3>
+                <h3 class="text-lg font-bold text-obelisco-dark ml-4 leading-snug break-words flex-grow">${data.title}</h3>
             </div>
-            <p class="text-obelisco-gray text-sm flex-grow mb-6 truncate" title="${categoryNames}">${categoryNames}</p>
+            <p class="text-obelisco-gray text-xs flex-grow mb-6 italic" title="${categoryNames}">${categoryNames}</p>
             <span class="text-obelisco-blue font-bold text-sm flex items-center">
-                ${hasAccess ? 'Ver tablero' : 'Solicitar acceso'}
+                ${hasAccess ? 'Ver tablero' : (isUnderReview ? 'Pendiente' : 'Solicitar acceso')}
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>

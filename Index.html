@@ -73,6 +73,25 @@
                     </svg>
                     <span class="font-medium">Buscar</span>
                 </button>
+
+                <!-- Authentication UI -->
+                <div id="auth-section" class="flex items-center space-x-3 ml-4 border-l pl-4 border-gray-300">
+                    <button id="login-btn" class="flex items-center space-x-2 bg-obelisco-yellow hover:bg-obelisco-yellowHover text-white font-medium rounded-lg px-4 py-2 transition shadow-sm">
+                        <svg class="w-5 h-5 mr-1" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
+                        </svg>
+                        <span>Iniciar Sesión</span>
+                    </button>
+
+                    <div class="flex items-center space-x-3">
+                        <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full hidden border border-gray-200 object-cover">
+                        <span id="user-name" class="font-medium text-sm text-obelisco-dark hidden"></span>
+                        <button id="logout-btn" class="text-sm text-obelisco-gray hover:text-red-500 font-medium hidden underline ml-2 transition-colors">
+                            Salir
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </header>
@@ -639,6 +658,9 @@
             class="text-obelisco-dark font-bold text-lg group-hover:text-[#25D366] transition tracking-tight">SUAV</span>
     </a>
 
+    <!-- Application Scripts -->
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="auth.js"></script>
 </body>
 
 </html>
