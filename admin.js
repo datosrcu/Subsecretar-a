@@ -180,8 +180,9 @@ async function loadUsers() {
             renderUserChecklist();
             return;
         }
-        snapshot.forEach(doc => {
-            const data = doc.data();
+        snapshot.forEach(userDoc => {
+            const data = userDoc.data();
+            const id = userDoc.id;
             allUsersFetched.push(data);
             const tr = document.createElement('tr');
             tr.className = "hover:bg-gray-50 transition";
@@ -197,9 +198,12 @@ async function loadUsers() {
                 <td class="py-3 px-4 text-xs text-obelisco-gray">${dateStr}</td>
                 <td class="py-3 px-4">
                     <select class="role-select text-xs border border-gray-300 rounded px-2 py-1 bg-white outline-none focus:border-obelisco-blue" data-email="${data.email}">
-                        <option value="usuario" ${role === 'usuario' ? 'selected' : ''}>Usuario</option>
+                        <option value="usuario" ${role === 'usuario' ? 'selected' : ''}>Usuario del Observatorio</option>
                         <option value="lector" ${role === 'lector' ? 'selected' : ''}>Lector</option>
                     </select>
+                </td>
+                <td class="py-3 px-4 text-right">
+                    <button class="text-red-500 hover:text-red-700 font-medium btn-del-user" data-id="${id}">Eliminar</button>
                 </td>
             `;
             usersTbody.appendChild(tr);
@@ -207,19 +211,34 @@ async function loadUsers() {
             // Role change listener
             tr.querySelector('.role-select').addEventListener('change', async (e) => {
                 const newRole = e.target.value;
-                const email = e.target.getAttribute('data-email');
                 try {
-                    await updateDoc(doc.ref, { role: newRole });
+                    await updateDoc(doc(db, "users", id), { role: newRole });
+                    alert("Rol actualizado.");
                 } catch (err) {
                     console.error("Error updating role:", err);
                     alert("No se pudo actualizar el rol.");
                 }
             });
+
+            // Delete user listener
+            tr.querySelector('.btn-del-user').addEventListener('click', () => deleteUser(id));
         });
         renderUserChecklist();
     } catch (error) {
         console.error(error);
-        usersTbody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-red-500">Error cargando usuarios.</td></tr>`;
+        usersTbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-red-500">Error cargando usuarios.</td></tr>`;
+    }
+}
+
+async function deleteUser(id) {
+    if (confirm("¿Estás seguro que querés eliminar este usuario?")) {
+        try {
+            await deleteDoc(doc(db, "users", id));
+            loadUsers();
+        } catch (error) {
+            console.error("Error deleting user:", error);
+            alert("No se pudo eliminar el usuario.");
+        }
     }
 }
 
