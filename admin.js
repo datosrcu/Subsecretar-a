@@ -189,7 +189,7 @@ function filterAndRenderUsers() {
 }
 
 async function loadUsers() {
-    console.log("Admin JS v1.2 - Loading users...");
+    console.log("Admin JS v1.2.1 - Loading users...");
     try {
         const snapshot = await getDocs(collection(db, "users"));
         allUsersFetched = [];
@@ -436,14 +436,23 @@ function renderUserChecklist(filterText = '') {
         return;
     }
     filtered.forEach(u => {
-        const isChecked = currentlySelectedUsers.includes(u.email.toLowerCase()) ? 'checked' : '';
+        const isLector = u.role === 'lector';
+        const isChecked = isLector || currentlySelectedUsers.includes(u.email.toLowerCase()) ? 'checked' : '';
+        const disabledAttr = isLector ? 'disabled' : '';
+        const lectorBadge = isLector ? '<span class="ml-auto text-[9px] bg-green-100 text-green-700 px-1 rounded font-bold uppercase">Lector (Acceso Total)</span>' : '';
+        
         const div = document.createElement('div');
-        div.className = "flex items-center space-x-2 p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200 cursor-pointer transition";
+        div.className = `flex items-center space-x-2 p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200 cursor-pointer transition ${isLector ? 'opacity-70' : ''}`;
         div.innerHTML = `
-            <input type="checkbox" id="user-${u.email}" value="${u.email}" class="user-checkbox w-4 h-4 text-obelisco-blue rounded border-gray-300 pointer-events-none" ${isChecked}>
-            <label for="user-${u.email}" class="text-sm font-medium cursor-pointer flex-grow pointer-events-none"><span class="block truncate">${u.name}</span> <span class="text-xs text-gray-500 font-normal block truncate">${u.email}</span></label>
+            <input type="checkbox" id="user-${u.email}" value="${u.email}" class="user-checkbox w-4 h-4 text-obelisco-blue rounded border-gray-300 pointer-events-none" ${isChecked} ${disabledAttr}>
+            <label for="user-${u.email}" class="text-sm font-medium cursor-pointer flex-grow pointer-events-none flex items-center">
+                <span class="block truncate max-w-[150px]">${u.name}</span> 
+                <span class="text-[10px] text-gray-400 font-normal block truncate ml-2">(${u.email})</span>
+                ${lectorBadge}
+            </label>
         `;
         div.addEventListener('click', () => {
+            if (isLector) return;
             const cb = div.querySelector('input');
             cb.checked = !cb.checked;
             const email = u.email.toLowerCase();
