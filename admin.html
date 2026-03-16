@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Observatorio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Select2 (for the multi-select styling over standard select) or Custom UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        obelisco: { yellow: '#009DE0', dark: '#212529', gray: '#495057', light: '#F8F9FA', border: '#DEE2E6', blue: '#0072BB' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen text-obelisco-dark font-sans flex flex-col">
+
+    <!-- Header Admins -->
+    <header class="bg-white border-b border-obelisco-border px-6 py-4 flex justify-between items-center shadow-sm relative z-20">
+        <div class="flex items-center space-x-3">
+            <img src="Escudo.png" alt="Escudo" class="h-10">
+            <div>
+                <h1 class="font-bold text-lg leading-tight">Panel Administrativo</h1>
+                <p class="text-xs text-obelisco-gray">Observatorio de Gestión</p>
+            </div>
+        </div>
+        
+        <div id="auth-section" class="flex items-center">
+            <!-- Loading State -->
+            <div id="auth-loader" class="flex items-center space-x-2 text-obelisco-gray">
+                <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-sm font-medium">Verificando...</span>
+            </div>
+
+            <!-- Logged In State -->
+            <div id="user-info" class="hidden flex items-center space-x-3">
+                <img id="admin-avatar" src="" class="w-8 h-8 rounded-full border border-gray-200 object-cover">
+                <span id="admin-name" class="font-medium text-sm"></span>
+                <button id="logout-btn" class="ml-4 text-sm text-red-600 hover:underline font-medium">Salir</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content (Protected) -->
+    <main id="admin-content" class="flex-grow flex flex-col hidden">
+        
+        <!-- Navigation Tabs -->
+        <div class="bg-white border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-6">
+                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                    <button class="nav-tab border-obelisco-blue text-obelisco-blue whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-target="tab-tableros">
+                        Tableros (Botones)
+                    </button>
+                    <button class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-target="tab-categorias">
+                        Categorías
+                    </button>
+                    <button class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-target="tab-usuarios">
+                        Usuarios
+                    </button>
+                    <button class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-target="tab-solicitudes">
+                        Solicitudes
+                        <span id="requests-badge" class="ml-2 hidden bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <div class="flex-grow p-6 max-w-7xl mx-auto w-full relative">
+            
+            <!-- CONTENIDO TABLEROS -->
+            <div id="tab-tableros" class="tab-pane hidden block"> <!-- "block" by default (active) -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-1">Gestión de Tableros</h2>
+                        <p class="text-obelisco-gray text-sm">Creá, editá y configurá los permisos de acceso a los tableros temáticos.</p>
+                    </div>
+                    <div class="flex space-x-3">
+                        <!-- Botón mágico eliminado a pedido del usuario -->
+                        <button id="add-board-btn" class="bg-obelisco-blue hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition flex items-center text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                            </svg>
+                            Nuevo Tablero
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                            <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
+                                <th class="py-3 px-4 font-semibold w-12">Estado</th>
+                                <th class="py-3 px-4 font-semibold">Título</th>
+                                <th class="py-3 px-4 font-semibold">Categoría</th>
+                                <th class="py-3 px-4 font-semibold">Permisos</th>
+                                <th class="py-3 px-4 font-semibold text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="boards-tbody" class="divide-y divide-obelisco-border">
+                            <tr><td colspan="5" class="text-center py-8 text-obelisco-gray">Cargando tableros...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CONTENIDO CATEGORÍAS -->
+            <div id="tab-categorias" class="tab-pane hidden">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-1">Categorías de Tableros</h2>
+                        <p class="text-obelisco-gray text-sm">Administrá las categorías que se muestran en la cuadrícula de tableros.</p>
+                    </div>
+                    <button id="add-cat-btn" class="bg-obelisco-blue hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition flex items-center text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                        </svg>
+                        Nueva Categoría
+                    </button>
+                </div>
+
+                <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden max-w-3xl">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
+                                <th class="py-3 px-4 font-semibold w-12">Ícono</th>
+                                <th class="py-3 px-4 font-semibold">Nombre de Categoría</th>
+                                <th class="py-3 px-4 font-semibold">Grupo Visual (Tipo)</th>
+                                <th class="py-3 px-4 font-semibold w-24">Color Hex</th>
+                                <th class="py-3 px-4 font-semibold text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categories-tbody" class="divide-y divide-obelisco-border">
+                            <tr><td colspan="5" class="text-center py-8 text-obelisco-gray">Cargando categorías...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CONTENIDO USUARIOS -->
+            <div id="tab-usuarios" class="tab-pane hidden text-sm">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-1">Directorio de Usuarios</h2>
+                    <p class="text-obelisco-gray text-sm">Listado de todos los usuarios que han iniciado sesión al menos una vez en el portal.</p>
+                </div>
+
+                <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden max-w-4xl">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
+                                <th class="py-3 px-4 font-semibold">Usuario</th>
+                                <th class="py-3 px-4 font-semibold">Email Institucional</th>
+                                <th class="py-3 px-4 font-semibold">Último Acceso</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-tbody" class="divide-y divide-obelisco-border">
+                            <tr><td colspan="3" class="text-center py-8 text-obelisco-gray">Cargando usuarios...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CONTENIDO SOLICITUDES -->
+            <div id="tab-solicitudes" class="tab-pane hidden text-sm">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-1">Solicitudes de Acceso</h2>
+                    <p class="text-obelisco-gray text-sm">Gestioná las peticiones de los usuarios para visualizar tableros restringidos.</p>
+                </div>
+
+                <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                            <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
+                                <th class="py-3 px-4 font-semibold">Fecha</th>
+                                <th class="py-3 px-4 font-semibold">Usuario</th>
+                                <th class="py-3 px-4 font-semibold">Tablero</th>
+                                <th class="py-3 px-4 font-semibold">Motivo</th>
+                                <th class="py-3 px-4 font-semibold text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requests-tbody" class="divide-y divide-obelisco-border">
+                            <tr><td colspan="5" class="text-center py-8 text-obelisco-gray">No hay solicitudes pendientes.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Error Screen (Unauth) -->
+    <div id="error-screen" class="hidden flex-grow flex items-center justify-center p-6 bg-gray-50 relative z-10">
+        <div class="text-center max-w-md bg-white p-8 rounded-2xl shadow-sm border border-red-100">
+            <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold mb-2">Acceso Denegado</h2>
+            <p id="error-message" class="text-obelisco-gray mb-6">No tenés privilegios de administrador para ver esta página.</p>
+            <button id="error-login-btn" class="w-full bg-obelisco-dark hover:bg-gray-800 text-white font-medium py-3 rounded-lg transition">
+                Intentar Iniciar Sesión de Nuevo
+            </button>
+            <a href="observatorio-gestion.html" class="block mt-4 text-obelisco-blue text-sm hover:underline">← Volver al inicio</a>
+        </div>
+    </div>
+
+    <!-- Modal Form (Tableros) -->
+    <div id="board-modal" class="fixed inset-0 hidden items-center justify-center z-[100]">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-close="board"></div>
+        <div class="bg-white w-[600px] max-w-[95vw] rounded-xl shadow-2xl relative z-10 flex flex-col max-h-[90vh]">
+            
+            <div class="px-6 py-4 border-b border-obelisco-border flex justify-between items-center bg-gray-50 rounded-t-xl shrink-0">
+                <h3 id="board-modal-title" class="text-lg font-bold">Nuevo Tablero</h3>
+                <button data-close="board" class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-5 w-5 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+
+            <form id="board-form" class="p-6 overflow-y-auto space-y-4 text-sm">
+                <input type="hidden" id="board-id">
+                
+                <div class="flex items-center space-x-2 mb-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <input type="checkbox" id="field-board-enabled" class="w-4 h-4 text-obelisco-blue rounded focus:ring-obelisco-blue" checked>
+                    <label for="field-board-enabled" class="font-medium cursor-pointer">Tablero Activo (Visible en el inicio)</label>
+                </div>
+
+                <div>
+                    <label class="block font-medium mb-1">Título</label>
+                    <input type="text" id="field-board-title" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue" required placeholder="Ej: Recaudación Mensual">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-medium mb-1">Elegir Ícono (Emoji/SVG)</label>
+                        <input type="text" id="field-board-icon" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue" placeholder="Ej: 📊">
+                    </div>
+                    <div>
+                        <label class="block font-medium mb-1">Requiere Login</label>
+                        <select id="field-board-req-login" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue bg-white">
+                            <option value="true">Sí (Privado)</option>
+                            <option value="false">No (Público)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-medium mb-2">Categorías a las que pertenece</label>
+                    <div class="border border-gray-300 rounded-lg overflow-hidden flex flex-col max-h-40">
+                        <div id="categories-checklist" class="overflow-y-auto p-2 space-y-1 bg-white flex-grow">
+                            <p class="text-xs text-center text-gray-400 py-4">Cargando categorías...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-medium mb-1">URL del Iframe (Looker, PowerBI, Sheets)</label>
+                    <input type="url" id="field-board-url" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue" placeholder="https://...">
+                </div>
+
+                <div>
+                    <label class="block font-medium mb-2">Usuarios Permitidos</label>
+                    <div class="border border-gray-300 rounded-lg overflow-hidden flex flex-col max-h-48">
+                        <div class="p-2 bg-gray-50 border-b border-gray-200">
+                            <input type="text" id="user-search" class="w-full text-xs px-2 py-1.5 border border-gray-300 rounded outline-none focus:border-obelisco-blue" placeholder="Buscar usuario para autorizar...">
+                        </div>
+                        <div id="users-checklist" class="overflow-y-auto p-2 space-y-1 bg-white flex-grow">
+                            <!-- Los checkboxes de usuarios se renderizarán aquí -->
+                            <p class="text-xs text-center text-gray-400 py-4">Cargando directorio...</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Los administradores siempre tienen acceso. Si no marcás ninguno y es un tablero "Privado", nadie más lo verá.</p>
+                </div>
+                
+            </form>
+
+            <div class="px-6 py-4 border-t border-obelisco-border bg-gray-50 flex justify-end space-x-3 rounded-b-xl shrink-0">
+                <button type="button" data-close="board" class="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded transition font-medium text-sm">Cancelar</button>
+                <button type="submit" form="board-form" id="save-board-btn" class="px-4 py-2 bg-obelisco-blue hover:bg-blue-700 text-white rounded shadow-sm transition font-medium flex items-center text-sm">
+                    Guardar Tablero
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Form (Categorías) -->
+    <div id="cat-modal" class="fixed inset-0 hidden items-center justify-center z-[100]">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-close="cat"></div>
+        <div class="bg-white w-[400px] max-w-[95vw] rounded-xl shadow-2xl relative z-10 flex flex-col">
+            
+            <div class="px-5 py-4 border-b border-obelisco-border flex justify-between items-center bg-gray-50 rounded-t-xl shrink-0">
+                <h3 id="cat-modal-title" class="text-lg font-bold">Nueva Categoría</h3>
+                <button data-close="cat" class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-5 w-5 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+
+            <form id="cat-form" class="p-5 space-y-4 text-sm">
+                <input type="hidden" id="cat-id">
+
+                <div>
+                    <label class="block font-medium mb-1">Nombre</label>
+                    <input type="text" id="field-cat-name" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue" required placeholder="Ej: Seguridad">
+                </div>
+
+                <div>
+                    <label class="block font-medium mb-1">Descripción</label>
+                    <textarea id="field-cat-desc" rows="2" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue" placeholder="Breve descripción de la categoría..."></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-medium mb-1">Elegir Ícono (Emoji/SVG)</label>
+                        <input type="text" id="field-cat-icon" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue" placeholder="Ej: 🛡️">
+                    </div>
+                    <div>
+                        <label class="block font-medium mb-1">Grupo Visual</label>
+                        <select id="field-cat-type" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue bg-white" required>
+                            <option value="Categorías">Categorías</option>
+                            <option value="Gestores Internos">Gestores Internos</option>
+                            <option value="Gestores Externos">Gestores Externos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-medium mb-1">Color Identificativo (Hex)</label>
+                    <div class="flex items-center space-x-2">
+                        <input type="color" id="field-cat-color-picker" class="h-9 w-9 p-0 border-0 rounded cursor-pointer" value="#009DE0">
+                        <input type="text" id="field-cat-color" class="flex-grow border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue font-mono" required placeholder="#009DE0" value="#009DE0">
+                    </div>
+                </div>
+            </form>
+
+            <div class="px-5 py-3 border-t border-obelisco-border bg-gray-50 flex justify-end space-x-2 rounded-b-xl">
+                <button type="button" data-close="cat" class="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded transition font-medium text-sm">Cancelar</button>
+                <button type="submit" form="cat-form" id="save-cat-btn" class="px-4 py-2 bg-obelisco-blue hover:bg-blue-700 text-white rounded shadow-sm transition font-medium flex items-center text-sm">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Scripts -->
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="admin.js"></script>
+</body>
+</html>
