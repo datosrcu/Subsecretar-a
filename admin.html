@@ -153,19 +153,27 @@
                     <p class="text-obelisco-gray text-sm">Listado de todos los usuarios que han iniciado sesión al menos una vez en el portal.</p>
                 </div>
 
+                <!-- Filtros de Usuarios -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-xl border border-obelisco-border flex flex-wrap gap-4 items-end">
+                    <div class="flex-grow min-w-[300px]">
+                        <label class="block text-[10px] uppercase font-bold text-obelisco-gray mb-1">Buscar por Nombre, Email u Organización</label>
+                        <input type="text" id="filter-user-search" class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-obelisco-blue" placeholder="Buscar usuario...">
+                    </div>
+                </div>
+
                 <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden max-w-4xl">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
                                 <th class="py-3 px-4 font-semibold">Usuario</th>
-                                <th class="py-3 px-4 font-semibold">Email Institucional</th>
-                                <th class="py-3 px-4 font-semibold">Último Acceso</th>
-                                <th class="py-3 px-4 font-semibold">Rol</th>
+                                <th class="py-3 px-4 font-semibold">Organización / Cargo</th>
+                                <th class="py-3 px-4 font-semibold">Registro / Acceso</th>
+                                <th class="py-3 px-4 font-semibold">Rol App</th>
                                 <th class="py-3 px-4 font-semibold text-right">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="users-tbody" class="divide-y divide-obelisco-border">
-                            <!-- v1.1 - Added Roles & Actions -->
+                            <!-- v1.2 - Advanced User Directory -->
                             <tr><td colspan="5" class="text-center py-8 text-obelisco-gray">Cargando usuarios...</td></tr>
                         </tbody>
                     </table>

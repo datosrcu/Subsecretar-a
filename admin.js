@@ -27,6 +27,7 @@ const addCatBtn = document.getElementById('add-cat-btn');
 
 // Usuarios
 const usersTbody = document.getElementById('users-tbody');
+const filterUserSearch = document.getElementById('filter-user-search');
 
 // Solicitudes
 const requestsTbody = document.getElementById('requests-tbody');
@@ -167,68 +168,106 @@ async function loadData() {
         loadBoards(),
         loadRequests()
     ]);
+}// --- USERS LISTING & SELECTOR ---
+filterUserSearch?.addEventListener('input', () => {
+    filterAndRenderUsers();
+});
+
+function filterAndRenderUsers() {
+    const filterText = filterUserSearch.value.toLowerCase().trim();
+    const filtered = allUsersFetched.filter(u => {
+        const name = (u.name || '').toLowerCase();
+        const email = (u.email || '').toLowerCase();
+        const orgName = (u.orgName || '').toLowerCase();
+        const orgType = (u.orgType || '').toLowerCase();
+        return name.includes(filterText) || 
+               email.includes(filterText) || 
+               orgName.includes(filterText) || 
+               orgType.includes(filterText);
+    });
+    renderUsersTable(filtered);
 }
 
-// --- USERS LISTING & SELECTOR ---
 async function loadUsers() {
-    console.log("Admin JS v1.1 - Loading users...");
+    console.log("Admin JS v1.2 - Loading users...");
     try {
         const snapshot = await getDocs(collection(db, "users"));
         allUsersFetched = [];
-        usersTbody.innerHTML = '';
-        if (snapshot.empty) {
-            usersTbody.innerHTML = `<tr><td colspan="3" class="py-12 text-center text-obelisco-gray">No hay usuarios registrados.</td></tr>`;
-            renderUserChecklist();
-            return;
-        }
         snapshot.forEach(userDoc => {
-            const data = userDoc.data();
-            const id = userDoc.id;
-            allUsersFetched.push(data);
-            const tr = document.createElement('tr');
-            tr.className = "hover:bg-gray-50 transition";
-            const dateStr = data.lastLogin ? new Date(data.lastLogin).toLocaleString() : 'N/A';
-            const role = data.role || 'usuario';
-            
-            tr.innerHTML = `
-                <td class="py-3 px-4 flex items-center space-x-3">
-                    <img src="${data.photoURL || `https://ui-avatars.com/api/?name=${data.name}&background=random`}" class="w-8 h-8 rounded-full border border-gray-200">
-                    <span class="font-medium">${data.name}</span>
-                </td>
-                <td class="py-3 px-4 text-obelisco-gray">${data.email}</td>
-                <td class="py-3 px-4 text-xs text-obelisco-gray">${dateStr}</td>
-                <td class="py-3 px-4">
-                    <select class="role-select text-xs border border-gray-300 rounded px-2 py-1 bg-white outline-none focus:border-obelisco-blue" data-email="${data.email}">
-                        <option value="usuario" ${role === 'usuario' ? 'selected' : ''}>Usuario del Observatorio</option>
-                        <option value="lector" ${role === 'lector' ? 'selected' : ''}>Lector</option>
-                    </select>
-                </td>
-                <td class="py-3 px-4 text-right">
-                    <button class="text-red-500 hover:text-red-700 font-medium btn-del-user" data-id="${id}">Eliminar</button>
-                </td>
-            `;
-            usersTbody.appendChild(tr);
-
-            // Role change listener
-            tr.querySelector('.role-select').addEventListener('change', async (e) => {
-                const newRole = e.target.value;
-                try {
-                    await updateDoc(doc(db, "users", id), { role: newRole });
-                    alert("Rol actualizado.");
-                } catch (err) {
-                    console.error("Error updating role:", err);
-                    alert("No se pudo actualizar el rol.");
-                }
-            });
-
-            // Delete user listener
-            tr.querySelector('.btn-del-user').addEventListener('click', () => deleteUser(id));
+            allUsersFetched.push({ id: userDoc.id, ...userDoc.data() });
         });
+        filterAndRenderUsers();
         renderUserChecklist();
     } catch (error) {
         console.error(error);
         usersTbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-red-500">Error cargando usuarios.</td></tr>`;
     }
+}
+
+function renderUsersTable(users) {
+    if (!usersTbody) return;
+    usersTbody.innerHTML = '';
+    
+    if (users.length === 0) {
+        usersTbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center text-obelisco-gray">No se encontraron usuarios.</td></tr>`;
+        return;
+    }
+
+    users.forEach(u => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-gray-50 transition";
+        const lastLogin = u.lastLogin ? new Date(u.lastLogin).toLocaleString() : 'N/A';
+        const registered = u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A';
+        const role = u.role || 'usuario';
+        
+        tr.innerHTML = `
+            <td class="py-3 px-4 flex items-center space-x-3">
+                <img src="${u.photoURL || `https://ui-avatars.com/api/?name=${u.name}&background=random`}" class="w-8 h-8 rounded-full border border-gray-200">
+                <div class="flex flex-col">
+                    <span class="font-medium">${u.name}</span>
+                    <span class="text-xs text-obelisco-gray">${u.email}</span>
+                </div>
+            </td>
+            <td class="py-3 px-4">
+                <div class="flex flex-col">
+                    <span class="text-xs font-bold text-obelisco-blue uppercase">${u.orgType || 'N/A'}</span>
+                    <span class="text-sm font-medium">${u.orgName || '-'}</span>
+                    <span class="text-[10px] text-obelisco-gray uppercase">${u.orgRole || '-'}</span>
+                </div>
+            </td>
+            <td class="py-3 px-4">
+                <div class="flex flex-col text-[10px] text-obelisco-gray uppercase">
+                    <span>Reg: ${registered}</span>
+                    <span>Acc: ${lastLogin}</span>
+                </div>
+            </td>
+            <td class="py-3 px-4">
+                <select class="role-select text-xs border border-gray-300 rounded px-2 py-1 bg-white outline-none focus:border-obelisco-blue" data-id="${u.id}">
+                    <option value="usuario" ${role === 'usuario' ? 'selected' : ''}>Usuario del Observatorio</option>
+                    <option value="lector" ${role === 'lector' ? 'selected' : ''}>Lector</option>
+                </select>
+            </td>
+            <td class="py-3 px-4 text-right">
+                <button class="text-red-500 hover:text-red-700 font-medium btn-del-user" data-id="${u.id}">Eliminar</button>
+            </td>
+        `;
+        usersTbody.appendChild(tr);
+
+        // Role change listener
+        tr.querySelector('.role-select').addEventListener('change', async (e) => {
+            const newRole = e.target.value;
+            try {
+                await updateDoc(doc(db, "users", u.id), { role: newRole });
+                alert("Rol actualizado.");
+            } catch (err) {
+                console.error("Error updating role:", err);
+                alert("No se pudo actualizar el rol. Verificá las Reglas de Firestore.");
+            }
+        });
+
+        // Delete user listener
+        tr.querySelector('.btn-del-user').addEventListener('click', () => deleteUser(u.id));
+    });
 }
 
 async function deleteUser(id) {
