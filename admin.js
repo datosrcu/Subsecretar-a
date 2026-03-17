@@ -67,7 +67,6 @@ const fieldCatIcon = document.getElementById('field-cat-icon');
 const fieldCatType = document.getElementById('field-cat-type');
 const fieldCatColorPicker = document.getElementById('field-cat-color-picker');
 const fieldCatColorText = document.getElementById('field-cat-color');
-const fieldCatOrder = document.getElementById('field-cat-order');
 
 // Search & Filter Listeners for Requests (Added here)
 document.getElementById('filter-request-user')?.addEventListener('input', filterAndRenderRequests);
@@ -616,6 +615,9 @@ async function loadCategories() {
                         <span class="font-mono text-xs">${data.color}</span>
                     </div>
                 </td>
+                <td class="py-3 px-4">
+                    <input type="number" class="w-16 border border-gray-300 rounded px-2 py-1 text-xs outline-none focus:border-obelisco-blue cat-order-input" value="${data.order || 0}" data-id="${id}">
+                </td>
                 <td class="py-3 px-4 text-right space-x-2">
                     <button class="text-obelisco-blue hover:text-blue-800 font-medium btn-edit-cat" data-id="${id}">Editar</button>
                     <button class="text-red-500 hover:text-red-700 font-medium btn-del-cat" data-id="${id}">Eliminar</button>
@@ -630,12 +632,24 @@ async function loadCategories() {
                 fieldCatType.value = data.type || 'Categorías';
                 fieldCatColorText.value = data.color;
                 fieldCatColorPicker.value = data.color;
-                fieldCatOrder.value = data.order || 0;
                 catModalTitle.textContent = "Editar Categoría";
                 catModal.classList.remove('hidden');
                 catModal.classList.add('flex');
             });
             tr.querySelector('.btn-del-cat').addEventListener('click', () => deleteDocReq("categories", id));
+            
+            // Auto-save order on change
+            tr.querySelector('.cat-order-input').addEventListener('change', async (e) => {
+                const newOrder = parseInt(e.target.value) || 0;
+                try {
+                    await updateDoc(doc(db, "categories", id), { order: newOrder });
+                    // Optionally alert or just refresh
+                    await loadCategories(); 
+                } catch (err) {
+                    console.error("Error updating order:", err);
+                    alert("No se pudo actualizar el orden.");
+                }
+            });
         });
         
         renderCategoryChecklist();
@@ -648,7 +662,6 @@ addCatBtn.addEventListener('click', () => {
     fieldCatDesc.value = '';
     fieldCatColorPicker.value = '#009DE0';
     fieldCatColorText.value = '#009DE0';
-    fieldCatOrder.value = 0;
     catModalTitle.textContent = "Nueva Categoría";
     catModal.classList.remove('hidden');
     catModal.classList.add('flex');
@@ -665,11 +678,15 @@ catForm.addEventListener('submit', async (e) => {
             description: fieldCatDesc.value.trim(),
             icon: fieldCatIcon.value.trim(),
             type: fieldCatType.value,
-            color: fieldCatColorText.value.trim().toUpperCase(),
-            order: parseInt(fieldCatOrder.value) || 0
+            color: fieldCatColorText.value.trim().toUpperCase()
         };
         if (docId) await updateDoc(doc(db, "categories", docId), data);
-        else await addDoc(collection(db, "categories"), data);
+        else {
+            // New categories default to end of list
+            const maxOrder = globalCategories.length > 0 ? Math.max(...globalCategories.map(c => c.order || 0)) : 0;
+            data.order = maxOrder + 1;
+            await addDoc(collection(db, "categories"), data);
+        }
         closeAllModals();
         await loadCategories(); 
     } catch (e) { 

@@ -136,6 +136,7 @@
                                 <th class="py-3 px-4 font-semibold">Nombre de Categoría</th>
                                 <th class="py-3 px-4 font-semibold">Grupo Visual (Tipo)</th>
                                 <th class="py-3 px-4 font-semibold w-24">Color Hex</th>
+                                <th class="py-3 px-4 font-semibold w-20">Orden</th>
                                 <th class="py-3 px-4 font-semibold text-right">Acciones</th>
                             </tr>
                         </thead>
@@ -361,17 +362,13 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1">
                     <div>
                         <label class="block font-medium mb-1">Color Identificativo (Hex)</label>
                         <div class="flex items-center space-x-2">
                             <input type="color" id="field-cat-color-picker" class="h-9 w-9 p-0 border-0 rounded cursor-pointer" value="#009DE0">
                             <input type="text" id="field-cat-color" class="flex-grow border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue font-mono text-xs" required placeholder="#009DE0" value="#009DE0">
                         </div>
-                    </div>
-                    <div>
-                        <label class="block font-medium mb-1">Orden de Visualización</label>
-                        <input type="number" id="field-cat-order" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue" placeholder="0" min="0" value="0">
                     </div>
                 </div>
             </form>
