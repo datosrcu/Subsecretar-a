@@ -361,11 +361,17 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="block font-medium mb-1">Color Identificativo (Hex)</label>
-                    <div class="flex items-center space-x-2">
-                        <input type="color" id="field-cat-color-picker" class="h-9 w-9 p-0 border-0 rounded cursor-pointer" value="#009DE0">
-                        <input type="text" id="field-cat-color" class="flex-grow border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue font-mono" required placeholder="#009DE0" value="#009DE0">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-medium mb-1">Color Identificativo (Hex)</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="color" id="field-cat-color-picker" class="h-9 w-9 p-0 border-0 rounded cursor-pointer" value="#009DE0">
+                            <input type="text" id="field-cat-color" class="flex-grow border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue font-mono text-xs" required placeholder="#009DE0" value="#009DE0">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-medium mb-1">Orden de Visualización</label>
+                        <input type="number" id="field-cat-order" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue" placeholder="0" min="0" value="0">
                     </div>
                 </div>
             </form>

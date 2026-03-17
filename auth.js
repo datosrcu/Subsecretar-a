@@ -176,9 +176,10 @@ async function loadUserPermissions(user) {
             }
         });
 
-        // Cache categories
+        // Cache categories and sort by order
         allCategories = [];
         catSnapshot.forEach(doc => allCategories.push({id: doc.id, ...doc.data()}));
+        allCategories.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
         
         // Cache all enabled boards and flag those with access
         allAccessibleBoards = [];

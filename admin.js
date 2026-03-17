@@ -67,6 +67,7 @@ const fieldCatIcon = document.getElementById('field-cat-icon');
 const fieldCatType = document.getElementById('field-cat-type');
 const fieldCatColorPicker = document.getElementById('field-cat-color-picker');
 const fieldCatColorText = document.getElementById('field-cat-color');
+const fieldCatOrder = document.getElementById('field-cat-order');
 
 // Search & Filter Listeners for Requests (Added here)
 document.getElementById('filter-request-user')?.addEventListener('input', filterAndRenderRequests);
@@ -595,6 +596,14 @@ async function loadCategories() {
             const data = doc.data();
             const id = doc.id;
             globalCategories.push({id, ...data});
+        });
+        
+        // Sort by order ascending
+        globalCategories.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+
+        globalCategories.forEach(cat => {
+            const data = cat;
+            const id = cat.id;
             const tr = document.createElement('tr');
             tr.className = "hover:bg-gray-50 transition";
             tr.innerHTML = `
@@ -621,6 +630,7 @@ async function loadCategories() {
                 fieldCatType.value = data.type || 'Categorías';
                 fieldCatColorText.value = data.color;
                 fieldCatColorPicker.value = data.color;
+                fieldCatOrder.value = data.order || 0;
                 catModalTitle.textContent = "Editar Categoría";
                 catModal.classList.remove('hidden');
                 catModal.classList.add('flex');
@@ -638,6 +648,7 @@ addCatBtn.addEventListener('click', () => {
     fieldCatDesc.value = '';
     fieldCatColorPicker.value = '#009DE0';
     fieldCatColorText.value = '#009DE0';
+    fieldCatOrder.value = 0;
     catModalTitle.textContent = "Nueva Categoría";
     catModal.classList.remove('hidden');
     catModal.classList.add('flex');
@@ -654,7 +665,8 @@ catForm.addEventListener('submit', async (e) => {
             description: fieldCatDesc.value.trim(),
             icon: fieldCatIcon.value.trim(),
             type: fieldCatType.value,
-            color: fieldCatColorText.value.trim().toUpperCase()
+            color: fieldCatColorText.value.trim().toUpperCase(),
+            order: parseInt(fieldCatOrder.value) || 0
         };
         if (docId) await updateDoc(doc(db, "categories", docId), data);
         else await addDoc(collection(db, "categories"), data);
