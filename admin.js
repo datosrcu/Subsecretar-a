@@ -587,7 +587,7 @@ async function loadCategories() {
         globalCategories = [];
         catTbody.innerHTML = '';
         if (snapshot.empty) {
-            catTbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center text-obelisco-gray">No hay categorías.</td></tr>`;
+            catTbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-obelisco-gray">No hay categorías.</td></tr>`;
             renderCategoryChecklist();
             return;
         }
@@ -608,7 +608,9 @@ async function loadCategories() {
             tr.innerHTML = `
                 <td class="py-3 px-4 font-medium text-xl text-center">${data.icon || '📌'}</td>
                 <td class="py-3 px-4 font-medium">${data.name}</td>
-                <td class="py-3 px-4 text-obelisco-gray text-xs"><span class="bg-gray-100 border border-gray-200 px-2 py-1 rounded inline-block">${data.type || 'Categorías'}</span></td>
+                <td class="py-3 px-4 text-obelisco-gray text-xs truncate" title="${data.type || 'Categorías'}">
+                    <span class="bg-gray-100 border border-gray-200 px-2 py-1 rounded inline-block">${data.type || 'Categorías'}</span>
+                </td>
                 <td class="py-3 px-4">
                     <div class="flex items-center space-x-2">
                         <span class="w-4 h-4 rounded-full border border-gray-300" style="background-color: ${data.color}"></span>
