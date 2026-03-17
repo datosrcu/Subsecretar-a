@@ -78,8 +78,7 @@ let globalCategories = []; // to populate dropdowns
 let allRequestsFetched = []; // Cache for filtering
 
 const ADMIN_EMAILS = [
-    'datos@riocuarto.gov.ar',
-    'pfabbroni@riocuarto.gov.ar' // Keep user's current admin access
+    'datos@riocuarto.gov.ar'
 ];
 
 // --- Initialization & Auth ---
@@ -242,10 +241,15 @@ function renderUsersTable(users) {
                 </div>
             </td>
             <td class="py-3 px-4">
-                <select class="role-select text-xs border border-gray-300 rounded px-2 py-1 bg-white outline-none focus:border-obelisco-blue" data-id="${u.id}">
-                    <option value="usuario" ${role === 'usuario' ? 'selected' : ''}>Usuario del Observatorio</option>
-                    <option value="lector" ${role === 'lector' ? 'selected' : ''}>Lector</option>
-                </select>
+                <div class="flex items-center space-x-2">
+                    <select class="role-select text-xs border border-gray-300 rounded px-2 py-1 bg-white outline-none focus:border-obelisco-blue" data-id="${u.id}" data-original="${role}">
+                        <option value="usuario" ${role === 'usuario' ? 'selected' : ''}>Usuario del Observatorio</option>
+                        <option value="lector" ${role === 'lector' ? 'selected' : ''}>Lector</option>
+                    </select>
+                    <button class="btn-save-role hidden bg-green-500 hover:bg-green-600 text-white p-1 rounded transition-opacity" title="Guardar Cambio de Rol">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    </button>
+                </div>
             </td>
             <td class="py-3 px-4 text-right">
                 <button class="text-red-500 hover:text-red-700 font-medium btn-del-user" data-id="${u.id}">Eliminar</button>
@@ -253,15 +257,33 @@ function renderUsersTable(users) {
         `;
         usersTbody.appendChild(tr);
 
-        // Role change listener
-        tr.querySelector('.role-select').addEventListener('change', async (e) => {
-            const newRole = e.target.value;
+        // Role change logic with save button
+        const roleSelect = tr.querySelector('.role-select');
+        const saveBtn = tr.querySelector('.btn-save-role');
+
+        roleSelect.addEventListener('change', (e) => {
+            const currentRole = e.target.value;
+            const originalRole = e.target.getAttribute('data-original');
+            if (currentRole !== originalRole) {
+                saveBtn.classList.remove('hidden');
+            } else {
+                saveBtn.classList.add('hidden');
+            }
+        });
+
+        saveBtn.addEventListener('click', async () => {
+            const newRole = roleSelect.value;
             try {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
                 await updateDoc(doc(db, "users", u.id), { role: newRole });
-                alert("Rol actualizado.");
+                alert("Rol actualizado correctamente.");
+                await loadUsers(); // Refresh the table
             } catch (err) {
                 console.error("Error updating role:", err);
-                alert("No se pudo actualizar el rol. Verificá las Reglas de Firestore.");
+                alert("No se pudo actualizar el rol.");
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`;
             }
         });
 
@@ -273,11 +295,36 @@ function renderUsersTable(users) {
 async function deleteUser(id) {
     if (confirm("¿Estás seguro que querés eliminar este usuario?")) {
         try {
+            // 1. Get user details before deleting to have the email
+            const userDoc = await getDoc(doc(db, "users", id));
+            if (userDoc.exists()) {
+                const userEmail = userDoc.data().email.toLowerCase();
+                
+                // 2. Remove user from all buttons/boards permissions
+                const buttonsSnapshot = await getDocs(collection(db, "buttons"));
+                const updatePromises = [];
+                
+                buttonsSnapshot.forEach(buttonDoc => {
+                    const data = buttonDoc.data();
+                    const allowedUsers = data.allowedUsers || [];
+                    if (allowedUsers.map(e => e.toLowerCase()).includes(userEmail)) {
+                        const newAllowedUsers = allowedUsers.filter(e => e.toLowerCase() !== userEmail);
+                        updatePromises.push(updateDoc(buttonDoc.ref, { allowedUsers: newAllowedUsers }));
+                    }
+                });
+                
+                if (updatePromises.length > 0) {
+                    await Promise.all(updatePromises);
+                    console.log(`User ${userEmail} removed from ${updatePromises.length} boards.`);
+                }
+            }
+
+            // 3. Delete the user document
             await deleteDoc(doc(db, "users", id));
             loadUsers();
         } catch (error) {
             console.error("Error deleting user:", error);
-            alert("No se pudo eliminar el usuario.");
+            alert("No se pudo eliminar el usuario completamente.");
         }
     }
 }
@@ -436,23 +483,29 @@ function renderUserChecklist(filterText = '') {
         return;
     }
     filtered.forEach(u => {
+        const userEmail = u.email.toLowerCase();
+        const isAdmin = ADMIN_EMAILS.map(e => e.toLowerCase()).includes(userEmail);
         const isLector = u.role === 'lector';
-        const isChecked = isLector || currentlySelectedUsers.includes(u.email.toLowerCase()) ? 'checked' : '';
-        const disabledAttr = isLector ? 'disabled' : '';
-        const lectorBadge = isLector ? '<span class="ml-auto text-[9px] bg-green-100 text-green-700 px-1 rounded font-bold uppercase">Lector (Acceso Total)</span>' : '';
+        
+        const isChecked = isAdmin || isLector || currentlySelectedUsers.includes(userEmail) ? 'checked' : '';
+        const disabledAttr = (isAdmin || isLector) ? 'disabled' : '';
+        
+        let badgeHtml = '';
+        if (isAdmin) badgeHtml = '<span class="ml-auto text-[9px] bg-amber-100 text-amber-700 px-1 rounded font-bold uppercase">Admin (Acceso Total)</span>';
+        else if (isLector) badgeHtml = '<span class="ml-auto text-[9px] bg-green-100 text-green-700 px-1 rounded font-bold uppercase">Lector (Acceso Total)</span>';
         
         const div = document.createElement('div');
-        div.className = `flex items-center space-x-2 p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200 cursor-pointer transition ${isLector ? 'opacity-70' : ''}`;
+        div.className = `flex items-center space-x-2 p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200 cursor-pointer transition ${(isAdmin || isLector) ? 'opacity-70' : ''}`;
         div.innerHTML = `
             <input type="checkbox" id="user-${u.email}" value="${u.email}" class="user-checkbox w-4 h-4 text-obelisco-blue rounded border-gray-300 pointer-events-none" ${isChecked} ${disabledAttr}>
             <label for="user-${u.email}" class="text-sm font-medium cursor-pointer flex-grow pointer-events-none flex items-center">
                 <span class="block truncate max-w-[150px]">${u.name}</span> 
                 <span class="text-[10px] text-gray-400 font-normal block truncate ml-2">(${u.email})</span>
-                ${lectorBadge}
+                ${badgeHtml}
             </label>
         `;
         div.addEventListener('click', () => {
-            if (isLector) return;
+            if (isAdmin || isLector) return;
             const cb = div.querySelector('input');
             cb.checked = !cb.checked;
             const email = u.email.toLowerCase();
@@ -673,32 +726,15 @@ async function loadBoards() {
                 fieldBoardUrl.value = data.iframeUrl || '';
                 fieldBoardIcon.value = data.icon || '';
                 fieldBoardReqLogin.value = data.requireLogin !== false ? 'true' : 'false';
-                currentlySelectedUsers = (data.allowedUsers || []).map(u => u.toLowerCase());
-                
-                // Add users that are authorized but not in the global users directory
-                // to the temporary view so checkboxes work for them too
-                const virtualUsers = [];
-                currentlySelectedUsers.forEach(email => {
-                    const emailLower = email.toLowerCase();
-                    const exists = allUsersFetched.some(u => u.email.toLowerCase() === emailLower);
-                    if (!exists) {
-                        virtualUsers.push({
-                            email: emailLower,
-                            name: emailLower.split('@')[0],
-                            photoURL: ''
-                        });
-                    }
-                });
-
-                // Temporarily add them to the fetched list for the render
-                const originalFetched = [...allUsersFetched];
-                allUsersFetched = [...allUsersFetched, ...virtualUsers];
+                const rawAllowedUsers = (data.allowedUsers || []).map(u => u.toLowerCase());
+                // Filter out non-existent users (except current admins)
+                currentlySelectedUsers = rawAllowedUsers.filter(email => 
+                    allUsersFetched.some(u => u.email.toLowerCase() === email) || 
+                    ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email)
+                );
                 
                 userSearchInput.value = '';
                 renderUserChecklist();
-                
-                // Restore original list after render (the checklist uses the DOM, we don't need the virtual users in allUsersFetched permanently)
-                allUsersFetched = originalFetched;
                 
                 // For retrocompatibility with old boards that had string `category`
                 currentlySelectedCategories = data.categories || [];
@@ -745,7 +781,10 @@ boardForm.addEventListener('submit', async (e) => {
             categories: currentlySelectedCategories,
             requireLogin: fieldBoardReqLogin.value === 'true',
             iframeUrl: fieldBoardUrl.value.trim(),
-            allowedUsers: currentlySelectedUsers,
+            allowedUsers: currentlySelectedUsers.filter(email => 
+                allUsersFetched.some(u => u.email.toLowerCase() === email.toLowerCase()) || 
+                ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase())
+            ),
             updatedAt: new Date().toISOString()
         };
 

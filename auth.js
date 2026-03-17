@@ -22,8 +22,7 @@ const registrationModal = document.getElementById('registration-modal');
 const registrationForm = document.getElementById('registration-form');
 
 const ADMIN_EMAILS = [
-    'datos@riocuarto.gov.ar',
-    'pfabbroni@riocuarto.gov.ar'
+    'datos@riocuarto.gov.ar'
 ];
 console.log("Auth JS v1.2 - Loaded");
 

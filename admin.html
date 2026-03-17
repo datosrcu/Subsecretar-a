@@ -56,7 +56,7 @@
         
         <!-- Navigation Tabs -->
         <div class="bg-white border-b border-gray-200">
-            <div class="max-w-7xl mx-auto px-6">
+        <div class="max-w-[1600px] mx-auto px-6">
                 <nav class="-mb-px flex space-x-8" aria-label="Tabs">
                     <button class="nav-tab border-obelisco-blue text-obelisco-blue whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-target="tab-tableros">
                         Tableros (Botones)
@@ -75,7 +75,7 @@
             </div>
         </div>
 
-        <div class="flex-grow p-6 max-w-7xl mx-auto w-full relative">
+        <div class="flex-grow p-6 max-w-[1600px] mx-auto w-full relative">
             
             <!-- CONTENIDO TABLEROS -->
             <div id="tab-tableros" class="tab-pane hidden block"> <!-- "block" by default (active) -->
@@ -161,7 +161,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden max-w-4xl">
+                <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden max-w-[1600px]">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
@@ -196,8 +196,8 @@
                     <div class="w-48">
                         <label class="block text-[10px] uppercase font-bold text-obelisco-gray mb-1">Estado</label>
                         <select id="filter-request-status" class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-obelisco-blue bg-white">
-                            <option value="all">Todos los estados</option>
-                            <option value="pending" selected>Pendientes</option>
+                            <option value="all" selected>Todos los estados</option>
+                            <option value="pending">Pendientes</option>
                             <option value="approved">Aprobadas</option>
                             <option value="rejected">Rechazadas</option>
                             <option value="restricted">Restringidas</option>
