@@ -76,6 +76,7 @@ document.getElementById('filter-request-status')?.addEventListener('change', fil
 let isSubmitting = false;
 let globalCategories = []; // to populate dropdowns
 let allRequestsFetched = []; // Cache for filtering
+let currentCatFilter = "Categorías";
 
 const ADMIN_EMAILS = [
     'datos@riocuarto.gov.ar'
@@ -585,25 +586,34 @@ async function loadCategories() {
     try {
         const snapshot = await getDocs(collection(db, "categories"));
         globalCategories = [];
-        catTbody.innerHTML = '';
-        if (snapshot.empty) {
-            catTbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-obelisco-gray">No hay categorías.</td></tr>`;
-            renderCategoryChecklist();
-            return;
-        }
         snapshot.forEach(doc => {
             const data = doc.data();
             const id = doc.id;
             globalCategories.push({id, ...data});
         });
         
-        // Sort by order ascending
-        globalCategories.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+        renderCategories();
+        renderCategoryChecklist();
+    } catch (error) { console.error(error); }
+}
 
-        globalCategories.forEach(cat => {
-            const data = cat;
-            const id = cat.id;
-            const tr = document.createElement('tr');
+function renderCategories() {
+    catTbody.innerHTML = '';
+    
+    // Sort all by order FIRST to maintain global ordering
+    globalCategories.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+
+    const filtered = globalCategories.filter(cat => (cat.type || 'Categorías') === currentCatFilter);
+
+    if (filtered.length === 0) {
+        catTbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-obelisco-gray">No hay elementos en esta sección.</td></tr>`;
+        return;
+    }
+
+    filtered.forEach(cat => {
+        const data = cat;
+        const id = cat.id;
+        const tr = document.createElement('tr');
             tr.className = "hover:bg-gray-50 transition";
             tr.innerHTML = `
                 <td class="py-3 px-4 font-medium text-xl text-center">${data.icon || '📌'}</td>
@@ -657,6 +667,23 @@ async function loadCategories() {
         renderCategoryChecklist();
     } catch (error) { console.error(error); }
 }
+
+// Cat filter listeners
+document.querySelectorAll('.cat-filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        currentCatFilter = e.target.dataset.type;
+        
+        // Update UI styles
+        document.querySelectorAll('.cat-filter-btn').forEach(b => {
+            b.classList.remove('active-cat-filter', 'bg-white', 'text-obelisco-blue', 'shadow-sm');
+            b.classList.add('text-gray-600', 'hover:bg-gray-200');
+        });
+        btn.classList.add('active-cat-filter', 'bg-white', 'text-obelisco-blue', 'shadow-sm');
+        btn.classList.remove('text-gray-600', 'hover:bg-gray-200');
+        
+        renderCategories();
+    });
+});
 
 addCatBtn.addEventListener('click', () => {
     catForm.reset();
