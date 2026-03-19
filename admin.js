@@ -665,7 +665,6 @@ function renderCategories() {
         });
         
         renderCategoryChecklist();
-    } catch (error) { console.error(error); }
 }
 
 // Cat filter listeners
