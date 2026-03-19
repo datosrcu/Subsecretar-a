@@ -344,11 +344,11 @@ function renderCategoryCard(container, category, boardCount) {
     const html = `
         <div data-cat-id="${category.id}"
             class="obelisco-card category-card bg-white border border-obelisco-border rounded-xl p-6 flex flex-col h-full hover:bg-gray-50 transition drop-shadow-sm cursor-pointer border-t-4" style="border-top-color: ${hexColor}">
-            <div class="flex items-center mb-4 truncate w-full">
+            <div class="flex items-center mb-4 w-full">
                 <div class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
                     ${iconStr}
                 </div>
-                <h3 class="text-xl font-bold text-obelisco-dark ml-4 leading-tight">${category.name}</h3>
+                <h3 class="text-base font-bold text-obelisco-dark ml-4 leading-snug break-words flex-grow">${category.name}</h3>
             </div>
             ${desc ? `<p class="text-obelisco-gray text-sm flex-grow mb-6 line-clamp-3" title="${desc}">${desc}</p>` : '<div class="flex-grow"></div>'}
             <div class="flex justify-between items-center w-full">
@@ -479,7 +479,7 @@ function renderButton(container, id, data) {
                 <div class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
                     ${iconStr}
                 </div>
-                <h3 class="text-lg font-bold text-obelisco-dark ml-4 leading-snug break-words flex-grow">${data.title}</h3>
+                <h3 class="text-sm font-bold text-obelisco-dark ml-4 leading-snug break-words flex-grow">${data.title}</h3>
             </div>
             <p class="text-obelisco-gray text-xs flex-grow mb-6 italic" title="${categoryNames}">${categoryNames}</p>
             <span class="text-obelisco-blue font-bold text-sm flex items-center">

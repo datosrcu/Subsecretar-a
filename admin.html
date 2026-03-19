@@ -95,6 +95,14 @@
                     </div>
                 </div>
 
+                <!-- Filtros de grupo de tableros -->
+                <div class="flex gap-2 mb-5 bg-gray-100 p-1.5 rounded-xl w-fit">
+                    <button class="board-filter-btn active-board-filter bg-white text-obelisco-blue shadow-sm text-sm font-medium px-4 py-1.5 rounded-lg transition" data-filter="all">📋 Todos</button>
+                    <button class="board-filter-btn text-gray-600 hover:bg-gray-200 text-sm font-medium px-4 py-1.5 rounded-lg transition" data-filter="Categorías">📁 Categorías</button>
+                    <button class="board-filter-btn text-gray-600 hover:bg-gray-200 text-sm font-medium px-4 py-1.5 rounded-lg transition" data-filter="Gestores Internos">🏛️ Gestores Internos</button>
+                    <button class="board-filter-btn text-gray-600 hover:bg-gray-200 text-sm font-medium px-4 py-1.5 rounded-lg transition" data-filter="Gestores Externos">🌐 Gestores Externos</button>
+                </div>
+
                 <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden">
                     <table class="w-full text-left border-collapse min-w-[700px]">
                         <thead>
@@ -103,11 +111,12 @@
                                 <th class="py-3 px-4 font-semibold">Título</th>
                                 <th class="py-3 px-4 font-semibold">Categoría</th>
                                 <th class="py-3 px-4 font-semibold">Permisos</th>
+                                <th class="py-3 px-4 font-semibold w-20">Orden</th>
                                 <th class="py-3 px-4 font-semibold text-right">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="boards-tbody" class="divide-y divide-obelisco-border">
-                            <tr><td colspan="5" class="text-center py-8 text-obelisco-gray">Cargando tableros...</td></tr>
+                            <tr><td colspan="6" class="text-center py-8 text-obelisco-gray">Cargando tableros...</td></tr>
                         </tbody>
                     </table>
                 </div>

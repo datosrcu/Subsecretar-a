@@ -75,6 +75,8 @@ let isSubmitting = false;
 let globalCategories = []; // to populate dropdowns
 let allRequestsFetched = []; // Cache for filtering
 let currentCatFilter = "Categorías";
+let allBoardsFetched = [];
+let currentBoardFilter = 'all';
 
 const ADMIN_EMAILS = [
     'datos@riocuarto.gov.ar'
@@ -556,8 +558,28 @@ userSearchInput.addEventListener('input', (e) => renderUserChecklist(e.target.va
 // --- CATEGORIES LISTING & SELECTOR ---
 function renderCategoryChecklist() {
     categoriesChecklist.innerHTML = '';
+    // Virtual option: assign board directly to Gestores Externos (no real category needed)
+    const vIsChecked = currentlySelectedCategories.includes('_ge_direct');
+    const vDiv = document.createElement('div');
+    vDiv.className = `flex items-center space-x-2 p-2 rounded border cursor-pointer transition mb-1 ${vIsChecked ? 'border-blue-300 bg-blue-50' : 'border-dashed border-blue-200 hover:bg-blue-50'}`;
+    vDiv.innerHTML = `
+        <input type="checkbox" class="w-4 h-4 text-obelisco-blue rounded border-gray-300 pointer-events-none" ${vIsChecked ? 'checked' : ''}>
+        <span class="pointer-events-none">🌐</span>
+        <span class="text-sm font-semibold pointer-events-none text-obelisco-blue">Gestores Externos <span class="text-xs text-gray-400 font-normal">· sin categoría específica</span></span>
+    `;
+    vDiv.addEventListener('click', () => {
+        const cb = vDiv.querySelector('input');
+        cb.checked = !cb.checked;
+        vDiv.className = `flex items-center space-x-2 p-2 rounded border cursor-pointer transition mb-1 ${cb.checked ? 'border-blue-300 bg-blue-50' : 'border-dashed border-blue-200 hover:bg-blue-50'}`;
+        if (cb.checked) { if (!currentlySelectedCategories.includes('_ge_direct')) currentlySelectedCategories.push('_ge_direct'); }
+        else { currentlySelectedCategories = currentlySelectedCategories.filter(id => id !== '_ge_direct'); }
+    });
+    categoriesChecklist.appendChild(vDiv);
     if (globalCategories.length === 0) {
-        categoriesChecklist.innerHTML = `<p class="text-xs text-center text-gray-500 py-4">No hay categorías creadas aún.</p>`;
+        const p = document.createElement('p');
+        p.className = 'text-xs text-center text-gray-500 py-4';
+        p.textContent = 'No hay categorías creadas aún.';
+        categoriesChecklist.appendChild(p);
         return;
     }
     globalCategories.forEach(c => {
@@ -728,89 +750,123 @@ catForm.addEventListener('submit', async (e) => {
 });
 
 // --- BOARDS CRUD ---
+function boardMatchesFilter(data, filterType) {
+    if (filterType === 'all') return true;
+    if (data.categories && data.categories.length > 0) {
+        return data.categories.some(catId => {
+            const cat = globalCategories.find(c => c.id === catId);
+            return cat && (cat.type || 'Categorías') === filterType;
+        });
+    }
+    return (data.category || '') === filterType;
+}
+
 async function loadBoards() {
     try {
         const snapshot = await getDocs(collection(db, "buttons"));
-        boardsTbody.innerHTML = '';
-        if (snapshot.empty) {
-            boardsTbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center text-obelisco-gray bg-gray-50">No hay tableros creados aún.</td></tr>`;
-            return;
-        }
-        snapshot.forEach((doc) => {
-            const data = doc.data();
-            const id = doc.id;
-            const allowedCount = (data.allowedUsers || []).length;
-            const accessBadge = allowedCount === 0 && data.requireLogin 
-                ? `<span class="bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded text-xs">Público bloq.</span>`
-                : (data.requireLogin 
-                    ? `<span class="bg-blue-50 text-obelisco-blue border border-blue-200 px-2 py-0.5 rounded text-xs">${allowedCount} autorizados</span>`
-                    : `<span class="bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded text-xs">Público abierto</span>`);
-            
-            // Map category IDs to Names for Table display
-            const catNames = (data.categories || []).map(catId => {
-                const c = globalCategories.find(gc => gc.id === catId);
-                return c ? c.name : 'Desc.';
-            }).join(', ');
-            
-            const tr = document.createElement('tr');
-            tr.className = "hover:bg-gray-50 transition";
-            tr.innerHTML = `
-                <td class="py-3 px-4 cursor-pointer text-center" title="Click para alternar estado" data-toggle="${id}">
-                    ${data.enabled 
-                        ? '<span class="w-3 h-3 bg-green-500 rounded-full inline-block shadow-sm"></span>' 
-                        : '<span class="w-3 h-3 bg-red-500 rounded-full inline-block shadow-sm"></span>'}
-                </td>
-                <td class="py-3 px-4 font-medium"><span class="mr-2">${data.icon || '📌'}</span>${data.title}</td>
-                <td class="py-3 px-4 text-obelisco-gray text-xs truncate max-w-[200px]" title="${catNames}">${catNames || 'Sin Categoría'}</td>
-                <td class="py-3 px-4">${accessBadge}</td>
-                <td class="py-3 px-4 text-right space-x-2">
-                    <button class="text-obelisco-blue hover:text-blue-800 font-medium btn-edit-board" data-id="${id}">Editar</button>
-                    <button class="text-red-500 hover:text-red-700 font-medium btn-del-board" data-id="${id}">Eliminar</button>
-                </td>
-            `;
-            boardsTbody.appendChild(tr);
-            
-            // Quick toggle enabled/disabled
-            tr.querySelector(`[data-toggle="${id}"]`).addEventListener('click', async () => {
-                try {
-                    await updateDoc(doc.ref, { enabled: !data.enabled });
-                    loadBoards();
-                } catch(e){ console.error(e) }
-            });
-            
-            tr.querySelector('.btn-edit-board').addEventListener('click', () => {
-                boardModalTitle.textContent = 'Editar Tablero';
-                fieldBoardId.value = id;
-                fieldBoardEnabled.checked = data.enabled !== false;
-                fieldBoardTitle.value = data.title || '';
-                fieldBoardUrl.value = data.iframeUrl || '';
-                fieldBoardIcon.value = data.icon || '';
-                fieldBoardReqLogin.value = data.requireLogin !== false ? 'true' : 'false';
-                const rawAllowedUsers = (data.allowedUsers || []).map(u => u.toLowerCase());
-                // Filter out non-existent users (except current admins)
-                currentlySelectedUsers = rawAllowedUsers.filter(email => 
-                    allUsersFetched.some(u => u.email.toLowerCase() === email) || 
-                    ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email)
-                );
-                
-                userSearchInput.value = '';
-                renderUserChecklist();
-                
-                // For retrocompatibility with old boards that had string `category`
-                currentlySelectedCategories = data.categories || [];
-                if (currentlySelectedCategories.length === 0 && data.category) {
+        allBoardsFetched = [];
+        snapshot.forEach((docSnap) => allBoardsFetched.push({ id: docSnap.id, ...docSnap.data() }));
+        filterAndRenderBoards();
+    } catch (error) { console.error(error); }
+}
+
+function filterAndRenderBoards() {
+    boardsTbody.innerHTML = '';
+    const filtered = allBoardsFetched.filter(b => boardMatchesFilter(b, currentBoardFilter));
+    if (filtered.length === 0) {
+        boardsTbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-obelisco-gray bg-gray-50">No hay tableros en esta sección.</td></tr>`;
+        return;
+    }
+    // Sort by order field
+    filtered.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+    filtered.forEach((data) => {
+        const id = data.id;
+        const allowedCount = (data.allowedUsers || []).length;
+        const accessBadge = allowedCount === 0 && data.requireLogin
+            ? `<span class="bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded text-xs">Público bloq.</span>`
+            : (data.requireLogin
+                ? `<span class="bg-blue-50 text-obelisco-blue border border-blue-200 px-2 py-0.5 rounded text-xs">${allowedCount} autorizados</span>`
+                : `<span class="bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded text-xs">Público abierto</span>`);
+        const catNames = (data.categories || []).map(catId => {
+            const c = globalCategories.find(gc => gc.id === catId);
+            return c ? c.name : 'Desc.';
+        }).join(', ') || data.category || 'Sin Categoría';
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-gray-50 transition";
+        tr.innerHTML = `
+            <td class="py-3 px-4 cursor-pointer text-center" title="Click para alternar estado" data-toggle="${id}">
+                ${data.enabled ? '<span class="w-3 h-3 bg-green-500 rounded-full inline-block shadow-sm"></span>' : '<span class="w-3 h-3 bg-red-500 rounded-full inline-block shadow-sm"></span>'}
+            </td>
+            <td class="py-3 px-4 font-medium"><span class="mr-2">${data.icon || '📌'}</span>${data.title}</td>
+            <td class="py-3 px-4 text-obelisco-gray text-xs truncate max-w-[200px]" title="${catNames}">${catNames}</td>
+            <td class="py-3 px-4">${accessBadge}</td>
+            <td class="py-3 px-4">
+                <input type="number" class="w-16 border border-gray-300 rounded px-2 py-1 text-xs outline-none focus:border-obelisco-blue board-order-input" value="${data.order || 0}" data-id="${id}">
+            </td>
+            <td class="py-3 px-4 text-right space-x-2">
+                <button class="text-obelisco-blue hover:text-blue-800 font-medium btn-edit-board" data-id="${id}">Editar</button>
+                <button class="text-red-500 hover:text-red-700 font-medium btn-del-board" data-id="${id}">Eliminar</button>
+            </td>
+        `;
+        boardsTbody.appendChild(tr);
+        tr.querySelector(`[data-toggle="${id}"]`).addEventListener('click', async () => {
+            try { await updateDoc(doc(db, "buttons", id), { enabled: !data.enabled }); loadBoards(); }
+            catch(e){ console.error(e); }
+        });
+        // Auto-save order on change
+        tr.querySelector('.board-order-input').addEventListener('change', async (e) => {
+            const newOrder = parseInt(e.target.value) || 0;
+            try {
+                await updateDoc(doc(db, "buttons", id), { order: newOrder });
+                await loadBoards();
+            } catch (err) { console.error("Error updating board order:", err); }
+        });
+        tr.querySelector('.btn-edit-board').addEventListener('click', () => {
+            boardModalTitle.textContent = 'Editar Tablero';
+            fieldBoardId.value = id;
+            fieldBoardEnabled.checked = data.enabled !== false;
+            fieldBoardTitle.value = data.title || '';
+            fieldBoardUrl.value = data.iframeUrl || '';
+            fieldBoardIcon.value = data.icon || '';
+            fieldBoardReqLogin.value = data.requireLogin !== false ? 'true' : 'false';
+            currentlySelectedUsers = (data.allowedUsers || []).map(u => u.toLowerCase()).filter(email =>
+                allUsersFetched.some(u => u.email.toLowerCase() === email) ||
+                ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email)
+            );
+            userSearchInput.value = '';
+            renderUserChecklist();
+            // Handle categories including virtual GE direct
+            currentlySelectedCategories = data.categories || [];
+            if (currentlySelectedCategories.length === 0 && data.category) {
+                if (data.category === 'Gestores Externos') {
+                    currentlySelectedCategories = ['_ge_direct'];
+                } else {
                     const matchedCat = globalCategories.find(c => c.name === data.category);
                     if (matchedCat) currentlySelectedCategories.push(matchedCat.id);
                 }
-                renderCategoryChecklist();
-                
-                boardModal.classList.remove('hidden');
-                boardModal.classList.add('flex');
-            });
-            tr.querySelector('.btn-del-board').addEventListener('click', () => deleteDocReq("buttons", id));
+            }
+            renderCategoryChecklist();
+            boardModal.classList.remove('hidden');
+            boardModal.classList.add('flex');
         });
-    } catch (error) { console.error(error); }
+        tr.querySelector('.btn-del-board').addEventListener('click', () => deleteDocReq("buttons", id));
+    });
 }
+
+// Board group filter buttons
+document.querySelectorAll('.board-filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const targetBtn = e.currentTarget;
+        currentBoardFilter = targetBtn.dataset.filter;
+        document.querySelectorAll('.board-filter-btn').forEach(b => {
+            b.classList.remove('active-board-filter', 'bg-white', 'text-obelisco-blue', 'shadow-sm');
+            b.classList.add('text-gray-600', 'hover:bg-gray-200');
+        });
+        targetBtn.classList.add('active-board-filter', 'bg-white', 'text-obelisco-blue', 'shadow-sm');
+        targetBtn.classList.remove('text-gray-600', 'hover:bg-gray-200');
+        filterAndRenderBoards();
+    });
+});
 
 addBoardBtn.addEventListener('click', () => {
     boardForm.reset();
@@ -834,15 +890,19 @@ boardForm.addEventListener('submit', async (e) => {
     isSubmitting = true;
     try {
         const docId = fieldBoardId.value;
+        // Handle virtual 'Gestores Externos directo' sentinel
+        const hasGEDirect = currentlySelectedCategories.includes('_ge_direct');
+        const finalCategories = currentlySelectedCategories.filter(id => id !== '_ge_direct');
         const boardData = {
             enabled: fieldBoardEnabled.checked,
             title: fieldBoardTitle.value.trim(),
             icon: fieldBoardIcon.value.trim(),
-            categories: currentlySelectedCategories,
+            categories: finalCategories,
+            category: hasGEDirect ? 'Gestores Externos' : '',
             requireLogin: fieldBoardReqLogin.value === 'true',
             iframeUrl: fieldBoardUrl.value.trim(),
-            allowedUsers: currentlySelectedUsers.filter(email => 
-                allUsersFetched.some(u => u.email.toLowerCase() === email.toLowerCase()) || 
+            allowedUsers: currentlySelectedUsers.filter(email =>
+                allUsersFetched.some(u => u.email.toLowerCase() === email.toLowerCase()) ||
                 ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase())
             ),
             updatedAt: new Date().toISOString()
