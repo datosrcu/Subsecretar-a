@@ -68,9 +68,7 @@ const fieldCatType = document.getElementById('field-cat-type');
 const fieldCatColorPicker = document.getElementById('field-cat-color-picker');
 const fieldCatColorText = document.getElementById('field-cat-color');
 
-// Search & Filter Listeners for Requests (Added here)
-document.getElementById('filter-request-user')?.addEventListener('input', filterAndRenderRequests);
-document.getElementById('filter-request-status')?.addEventListener('change', filterAndRenderRequests);
+// Search & Filter Listeners for Requests
 
 // --- State ---
 let isSubmitting = false;
@@ -373,6 +371,7 @@ function filterAndRenderRequests() {
 document.getElementById('filter-request-user')?.addEventListener('input', filterAndRenderRequests);
 document.getElementById('filter-request-status')?.addEventListener('change', filterAndRenderRequests);
 
+
 function renderRequests(requests) {
     if (!requestsTbody) return;
     if (requests.length === 0) {
@@ -404,7 +403,7 @@ function renderRequests(requests) {
             <td class="py-4 px-4 text-xs font-semibold">${req.buttonName || 'ID: ' + req.buttonId}</td>
             <td class="py-4 px-4 italic text-obelisco-gray text-xs">"${req.reason}"</td>
             <td class="py-4 px-4 text-right space-x-2 whitespace-nowrap">
-                ${status !== 'approved' ? `
+                ${(status === 'pending' || status === 'rejected' || status === 'restricted') ? `
                 <button class="btn-approve text-green-600 hover:bg-green-100 p-2 rounded" data-id="${req.id}" data-email="${req.userEmail}" data-button="${req.buttonId}" title="Aprobar Acceso">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 </button>
@@ -422,11 +421,21 @@ function renderRequests(requests) {
             </td>
         `;
         
-        if (status !== 'approved' && status !== 'rejected' && status !== 'restricted') {
-            tr.querySelector('.btn-approve').addEventListener('click', () => approveRequest(req.id, req.userEmail, req.buttonId));
+        if (status === 'pending' || status === 'rejected' || status === 'restricted') {
+            tr.querySelector('.btn-approve').addEventListener('click', async (e) => {
+                const btn = e.currentTarget;
+                btn.disabled = true;
+                btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>';
+                await approveRequest(req.id, req.userEmail, req.buttonId);
+            });
         }
         if (status === 'pending') {
-            tr.querySelector('.btn-reject').addEventListener('click', () => updateRequestStatus(req.id, 'rejected'));
+            tr.querySelector('.btn-reject').addEventListener('click', async (e) => {
+                const btn = e.currentTarget;
+                btn.disabled = true;
+                btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>';
+                await updateRequestStatus(req.id, 'rejected');
+            });
         }
         tr.querySelector('.btn-del-req').addEventListener('click', () => deleteDocReq("requests", req.id));
         
@@ -435,7 +444,6 @@ function renderRequests(requests) {
 }
 
 async function updateRequestStatus(requestId, newStatus) {
-    if (!confirm(`¿Cambiar estado de solicitud a ${newStatus}?`)) return;
     try {
         await updateDoc(doc(db, "requests", requestId), { status: newStatus });
         await loadRequests();
@@ -443,8 +451,6 @@ async function updateRequestStatus(requestId, newStatus) {
 }
 
 async function approveRequest(requestId, email, buttonId) {
-    if (!confirm(`¿Aprobar acceso para ${email}?`)) return;
-    
     try {
         // 1. Get the button doc
         const buttonRef = doc(db, "buttons", buttonId);
@@ -462,17 +468,14 @@ async function approveRequest(requestId, email, buttonId) {
             
             // 2. Mark request as approved
             await updateDoc(doc(db, "requests", requestId), { status: 'approved' });
-            
-            alert("Acceso otorgado correctamente.");
             await loadRequests();
         } else {
-            alert("El tablero ya no existe.");
+            // Board no longer exists — just delete the request
             await deleteDoc(doc(db, "requests", requestId));
             await loadRequests();
         }
     } catch (error) {
         console.error("Error approving request:", error);
-        alert("Error al aprobar.");
     }
 }
 
@@ -855,16 +858,18 @@ boardForm.addEventListener('submit', async (e) => {
                 const removedUsers = oldUsers.filter(u => !currentUsersLower.includes(u));
                 
                 if (removedUsers.length > 0) {
-                    // Update related requests by querying Firestore (more robust than local cache)
+                    // Update related requests by querying Firestore — use Promise.all so awaits are respected
                     const reqSnap = await getDocs(collection(db, "requests"));
-                    reqSnap.forEach(async (rDoc) => {
+                    const restrictUpdates = [];
+                    reqSnap.forEach((rDoc) => {
                         const rData = rDoc.data();
                         if (rData.buttonId === docId && 
-                            removedUsers.includes(rData.userEmail.toLowerCase()) && 
+                            removedUsers.includes((rData.userEmail || '').toLowerCase()) && 
                             rData.status === 'approved') {
-                            await updateDoc(doc(db, "requests", rDoc.id), { status: 'restricted' });
+                            restrictUpdates.push(updateDoc(doc(db, "requests", rDoc.id), { status: 'restricted' }));
                         }
                     });
+                    if (restrictUpdates.length > 0) await Promise.all(restrictUpdates);
                 }
             }
             await updateDoc(doc(db, "buttons", docId), boardData);

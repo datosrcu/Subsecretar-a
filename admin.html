@@ -115,7 +115,7 @@
 
             <!-- CONTENIDO CATEGORÍAS -->
             <div id="tab-categorias" class="tab-pane hidden">
-                <div class="flex justify-between items-end mb-6">
+                <div class="flex justify-between items-end mb-4">
                     <div>
                         <h2 class="text-2xl font-bold mb-1">Categorías de Tableros</h2>
                         <p class="text-obelisco-gray text-sm">Administrá las categorías que se muestran en la cuadrícula de tableros.</p>
@@ -125,6 +125,19 @@
                             <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
                         </svg>
                         Nueva Categoría
+                    </button>
+                </div>
+
+                <!-- Filtros de tipo -->
+                <div class="flex gap-2 mb-5 bg-gray-100 p-1.5 rounded-xl w-fit">
+                    <button class="cat-filter-btn active-cat-filter bg-white text-obelisco-blue shadow-sm text-sm font-medium px-4 py-1.5 rounded-lg transition" data-type="Categorías">
+                        📁 Categorías
+                    </button>
+                    <button class="cat-filter-btn text-gray-600 hover:bg-gray-200 text-sm font-medium px-4 py-1.5 rounded-lg transition" data-type="Gestores Internos">
+                        🏛️ Gestores Internos
+                    </button>
+                    <button class="cat-filter-btn text-gray-600 hover:bg-gray-200 text-sm font-medium px-4 py-1.5 rounded-lg transition" data-type="Gestores Externos">
+                        🌐 Gestores Externos
                     </button>
                 </div>
 
