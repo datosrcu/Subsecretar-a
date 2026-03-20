@@ -1221,7 +1221,15 @@ window.viewRequestDetails = (id) => {
     }
     details += `\n• INFO ADICIONAL: ${req.additionalInfo || 'N/A'}\n`;
     if (req.attachments && req.attachments.length > 0) {
-        details += `• ARCHIVOS ADJUNTOS: ${req.attachments.join(', ')}`;
+        details += `\n• ARCHIVOS ADJUNTOS:\n`;
+        req.attachments.forEach(file => {
+            if (typeof file === 'object' && file.url) {
+                details += `  - ${file.name}\n    Enlace: ${file.url}\n`;
+            } else {
+                // Backward compatibility if it was just a string
+                details += `  - ${file}\n`;
+            }
+        });
     }
     
     alert(details);
