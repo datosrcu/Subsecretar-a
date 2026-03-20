@@ -472,7 +472,7 @@ function renderButton(container, id, data) {
         : '<div class="absolute top-2 right-2 text-green-600 bg-green-50 p-1.5 rounded-full border border-green-100 shadow-sm" title="Acceso concedido"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" /></svg></div>';
                         
     const html = `
-        <a href="#" data-button-id="${id}" data-iframe="${data.iframeUrl || ''}" data-heading="${data.title}" data-access="${hasAccess}"
+        <a href="#" data-button-id="${id}" data-iframe="${data.iframeUrl || ''}" data-heading="${data.title}" data-access="${hasAccess}" data-new-tab="${data.openInNewTab === true}"
             class="obelisco-card dashboard-btn bg-white border border-obelisco-border rounded-xl p-6 flex flex-col h-full hover:bg-gray-50 transition drop-shadow-sm relative ${restrictedClass}">
             ${lockIcon}
             <div class="flex items-center mb-4 w-full">
@@ -679,7 +679,13 @@ document.addEventListener('click', (e) => {
         
         if (hasAccess) {
             const url = btn.getAttribute('data-iframe');
-            openModal(title, url);
+            const openInNewTab = btn.getAttribute('data-new-tab') === 'true';
+            
+            if (openInNewTab) {
+                window.open(url, '_blank');
+            } else {
+                openModal(title, url);
+            }
         } else {
             openAccessRequestForm(title, id);
         }

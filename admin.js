@@ -50,6 +50,7 @@ let currentlySelectedCategories = [];
 const fieldBoardReqLogin = document.getElementById('field-board-req-login');
 const fieldBoardUrl = document.getElementById('field-board-url');
 const fieldBoardIcon = document.getElementById('field-board-icon');
+const fieldBoardNewTab = document.getElementById('field-board-new-tab');
 
 // User Multi-select inside Board Form
 const userSearchInput = document.getElementById('user-search');
@@ -829,6 +830,7 @@ function filterAndRenderBoards() {
             fieldBoardUrl.value = data.iframeUrl || '';
             fieldBoardIcon.value = data.icon || '';
             fieldBoardReqLogin.value = data.requireLogin !== false ? 'true' : 'false';
+            fieldBoardNewTab.checked = data.openInNewTab === true;
             currentlySelectedUsers = (data.allowedUsers || []).map(u => u.toLowerCase()).filter(email =>
                 allUsersFetched.some(u => u.email.toLowerCase() === email) ||
                 ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email)
@@ -872,6 +874,7 @@ addBoardBtn.addEventListener('click', () => {
     boardForm.reset();
     fieldBoardId.value = '';
     fieldBoardReqLogin.value = 'true';
+    fieldBoardNewTab.checked = false;
     currentlySelectedUsers = []; 
     userSearchInput.value = '';
     renderUserChecklist();
@@ -901,6 +904,7 @@ boardForm.addEventListener('submit', async (e) => {
             category: hasGEDirect ? 'Gestores Externos' : '',
             requireLogin: fieldBoardReqLogin.value === 'true',
             iframeUrl: fieldBoardUrl.value.trim(),
+            openInNewTab: fieldBoardNewTab.checked,
             allowedUsers: currentlySelectedUsers.filter(email =>
                 allUsersFetched.some(u => u.email.toLowerCase() === email.toLowerCase()) ||
                 ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase())
