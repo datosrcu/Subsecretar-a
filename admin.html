@@ -94,6 +94,37 @@
                         </button>
                     </div>
                 </div>
+                
+                <!-- Tarjetas de Resumen -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-white p-4 rounded-xl border-l-4 shadow-sm flex items-center space-x-4 transition hover:shadow-md" style="border-left-color: #009de0;">
+                        <div class="p-3 rounded-full bg-blue-50 text-[#009de0]">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-500 uppercase">Total Tableros</p>
+                            <p id="count-total" class="text-2xl font-black text-gray-800">0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border-l-4 shadow-sm flex items-center space-x-4 transition hover:shadow-md" style="border-left-color: #00c96b;">
+                        <div class="p-3 rounded-full bg-green-50 text-[#00c96b]">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-500 uppercase">Activos</p>
+                            <p id="count-active" class="text-2xl font-black text-gray-800">0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border-l-4 shadow-sm flex items-center space-x-4 transition hover:shadow-md" style="border-left-color: #ff7d00;">
+                        <div class="p-3 rounded-full bg-orange-50 text-[#ff7d00]">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-500 uppercase">Inactivos</p>
+                            <p id="count-inactive" class="text-2xl font-black text-gray-800">0</p>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Buscador y Filtro de Categorías -->
                 <div class="flex flex-wrap items-center gap-4 mb-6">
@@ -109,6 +140,15 @@
                         <select id="filter-board-category" class="border border-gray-300 rounded-lg px-3 py-2 bg-white outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition text-sm min-w-[180px]">
                             <option value="all">Todas las categorías</option>
                             <option value="_ge_direct">🌐 Gestores Externos (Directos)</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Estado:</label>
+                        <select id="filter-board-status" class="border border-gray-300 rounded-lg px-3 py-2 bg-white outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition text-sm">
+                            <option value="all">Todos</option>
+                            <option value="active">🟢 Activos</option>
+                            <option value="inactive">🔴 Inactivos</option>
                         </select>
                     </div>
                 </div>

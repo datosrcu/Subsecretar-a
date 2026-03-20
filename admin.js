@@ -34,6 +34,11 @@ const requestsTbody = document.getElementById('requests-tbody');
 const requestsBadge = document.getElementById('requests-badge');
 const filterBoardSearch = document.getElementById('filter-board-search');
 const filterBoardCategory = document.getElementById('filter-board-category');
+const filterBoardStatus = document.getElementById('filter-board-status');
+
+const countTotal = document.getElementById('count-total');
+const countActive = document.getElementById('count-active');
+const countInactive = document.getElementById('count-inactive');
 
 // Modal Elements
 const boardModal = document.getElementById('board-modal');
@@ -81,6 +86,7 @@ let currentCatFilter = "Categorías";
 let allBoardsFetched = [];
 let boardSearchQuery = "";
 let boardCategoryFilter = "all";
+let boardStatusFilter = "all";
 
 const ADMIN_EMAILS = [
     'datos@riocuarto.gov.ar'
@@ -773,7 +779,7 @@ catForm.addEventListener('submit', async (e) => {
 });
 
 // --- BOARDS CRUD ---
-function boardMatchesFilter(data, search, catId) {
+function boardMatchesFilter(data, search, catId, status) {
     const matchesSearch = !search || data.title.toLowerCase().includes(search.toLowerCase());
     
     let matchesCat = true;
@@ -784,8 +790,14 @@ function boardMatchesFilter(data, search, catId) {
             matchesCat = (data.categories || []).includes(catId);
         }
     }
+
+    let matchesStatus = true;
+    if (status !== 'all') {
+        const isActive = data.enabled !== false;
+        matchesStatus = (status === 'active' && isActive) || (status === 'inactive' && !isActive);
+    }
     
-    return matchesSearch && matchesCat;
+    return matchesSearch && matchesCat && matchesStatus;
 }
 
 async function loadBoards() {
@@ -799,7 +811,17 @@ async function loadBoards() {
 
 function filterAndRenderBoards() {
     boardsTbody.innerHTML = '';
-    const filtered = allBoardsFetched.filter(b => boardMatchesFilter(b, boardSearchQuery, boardCategoryFilter));
+    const filtered = allBoardsFetched.filter(b => boardMatchesFilter(b, boardSearchQuery, boardCategoryFilter, boardStatusFilter));
+    
+    // Update summary cards based on current filters
+    const total = filtered.length;
+    const active = filtered.filter(b => b.enabled !== false).length;
+    const inactive = total - active;
+
+    if (countTotal) countTotal.textContent = total;
+    if (countActive) countActive.textContent = active;
+    if (countInactive) countInactive.textContent = inactive;
+
     if (filtered.length === 0) {
         boardsTbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-obelisco-gray bg-gray-50">No hay tableros en esta sección.</td></tr>`;
         return;
@@ -889,6 +911,11 @@ filterBoardSearch?.addEventListener('input', (e) => {
 
 filterBoardCategory?.addEventListener('change', (e) => {
     boardCategoryFilter = e.target.value;
+    filterAndRenderBoards();
+});
+
+filterBoardStatus?.addEventListener('change', (e) => {
+    boardStatusFilter = e.target.value;
     filterAndRenderBoards();
 });
 
