@@ -199,23 +199,12 @@ async function handleSubmit(e) {
         
     } catch (error) {
         console.error("Error detallado al enviar solicitud:", error);
-        const errorMsgEl = document.getElementById('request-error-msg');
-        if (errorMsgEl) {
-            errorMsgEl.innerHTML = `<strong>Error de envío:</strong> Hubo un problema al contactar con la base de datos (Posible falta de permisos). Por favor, contacte temporalmente al administrador directo.<br><span class="text-[10px] text-red-500 opacity-80">${error.message}</span>`;
-            errorMsgEl.classList.remove('hidden');
-            // Hide after 10 seconds
-            setTimeout(() => {
-                 errorMsgEl.classList.add('hidden');
-            }, 10000);
-        } else {
-            alert('Hubo un error al enviar la solicitud. Por favor, reintentá luego. Error: ' + error.message);
-        }
+        alert(`❌ Error de permisos o conexión al enviar la solicitud:\n\nFirebase devolvió: "${error.message}"\n\nPor favor, asegurate de que las reglas de Firestore (en Firebase Console) permitan escritura en la colección "statistical_requests" para usuarios anónimos o no logueados.`);
     } finally {
         btnSubmit.disabled = false;
         btnSubmit.textContent = 'Enviar Solicitud';
     }
 }
-
 
 // Event Listeners
 openRequestBtn.addEventListener('click', openModal);
