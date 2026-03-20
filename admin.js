@@ -32,6 +32,8 @@ const filterUserSearch = document.getElementById('filter-user-search');
 // Solicitudes
 const requestsTbody = document.getElementById('requests-tbody');
 const requestsBadge = document.getElementById('requests-badge');
+const filterBoardSearch = document.getElementById('filter-board-search');
+const filterBoardCategory = document.getElementById('filter-board-category');
 
 // Modal Elements
 const boardModal = document.getElementById('board-modal');
@@ -77,7 +79,8 @@ let globalCategories = []; // to populate dropdowns
 let allRequestsFetched = []; // Cache for filtering
 let currentCatFilter = "Categorías";
 let allBoardsFetched = [];
-let currentBoardFilter = 'all';
+let boardSearchQuery = "";
+let boardCategoryFilter = "all";
 
 const ADMIN_EMAILS = [
     'datos@riocuarto.gov.ar'
@@ -620,7 +623,26 @@ async function loadCategories() {
         
         renderCategories();
         renderCategoryChecklist();
+        updateBoardCategoryFilterOptions();
     } catch (error) { console.error(error); }
+}
+
+function updateBoardCategoryFilterOptions() {
+    if (!filterBoardCategory) return;
+    const currentVal = filterBoardCategory.value;
+    filterBoardCategory.innerHTML = '<option value="all">Todas las categorías</option>';
+    filterBoardCategory.innerHTML += '<option value="_ge_direct">🌐 Gestores Externos (Directos)</option>';
+    
+    globalCategories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.id;
+        option.textContent = `${cat.icon || '📁'} ${cat.name}`;
+        filterBoardCategory.appendChild(option);
+    });
+    
+    if ([...filterBoardCategory.options].some(o => o.value === currentVal)) {
+        filterBoardCategory.value = currentVal;
+    }
 }
 
 function renderCategories() {
@@ -751,15 +773,19 @@ catForm.addEventListener('submit', async (e) => {
 });
 
 // --- BOARDS CRUD ---
-function boardMatchesFilter(data, filterType) {
-    if (filterType === 'all') return true;
-    if (data.categories && data.categories.length > 0) {
-        return data.categories.some(catId => {
-            const cat = globalCategories.find(c => c.id === catId);
-            return cat && (cat.type || 'Categorías') === filterType;
-        });
+function boardMatchesFilter(data, search, catId) {
+    const matchesSearch = !search || data.title.toLowerCase().includes(search.toLowerCase());
+    
+    let matchesCat = true;
+    if (catId !== 'all') {
+        if (catId === '_ge_direct') {
+            matchesCat = (data.category === 'Gestores Externos' && (!data.categories || data.categories.length === 0));
+        } else {
+            matchesCat = (data.categories || []).includes(catId);
+        }
     }
-    return (data.category || '') === filterType;
+    
+    return matchesSearch && matchesCat;
 }
 
 async function loadBoards() {
@@ -773,7 +799,7 @@ async function loadBoards() {
 
 function filterAndRenderBoards() {
     boardsTbody.innerHTML = '';
-    const filtered = allBoardsFetched.filter(b => boardMatchesFilter(b, currentBoardFilter));
+    const filtered = allBoardsFetched.filter(b => boardMatchesFilter(b, boardSearchQuery, boardCategoryFilter));
     if (filtered.length === 0) {
         boardsTbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-obelisco-gray bg-gray-50">No hay tableros en esta sección.</td></tr>`;
         return;
@@ -855,19 +881,15 @@ function filterAndRenderBoards() {
     });
 }
 
-// Board group filter buttons
-document.querySelectorAll('.board-filter-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        const targetBtn = e.currentTarget;
-        currentBoardFilter = targetBtn.dataset.filter;
-        document.querySelectorAll('.board-filter-btn').forEach(b => {
-            b.classList.remove('active-board-filter', 'bg-white', 'text-obelisco-blue', 'shadow-sm');
-            b.classList.add('text-gray-600', 'hover:bg-gray-200');
-        });
-        targetBtn.classList.add('active-board-filter', 'bg-white', 'text-obelisco-blue', 'shadow-sm');
-        targetBtn.classList.remove('text-gray-600', 'hover:bg-gray-200');
-        filterAndRenderBoards();
-    });
+// Board filters
+filterBoardSearch?.addEventListener('input', (e) => {
+    boardSearchQuery = e.target.value;
+    filterAndRenderBoards();
+});
+
+filterBoardCategory?.addEventListener('change', (e) => {
+    boardCategoryFilter = e.target.value;
+    filterAndRenderBoards();
 });
 
 addBoardBtn.addEventListener('click', () => {

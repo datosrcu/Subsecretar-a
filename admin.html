@@ -95,12 +95,22 @@
                     </div>
                 </div>
 
-                <!-- Filtros de grupo de tableros -->
-                <div class="flex gap-2 mb-5 bg-gray-100 p-1.5 rounded-xl w-fit">
-                    <button class="board-filter-btn active-board-filter bg-white text-obelisco-blue shadow-sm text-sm font-medium px-4 py-1.5 rounded-lg transition" data-filter="all">📋 Todos</button>
-                    <button class="board-filter-btn text-gray-600 hover:bg-gray-200 text-sm font-medium px-4 py-1.5 rounded-lg transition" data-filter="Categorías">📁 Categorías</button>
-                    <button class="board-filter-btn text-gray-600 hover:bg-gray-200 text-sm font-medium px-4 py-1.5 rounded-lg transition" data-filter="Gestores Internos">🏛️ Gestores Internos</button>
-                    <button class="board-filter-btn text-gray-600 hover:bg-gray-200 text-sm font-medium px-4 py-1.5 rounded-lg transition" data-filter="Gestores Externos">🌐 Gestores Externos</button>
+                <!-- Buscador y Filtro de Categorías -->
+                <div class="flex flex-wrap items-center gap-4 mb-6">
+                    <div class="relative min-w-[240px]">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </span>
+                        <input type="text" id="filter-board-search" placeholder="Buscar por nombre..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue outline-none transition text-sm">
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Categoría:</label>
+                        <select id="filter-board-category" class="border border-gray-300 rounded-lg px-3 py-2 bg-white outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition text-sm min-w-[180px]">
+                            <option value="all">Todas las categorías</option>
+                            <option value="_ge_direct">🌐 Gestores Externos (Directos)</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden">
