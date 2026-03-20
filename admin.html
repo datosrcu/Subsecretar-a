@@ -52,30 +52,73 @@
     </header>
 
     <!-- Main Content (Protected) -->
-    <main id="admin-content" class="flex-grow flex flex-col hidden">
+    <main id="admin-content" class="flex-grow flex flex-col hidden bg-gray-50">
         
-        <!-- Navigation Tabs -->
-        <div class="bg-white border-b border-gray-200">
-        <div class="max-w-[1600px] mx-auto px-6">
-                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                    <button class="nav-tab border-obelisco-blue text-obelisco-blue whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-target="tab-tableros">
-                        Tableros (Botones)
-                    </button>
-                    <button class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-target="tab-categorias">
-                        Categorías
-                    </button>
-                    <button class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-target="tab-usuarios">
-                        Usuarios
-                    </button>
-                    <button class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-target="tab-solicitudes">
-                        Solicitudes
-                        <span id="requests-badge" class="ml-2 hidden bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
-                    </button>
-                </nav>
+        <!-- Dashboard Principal -->
+        <div id="admin-dashboard" class="flex-grow p-8 sm:p-12 max-w-[1000px] mx-auto w-full flex flex-col justify-center">
+            <div class="mb-12">
+                <h1 class="text-4xl font-black text-obelisco-dark mb-3">Panel de Control</h1>
+                <p class="text-obelisco-gray text-lg">Seleccioná la sección que deseás gestionar en el Observatorio.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Tarjeta 1: Administración del OG -->
+                <button id="btn-goto-og" class="group bg-white p-8 rounded-2xl shadow-sm border-2 border-transparent hover:border-obelisco-blue hover:shadow-xl transition-all duration-300 text-left flex flex-col h-full">
+                    <div class="w-16 h-16 bg-blue-50 text-obelisco-blue rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-obelisco-dark mb-3">Administración del OG</h2>
+                    <p class="text-obelisco-gray mb-6 flex-grow">Gestioná tableros, categorías, permisos de usuarios y solicitudes de acceso al sistema.</p>
+                    <span class="text-obelisco-blue font-bold flex items-center group-hover:translate-x-2 transition-transform">
+                        Ingresar <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </span>
+                </button>
+
+                <!-- Tarjeta 2: Solicitudes de productos estadísticos -->
+                <button id="btn-goto-pedidos" class="group bg-white p-8 rounded-2xl shadow-sm border-2 border-transparent hover:border-obelisco-blue hover:shadow-xl transition-all duration-300 text-left flex flex-col h-full">
+                    <div class="w-16 h-16 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-obelisco-dark mb-3">Pedidos Estadísticos</h2>
+                    <p class="text-obelisco-gray mb-6 flex-grow">Administrá las solicitudes de informes detallados, mapas, recortes de datos y productos estadísticos.</p>
+                    <span class="text-orange-600 font-bold flex items-center group-hover:translate-x-2 transition-transform">
+                        Ver Pedidos <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </span>
+                </button>
             </div>
         </div>
 
-        <div class="flex-grow p-6 max-w-[1600px] mx-auto w-full relative">
+        <!-- SECCIÓN ADMINISTRACIÓN OG -->
+        <div id="section-admin-og" class="hidden flex-grow flex flex-col">
+            <!-- Sub-Header con botón volver -->
+            <div class="bg-white border-b border-gray-200 py-3 px-6">
+                <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+                    <button class="btn-back-dashboard text-obelisco-gray hover:text-obelisco-dark flex items-center text-sm font-medium transition">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        Volver al Panel
+                    </button>
+                    <div id="og-title" class="text-xs font-bold text-gray-400 uppercase tracking-widest px-3 py-1 bg-gray-50 rounded-full border border-gray-200">
+                        Administración del OG
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="bg-white border-b border-gray-200">
+                <div class="max-w-[1600px] mx-auto px-6">
+                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <button class="nav-tab border-obelisco-blue text-obelisco-blue whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-target="tab-tableros">Tableros</button>
+                        <button class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-target="tab-categorias">Categorías</button>
+                        <button class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-target="tab-usuarios">Usuarios</button>
+                        <button class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-target="tab-solicitudes">
+                            Solicitudes de Acceso
+                            <span id="requests-badge" class="ml-2 hidden bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="flex-grow p-6 max-w-[1600px] mx-auto w-full relative">
             
             <!-- CONTENIDO TABLEROS -->
             <div id="tab-tableros" class="tab-pane hidden block"> <!-- "block" by default (active) -->
@@ -398,6 +441,90 @@
             </div>
         </div>
     </div>
+
+            </div>
+        </div> <!-- Fin de section-admin-og -->
+
+        <!-- SECCIÓN PEDIDOS ESTADÍSTICOS -->
+        <div id="section-admin-pedidos" class="hidden flex-grow flex flex-col">
+            <!-- Sub-Header con botón volver -->
+            <div class="bg-white border-b border-gray-200 py-3 px-6">
+                <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+                    <button class="btn-back-dashboard text-obelisco-gray hover:text-obelisco-dark flex items-center text-sm font-medium transition">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        Volver al Panel
+                    </button>
+                    <div class="text-xs font-bold text-orange-400 uppercase tracking-widest px-3 py-1 bg-orange-50 rounded-full border border-orange-200">
+                        Pedidos Estadísticos
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-grow p-6 max-w-[1600px] mx-auto w-full relative">
+                
+                <!-- Tarjetas de Resumen de Pedidos -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-white p-4 rounded-xl border-l-4 border-blue-500 shadow-sm flex items-center space-x-4">
+                        <div class="p-3 rounded-full bg-blue-50 text-blue-500 shadow-inner"><svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+                        <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Pedidos</p><p id="count-req-total" class="text-2xl font-black text-gray-800 leading-none mt-1">0</p></div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border-l-4 border-yellow-500 shadow-sm flex items-center space-x-4">
+                        <div class="p-3 rounded-full bg-yellow-50 text-yellow-600 shadow-inner"><svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+                        <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pendientes</p><p id="count-req-pending" class="text-2xl font-black text-gray-800 leading-none mt-1">0</p></div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border-l-4 border-green-500 shadow-sm flex items-center space-x-4">
+                        <div class="p-3 rounded-full bg-green-50 text-green-600 shadow-inner"><svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>
+                        <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Completados</p><p id="count-req-completed" class="text-2xl font-black text-gray-800 leading-none mt-1">0</p></div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-obelisco-border rounded-xl shadow-sm overflow-hidden flex flex-col">
+                    <!-- Buscador y Filtro -->
+                    <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row gap-4">
+                        <div class="relative flex-grow">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </span>
+                            <input type="text" id="filter-req-search" class="w-full border border-gray-200 rounded-lg pl-10 pr-4 py-2 text-sm focus:border-obelisco-blue outline-none transition" placeholder="Buscar por título, área o solicitante...">
+                        </div>
+                        <select id="filter-req-status" class="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:border-obelisco-blue outline-none bg-white transition min-w-[180px]">
+                            <option value="todos">Todos los estados</option>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="En Proceso">En Proceso</option>
+                            <option value="Completado">Completado</option>
+                            <option value="Rechazado">Rechazado</option>
+                        </select>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200">
+                                <tr>
+                                    <th class="px-6 py-4">Fecha</th>
+                                    <th class="px-6 py-4">Solicitante / Área</th>
+                                    <th class="px-6 py-4">Producto / Título</th>
+                                    <th class="px-6 py-4">Estado</th>
+                                    <th class="px-6 py-4 text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pedidos-table-body" class="divide-y divide-gray-100 text-sm">
+                                <!-- Se llena dinámicamente -->
+                                <tr>
+                                    <td colspan="5" class="px-6 py-16 text-center text-gray-400">
+                                        <div class="flex flex-col items-center">
+                                            <svg class="animate-spin h-8 w-8 text-obelisco-blue mb-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                            <p class="font-medium">Cargando pedidos de productos estadísticos...</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
 
     <!-- Modal Form (Categorías) -->
     <div id="cat-modal" class="fixed inset-0 hidden items-center justify-center z-[100]">

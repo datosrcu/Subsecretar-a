@@ -9,6 +9,13 @@ const adminName = document.getElementById('admin-name');
 const logoutBtn = document.getElementById('logout-btn');
 
 const adminContent = document.getElementById('admin-content');
+const adminDashboard = document.getElementById('admin-dashboard');
+const sectionAdminOG = document.getElementById('section-admin-og');
+const sectionAdminPedidos = document.getElementById('section-admin-pedidos');
+
+const btnGotoOG = document.getElementById('btn-goto-og');
+const btnGotoPedidos = document.getElementById('btn-goto-pedidos');
+const btnsBackDashboard = document.querySelectorAll('.btn-back-dashboard');
 const errorScreen = document.getElementById('error-screen');
 const errorMsg = document.getElementById('error-message');
 const errorLoginBtn = document.getElementById('error-login-btn');
@@ -39,6 +46,18 @@ const filterBoardStatus = document.getElementById('filter-board-status');
 const countTotal = document.getElementById('count-total');
 const countActive = document.getElementById('count-active');
 const countInactive = document.getElementById('count-inactive');
+
+// Solicitudes Estadísticas
+let statisticalRequests = [];
+let reqStatusFilter = 'todos';
+let reqSearchFilter = '';
+
+const pedidosTableBody = document.getElementById('pedidos-table-body');
+const filterReqSearch = document.getElementById('filter-req-search');
+const filterReqStatus = document.getElementById('filter-req-status');
+const countReqTotal = document.getElementById('count-req-total');
+const countReqPending = document.getElementById('count-req-pending');
+const countReqCompleted = document.getElementById('count-req-completed');
 
 // Modal Elements
 const boardModal = document.getElementById('board-modal');
@@ -136,7 +155,36 @@ function showAdminUI(user) {
     userInfo.classList.add('flex');
     adminAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName||user.email)}&background=212529&color=fff`;
     adminName.textContent = user.displayName || user.email;
+    
+    // Al entrar, siempre mostrar el Dashboard
+    showDashboard();
 }
+
+function showDashboard() {
+    adminDashboard.classList.remove('hidden');
+    sectionAdminOG.classList.add('hidden');
+    sectionAdminPedidos.classList.add('hidden');
+}
+
+function showOGSection() {
+    adminDashboard.classList.add('hidden');
+    sectionAdminOG.classList.remove('hidden');
+    sectionAdminPedidos.classList.add('hidden');
+    // Forzar carga de la primera pestaña si es necesario
+    loadBoards(); 
+}
+
+function showPedidosSection() {
+    adminDashboard.classList.add('hidden');
+    sectionAdminOG.classList.add('hidden');
+    sectionAdminPedidos.classList.remove('hidden');
+    loadStatisticalRequests();
+}
+
+// Navigation dashboard listeners
+btnGotoOG.addEventListener('click', showOGSection);
+btnGotoPedidos.addEventListener('click', showPedidosSection);
+btnsBackDashboard.forEach(btn => btn.addEventListener('click', showDashboard));
 
 function showError(msg) {
     adminContent.classList.add('hidden');
@@ -176,7 +224,8 @@ async function loadData() {
         loadUsers(),
         loadCategories(),
         loadBoards(),
-        loadRequests()
+        loadRequests(),
+        loadStatisticalRequests()
     ]);
 }// --- USERS LISTING & SELECTOR ---
 filterUserSearch?.addEventListener('input', () => {
@@ -1019,3 +1068,172 @@ async function deleteDocReq(collectionName, id) {
         } catch (error) { console.error(error); alert("No se pudo eliminar."); }
     }
 }
+// --- SOLICITUDES ESTADÍSTICAS (PEDIDOS) ---
+
+async function loadStatisticalRequests() {
+    console.log("Loading statistical requests...");
+    try {
+        const snapshot = await getDocs(collection(db, "statistical_requests"));
+        statisticalRequests = [];
+        snapshot.forEach(doc => {
+            statisticalRequests.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Ordenar por fecha descending (suponiendo que existe createdAt)
+        statisticalRequests.sort((a, b) => {
+            const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
+            const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
+            return dateB - dateA;
+        });
+
+        updateStatisticalSummary();
+        renderStatisticalRequests();
+    } catch (error) {
+        console.error("Error loading statistical requests:", error);
+        if (pedidosTableBody) {
+            pedidosTableBody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-red-500">Error cargando pedidos.</td></tr>`;
+        }
+    }
+}
+
+function updateStatisticalSummary() {
+    if (!countReqTotal) return;
+    
+    const total = statisticalRequests.length;
+    const pending = statisticalRequests.filter(r => r.status === 'Pendiente').length;
+    const completed = statisticalRequests.filter(r => r.status === 'Completado').length;
+    
+    countReqTotal.textContent = total;
+    countReqPending.textContent = pending;
+    countReqCompleted.textContent = completed;
+}
+
+function renderStatisticalRequests() {
+    if (!pedidosTableBody) return;
+    
+    const searchText = reqSearchFilter.toLowerCase().trim();
+    const filtered = statisticalRequests.filter(req => {
+        const matchesSearch = 
+            (req.clientName || '').toLowerCase().includes(searchText) ||
+            (req.requestTitle || '').toLowerCase().includes(searchText) ||
+            (req.clientArea || '').toLowerCase().includes(searchText);
+            
+        const matchesStatus = reqStatusFilter === 'todos' || req.status === reqStatusFilter;
+        
+        return matchesSearch && matchesStatus;
+    });
+
+    if (filtered.length === 0) {
+        pedidosTableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-gray-400">No se encontraron pedidos con esos filtros.</td></tr>`;
+        return;
+    }
+
+    pedidosTableBody.innerHTML = filtered.map(req => {
+        const date = req.createdAt?.toDate ? req.createdAt.toDate().toLocaleDateString() : 'N/A';
+        const statusClass = getStatusBadgeClass(req.status);
+        
+        return `
+            <tr class="hover:bg-gray-50/50 transition duration-150">
+                <td class="px-6 py-4 font-mono text-xs text-gray-400">${date}</td>
+                <td class="px-6 py-4">
+                    <div class="font-bold text-gray-800">${req.clientName || 'N/A'}</div>
+                    <div class="text-xs text-obelisco-gray">${req.clientArea || 'N/A'}</div>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="font-medium text-gray-700">${req.requestTitle || 'Sin título'}</div>
+                    <div class="text-[10px] text-gray-400 truncate max-w-[200px]">${req.description || ''}</div>
+                </td>
+                <td class="px-6 py-4">
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${statusClass}">
+                        ${req.status || 'Pendiente'}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                    <div class="flex items-center justify-end space-x-2">
+                        <select onchange="window.updateRequestStatus('${req.id}', this.value)" class="text-xs border border-gray-200 rounded px-2 py-1 outline-none bg-white font-medium">
+                            <option value="Pendiente" ${req.status === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                            <option value="En Proceso" ${req.status === 'En Proceso' ? 'selected' : ''}>En Proceso</option>
+                            <option value="Completado" ${req.status === 'Completado' ? 'selected' : ''}>Completado</option>
+                            <option value="Rechazado" ${req.status === 'Rechazado' ? 'selected' : ''}>Rechazado</option>
+                        </select>
+                        <button onclick="window.viewRequestDetails('${req.id}')" class="p-1.5 text-obelisco-blue hover:bg-blue-50 rounded transition shadow-sm border border-blue-100" title="Ver detalles completo">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function getStatusBadgeClass(status) {
+    switch (status) {
+        case 'Pendiente': return 'bg-yellow-100 text-yellow-700 border border-yellow-200';
+        case 'En Proceso': return 'bg-blue-100 text-blue-700 border border-blue-200';
+        case 'Completado': return 'bg-green-100 text-green-700 border border-green-200';
+        case 'Rechazado': return 'bg-red-100 text-red-700 border border-red-200';
+        default: return 'bg-gray-100 text-gray-700 border border-gray-200';
+    }
+}
+
+// Global functions for events
+window.updateRequestStatus = async (id, newStatus) => {
+    try {
+        await updateDoc(doc(db, "statistical_requests", id), { 
+            status: newStatus,
+            updatedAt: serverTimestamp()
+        });
+        // Local update
+        const req = statisticalRequests.find(r => r.id === id);
+        if (req) req.status = newStatus;
+        updateStatisticalSummary();
+        renderStatisticalRequests();
+    } catch (error) {
+        console.error("Error updating status:", error);
+        alert("Error al actualizar el estado.");
+    }
+};
+
+window.viewRequestDetails = (id) => {
+    const req = statisticalRequests.find(r => r.id === id);
+    if (!req) return;
+    
+    let details = `DETALLES DEL PEDIDO\n\n`;
+    details += `• CLIENTE: ${req.clientName}\n`;
+    details += `• CARGO: ${req.clientPosition} - ${req.clientArea}\n`;
+    details += `• JURISDICCIÓN: ${Array.isArray(req.jurisdictions) ? req.jurisdictions.join(', ') : (req.jurisdiction || 'N/A')}\n`;
+    details += `• EMAIL: ${req.clientEmail}\n`;
+    details += `• TELÉFONO: ${req.clientPhone}\n\n`;
+    
+    details += `• PRODUCTO(S): ${Array.isArray(req.productTypes) ? req.productTypes.join(', ') : (req.productType || 'N/A')}\n`;
+    details += `• TÍTULO: ${req.requestTitle}\n`;
+    details += `• DESCRIPCIÓN: ${req.description}\n`;
+    details += `• PERIODICIDAD: ${req.periodicity}\n`;
+    details += `• FECHA LÍMITE: ${req.dueDate}\n\n`;
+    
+    details += `• FORMATO(S): ${Array.isArray(req.formats) ? req.formats.join(', ') : (req.format || 'N/A')}\n`;
+    details += `• PRIORIDAD: ${req.priority === '3' ? 'Alta' : req.priority === '2' ? 'Media' : 'Baja'}\n`;
+    details += `• CONTACTO TÉCNICO: ${req.hasTechContact === 'si' ? 'Sí' : 'No'}\n`;
+    if (req.hasTechContact === 'si') {
+        details += `  - Nombre: ${req.techContactName || 'N/A'}\n`;
+        details += `  - Email: ${req.techContactEmail || 'N/A'}\n`;
+        details += `  - Tel: ${req.techContactPhone || 'N/A'}\n`;
+    }
+    details += `\n• INFO ADICIONAL: ${req.additionalInfo || 'N/A'}\n`;
+    if (req.attachments && req.attachments.length > 0) {
+        details += `• ARCHIVOS ADJUNTOS: ${req.attachments.join(', ')}`;
+    }
+    
+    alert(details);
+};
+
+// Listeners
+filterReqSearch?.addEventListener('input', (e) => {
+    reqSearchFilter = e.target.value;
+    renderStatisticalRequests();
+});
+
+filterReqStatus?.addEventListener('change', (e) => {
+    reqStatusFilter = e.target.value;
+    renderStatisticalRequests();
+});
