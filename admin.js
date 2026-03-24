@@ -88,6 +88,7 @@ let currentlySelectedUsers = [];
 const catForm = document.getElementById('cat-form');
 const catModalTitle = document.getElementById('cat-modal-title');
 const fieldCatId = document.getElementById('cat-id');
+const fieldCatVisible = document.getElementById('field-cat-visible');
 const fieldCatName = document.getElementById('field-cat-name');
 const fieldCatDesc = document.getElementById('field-cat-desc');
 const fieldCatIcon = document.getElementById('field-cat-icon');
@@ -118,10 +119,10 @@ onAuthStateChanged(auth, async (user) => {
         const userEmail = user.email.toLowerCase();
         const isAdminExact = ADMIN_EMAILS.map(e => e.toLowerCase()).includes(userEmail);
         const isDomain = userEmail.endsWith('@riocuarto.gov.ar');
-        
+
         if (isDomain || isAdminExact) { // For MVP
             showAdminUI(user);
-            
+
             // Auto-register/update admin user in the directory
             try {
                 await setDoc(doc(db, "users", userEmail), {
@@ -153,9 +154,9 @@ function showAdminUI(user) {
     errorScreen.classList.add('hidden');
     userInfo.classList.remove('hidden');
     userInfo.classList.add('flex');
-    adminAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName||user.email)}&background=212529&color=fff`;
+    adminAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email)}&background=212529&color=fff`;
     adminName.textContent = user.displayName || user.email;
-    
+
     // Al entrar, siempre mostrar el Dashboard
     showDashboard();
 }
@@ -171,7 +172,7 @@ function showOGSection() {
     sectionAdminOG.classList.remove('hidden');
     sectionAdminPedidos.classList.add('hidden');
     // Forzar carga de la primera pestaña si es necesario
-    loadBoards(); 
+    loadBoards();
 }
 
 function showPedidosSection() {
@@ -203,10 +204,10 @@ navTabs.forEach(tab => {
             t.classList.add('border-transparent', 'text-gray-500');
         });
         tabPanes.forEach(pane => pane.classList.add('hidden'));
-        
+
         tab.classList.remove('border-transparent', 'text-gray-500');
         tab.classList.add('border-obelisco-blue', 'text-obelisco-blue');
-        
+
         const targetPane = document.getElementById(target);
         if (targetPane) targetPane.classList.remove('hidden');
 
@@ -227,7 +228,8 @@ async function loadData() {
         loadRequests(),
         loadStatisticalRequests()
     ]);
-}// --- USERS LISTING & SELECTOR ---
+}
+// --- USERS LISTING & SELECTOR ---
 filterUserSearch?.addEventListener('input', () => {
     filterAndRenderUsers();
 });
@@ -239,10 +241,10 @@ function filterAndRenderUsers() {
         const email = (u.email || '').toLowerCase();
         const orgName = (u.orgName || '').toLowerCase();
         const orgType = (u.orgType || '').toLowerCase();
-        return name.includes(filterText) || 
-               email.includes(filterText) || 
-               orgName.includes(filterText) || 
-               orgType.includes(filterText);
+        return name.includes(filterText) ||
+            email.includes(filterText) ||
+            orgName.includes(filterText) ||
+            orgType.includes(filterText);
     });
     renderUsersTable(filtered);
 }
@@ -266,7 +268,7 @@ async function loadUsers() {
 function renderUsersTable(users) {
     if (!usersTbody) return;
     usersTbody.innerHTML = '';
-    
+
     if (users.length === 0) {
         usersTbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center text-obelisco-gray">No se encontraron usuarios.</td></tr>`;
         return;
@@ -278,7 +280,7 @@ function renderUsersTable(users) {
         const lastLogin = u.lastLogin ? new Date(u.lastLogin).toLocaleString() : 'N/A';
         const registered = u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A';
         const role = u.role || 'usuario';
-        
+
         tr.innerHTML = `
             <td class="py-3 px-4 flex items-center space-x-3">
                 <img src="${u.photoURL || `https://ui-avatars.com/api/?name=${u.name}&background=random`}" class="w-8 h-8 rounded-full border border-gray-200">
@@ -359,11 +361,11 @@ async function deleteUser(id) {
             const userDoc = await getDoc(doc(db, "users", id));
             if (userDoc.exists()) {
                 const userEmail = userDoc.data().email.toLowerCase();
-                
+
                 // 2. Remove user from all buttons/boards permissions
                 const buttonsSnapshot = await getDocs(collection(db, "buttons"));
                 const updatePromises = [];
-                
+
                 buttonsSnapshot.forEach(buttonDoc => {
                     const data = buttonDoc.data();
                     const allowedUsers = data.allowedUsers || [];
@@ -372,7 +374,7 @@ async function deleteUser(id) {
                         updatePromises.push(updateDoc(buttonDoc.ref, { allowedUsers: newAllowedUsers }));
                     }
                 });
-                
+
                 if (updatePromises.length > 0) {
                     await Promise.all(updatePromises);
                     console.log(`User ${userEmail} removed from ${updatePromises.length} boards.`);
@@ -397,10 +399,10 @@ async function loadRequests() {
         querySnapshot.forEach((doc) => {
             allRequestsFetched.push({ id: doc.id, ...doc.data() });
         });
-        
+
         // Sort by date desc
         allRequestsFetched.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
+
         const pendingCount = allRequestsFetched.filter(r => r.status === 'pending').length;
         if (pendingCount > 0) {
             requestsBadge.textContent = pendingCount;
@@ -444,9 +446,9 @@ function renderRequests(requests) {
     requests.forEach(req => {
         const date = req.createdAt ? new Date(req.createdAt).toLocaleDateString() : '-';
         const status = req.status || 'pending';
-        
+
         let statusBadge = '';
-        switch(status) {
+        switch (status) {
             case 'approved': statusBadge = '<span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-bold text-[10px] uppercase">Aprobada</span>'; break;
             case 'rejected': statusBadge = '<span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full font-bold text-[10px] uppercase">Rechazada</span>'; break;
             case 'restricted': statusBadge = '<span class="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full font-bold text-[10px] uppercase">Restringida</span>'; break;
@@ -481,7 +483,7 @@ function renderRequests(requests) {
                 </button>
             </td>
         `;
-        
+
         if (status === 'pending' || status === 'rejected' || status === 'restricted') {
             tr.querySelector('.btn-approve').addEventListener('click', async (e) => {
                 const btn = e.currentTarget;
@@ -499,7 +501,7 @@ function renderRequests(requests) {
             });
         }
         tr.querySelector('.btn-del-req').addEventListener('click', () => deleteDocReq("requests", req.id));
-        
+
         requestsTbody.appendChild(tr);
     });
 }
@@ -516,17 +518,17 @@ async function approveRequest(requestId, email, buttonId) {
         // 1. Get the button doc
         const buttonRef = doc(db, "buttons", buttonId);
         const buttonSnap = await getDoc(buttonRef);
-        
+
         if (buttonSnap.exists()) {
             const data = buttonSnap.data();
             const allowedUsers = data.allowedUsers || [];
-            
+
             // Add email if not already there
             if (!allowedUsers.map(e => e.toLowerCase()).includes(email.toLowerCase())) {
                 allowedUsers.push(email);
                 await updateDoc(buttonRef, { allowedUsers });
             }
-            
+
             // 2. Mark request as approved
             await updateDoc(doc(db, "requests", requestId), { status: 'approved' });
             await loadRequests();
@@ -551,14 +553,14 @@ function renderUserChecklist(filterText = '') {
         const userEmail = u.email.toLowerCase();
         const isAdmin = ADMIN_EMAILS.map(e => e.toLowerCase()).includes(userEmail);
         const isLector = u.role === 'lector';
-        
+
         const isChecked = isAdmin || isLector || currentlySelectedUsers.includes(userEmail) ? 'checked' : '';
         const disabledAttr = (isAdmin || isLector) ? 'disabled' : '';
-        
+
         let badgeHtml = '';
         if (isAdmin) badgeHtml = '<span class="ml-auto text-[9px] bg-amber-100 text-amber-700 px-1 rounded font-bold uppercase">Admin (Acceso Total)</span>';
         else if (isLector) badgeHtml = '<span class="ml-auto text-[9px] bg-green-100 text-green-700 px-1 rounded font-bold uppercase">Lector (Acceso Total)</span>';
-        
+
         const div = document.createElement('div');
         div.className = `flex items-center space-x-2 p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200 cursor-pointer transition ${(isAdmin || isLector) ? 'opacity-70' : ''}`;
         div.innerHTML = `
@@ -586,8 +588,8 @@ function renderUserChecklist(filterText = '') {
     // Option to add manually if filterText looks like an email and not in the list
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const lowerFilter = filterText.toLowerCase().trim();
-    const alreadyInList = allUsersFetched.some(u => u.email.toLowerCase() === lowerFilter) || 
-                         currentlySelectedUsers.some(e => e.toLowerCase() === lowerFilter);
+    const alreadyInList = allUsersFetched.some(u => u.email.toLowerCase() === lowerFilter) ||
+        currentlySelectedUsers.some(e => e.toLowerCase() === lowerFilter);
 
     if (emailRegex.test(lowerFilter) && !alreadyInList) {
         const divManual = document.createElement('div');
@@ -603,7 +605,7 @@ function renderUserChecklist(filterText = '') {
         `;
         divManual.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (!currentlySelectedUsers.map(u=>u.toLowerCase()).includes(lowerFilter)) {
+            if (!currentlySelectedUsers.map(u => u.toLowerCase()).includes(lowerFilter)) {
                 currentlySelectedUsers.push(lowerFilter);
                 userSearchInput.value = '';
                 renderUserChecklist();
@@ -664,7 +666,7 @@ function renderCategoryChecklist() {
 
 // --- CATEGORIES CRUD ---
 fieldCatColorPicker.addEventListener('input', e => fieldCatColorText.value = e.target.value.toUpperCase());
-fieldCatColorText.addEventListener('input', e => { if(/^#[0-9A-F]{6}$/i.test(e.target.value)) fieldCatColorPicker.value = e.target.value; });
+fieldCatColorText.addEventListener('input', e => { if (/^#[0-9A-F]{6}$/i.test(e.target.value)) fieldCatColorPicker.value = e.target.value; });
 
 async function loadCategories() {
     try {
@@ -673,9 +675,9 @@ async function loadCategories() {
         snapshot.forEach(doc => {
             const data = doc.data();
             const id = doc.id;
-            globalCategories.push({id, ...data});
+            globalCategories.push({ id, ...data });
         });
-        
+
         renderCategories();
         renderCategoryChecklist();
         updateBoardCategoryFilterOptions();
@@ -687,14 +689,14 @@ function updateBoardCategoryFilterOptions() {
     const currentVal = filterBoardCategory.value;
     filterBoardCategory.innerHTML = '<option value="all">Todas las categorías</option>';
     filterBoardCategory.innerHTML += '<option value="_ge_direct">🌐 Gestores Externos (Directos)</option>';
-    
+
     globalCategories.forEach(cat => {
         const option = document.createElement('option');
         option.value = cat.id;
         option.textContent = `${cat.icon || '📁'} ${cat.name}`;
         filterBoardCategory.appendChild(option);
     });
-    
+
     if ([...filterBoardCategory.options].some(o => o.value === currentVal)) {
         filterBoardCategory.value = currentVal;
     }
@@ -702,7 +704,7 @@ function updateBoardCategoryFilterOptions() {
 
 function renderCategories() {
     catTbody.innerHTML = '';
-    
+
     // Sort all by order FIRST to maintain global ordering
     globalCategories.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
 
@@ -717,8 +719,8 @@ function renderCategories() {
         const data = cat;
         const id = cat.id;
         const tr = document.createElement('tr');
-            tr.className = "hover:bg-gray-50 transition";
-            tr.innerHTML = `
+        tr.className = "hover:bg-gray-50 transition";
+        tr.innerHTML = `
                 <td class="py-3 px-4 font-medium text-xl text-center">${data.icon || '📌'}</td>
                 <td class="py-3 px-4 font-medium">${data.name}</td>
                 <td class="py-3 px-4 text-obelisco-gray text-xs truncate" title="${data.type || 'Categorías'}">
@@ -730,6 +732,13 @@ function renderCategories() {
                         <span class="font-mono text-xs">${data.color}</span>
                     </div>
                 </td>
+                <td class="py-3 px-4 text-center">
+                    <button class="toggle-cat-visibility flex items-center justify-center w-full" data-id="${id}" title="Alternar visibilidad">
+                        ${data.visible !== false
+                ? '<span class="w-3 h-3 bg-green-500 rounded-full inline-block shadow-sm"></span>'
+                : '<span class="w-3 h-3 bg-red-500 rounded-full inline-block shadow-sm"></span>'}
+                    </button>
+                </td>
                 <td class="py-3 px-4">
                     <input type="number" class="w-16 border border-gray-300 rounded px-2 py-1 text-xs outline-none focus:border-obelisco-blue cat-order-input" value="${data.order || 0}" data-id="${id}">
                 </td>
@@ -738,43 +747,51 @@ function renderCategories() {
                     <button class="text-red-500 hover:text-red-700 font-medium btn-del-cat" data-id="${id}">Eliminar</button>
                 </td>
             `;
-            catTbody.appendChild(tr);
-            tr.querySelector('.btn-edit-cat').addEventListener('click', () => {
-                fieldCatId.value = id;
-                fieldCatName.value = data.name;
-                fieldCatDesc.value = data.description || '';
-                fieldCatIcon.value = data.icon || '';
-                fieldCatType.value = data.type || 'Categorías';
-                fieldCatColorText.value = data.color;
-                fieldCatColorPicker.value = data.color;
-                catModalTitle.textContent = "Editar Categoría";
-                catModal.classList.remove('hidden');
-                catModal.classList.add('flex');
-            });
-            tr.querySelector('.btn-del-cat').addEventListener('click', () => deleteDocReq("categories", id));
-            
-            // Auto-save order on change
-            tr.querySelector('.cat-order-input').addEventListener('change', async (e) => {
-                const newOrder = parseInt(e.target.value) || 0;
-                try {
-                    await updateDoc(doc(db, "categories", id), { order: newOrder });
-                    // Optionally alert or just refresh
-                    await loadCategories(); 
-                } catch (err) {
-                    console.error("Error updating order:", err);
-                    alert("No se pudo actualizar el orden.");
-                }
-            });
+        catTbody.appendChild(tr);
+        tr.querySelector('.btn-edit-cat').addEventListener('click', () => {
+            fieldCatId.value = id;
+            fieldCatVisible.checked = data.visible !== false;
+            fieldCatName.value = data.name;
+            fieldCatDesc.value = data.description || '';
+            fieldCatIcon.value = data.icon || '';
+            fieldCatType.value = data.type || 'Categorías';
+            fieldCatColorText.value = data.color;
+            fieldCatColorPicker.value = data.color;
+            catModalTitle.textContent = "Editar Categoría";
+            catModal.classList.remove('hidden');
+            catModal.classList.add('flex');
         });
-        
-        renderCategoryChecklist();
+        tr.querySelector('.btn-del-cat').addEventListener('click', () => deleteDocReq("categories", id));
+
+        tr.querySelector('.toggle-cat-visibility').addEventListener('click', async () => {
+            try {
+                await updateDoc(doc(db, "categories", id), { visible: !(data.visible !== false) });
+                await loadCategories();
+            } catch (e) { console.error(e); }
+        });
+
+        // Auto-save order on change
+        tr.querySelector('.cat-order-input').addEventListener('change', async (e) => {
+            const newOrder = parseInt(e.target.value) || 0;
+            try {
+                await updateDoc(doc(db, "categories", id), { order: newOrder });
+                // Optionally alert or just refresh
+                await loadCategories();
+            } catch (err) {
+                console.error("Error updating order:", err);
+                alert("No se pudo actualizar el orden.");
+            }
+        });
+    });
+
+    renderCategoryChecklist();
 }
 
 // Cat filter listeners
 document.querySelectorAll('.cat-filter-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
         currentCatFilter = e.target.dataset.type;
-        
+
         // Update UI styles
         document.querySelectorAll('.cat-filter-btn').forEach(b => {
             b.classList.remove('active-cat-filter', 'bg-white', 'text-obelisco-blue', 'shadow-sm');
@@ -782,7 +799,7 @@ document.querySelectorAll('.cat-filter-btn').forEach(btn => {
         });
         btn.classList.add('active-cat-filter', 'bg-white', 'text-obelisco-blue', 'shadow-sm');
         btn.classList.remove('text-gray-600', 'hover:bg-gray-200');
-        
+
         renderCategories();
     });
 });
@@ -790,6 +807,7 @@ document.querySelectorAll('.cat-filter-btn').forEach(btn => {
 addCatBtn.addEventListener('click', () => {
     catForm.reset();
     fieldCatId.value = '';
+    fieldCatVisible.checked = true;
     fieldCatDesc.value = '';
     fieldCatColorPicker.value = '#009DE0';
     fieldCatColorText.value = '#009DE0';
@@ -805,6 +823,7 @@ catForm.addEventListener('submit', async (e) => {
     try {
         const docId = fieldCatId.value;
         const data = {
+            visible: fieldCatVisible.checked,
             name: fieldCatName.value.trim(),
             description: fieldCatDesc.value.trim(),
             icon: fieldCatIcon.value.trim(),
@@ -819,18 +838,18 @@ catForm.addEventListener('submit', async (e) => {
             await addDoc(collection(db, "categories"), data);
         }
         closeAllModals();
-        await loadCategories(); 
-    } catch (e) { 
+        await loadCategories();
+    } catch (e) {
         console.error("Error saving category:", e);
         const errorDetails = `CÓDIGO: ${e.code || 'N/A'}\nMENSAJE: ${e.message || 'Error desconocido'}`;
-        alert("🚨 ERROR AL GUARDAR CATEGORÍA 🚨\n\n" + errorDetails + "\n\nPor favor, enviame estos datos para solucionarlo."); 
+        alert("🚨 ERROR AL GUARDAR CATEGORÍA 🚨\n\n" + errorDetails + "\n\nPor favor, enviame estos datos para solucionarlo.");
     } finally { isSubmitting = false; }
 });
 
 // --- BOARDS CRUD ---
 function boardMatchesFilter(data, search, catId, status) {
     const matchesSearch = !search || data.title.toLowerCase().includes(search.toLowerCase());
-    
+
     let matchesCat = true;
     if (catId !== 'all') {
         if (catId === '_ge_direct') {
@@ -845,7 +864,7 @@ function boardMatchesFilter(data, search, catId, status) {
         const isActive = data.enabled !== false;
         matchesStatus = (status === 'active' && isActive) || (status === 'inactive' && !isActive);
     }
-    
+
     return matchesSearch && matchesCat && matchesStatus;
 }
 
@@ -861,7 +880,7 @@ async function loadBoards() {
 function filterAndRenderBoards() {
     boardsTbody.innerHTML = '';
     const filtered = allBoardsFetched.filter(b => boardMatchesFilter(b, boardSearchQuery, boardCategoryFilter, boardStatusFilter));
-    
+
     // Update summary cards based on current filters
     const total = filtered.length;
     const active = filtered.filter(b => b.enabled !== false).length;
@@ -909,7 +928,7 @@ function filterAndRenderBoards() {
         boardsTbody.appendChild(tr);
         tr.querySelector(`[data-toggle="${id}"]`).addEventListener('click', async () => {
             try { await updateDoc(doc(db, "buttons", id), { enabled: !data.enabled }); loadBoards(); }
-            catch(e){ console.error(e); }
+            catch (e) { console.error(e); }
         });
         // Auto-save order on change
         tr.querySelector('.board-order-input').addEventListener('change', async (e) => {
@@ -973,13 +992,13 @@ addBoardBtn.addEventListener('click', () => {
     fieldBoardId.value = '';
     fieldBoardReqLogin.value = 'true';
     fieldBoardNewTab.checked = false;
-    currentlySelectedUsers = []; 
+    currentlySelectedUsers = [];
     userSearchInput.value = '';
     renderUserChecklist();
-    
+
     currentlySelectedCategories = [];
     renderCategoryChecklist();
-    
+
     boardModalTitle.textContent = 'Nuevo Tablero';
     boardModal.classList.remove('hidden');
     boardModal.classList.add('flex');
@@ -1016,17 +1035,17 @@ boardForm.addEventListener('submit', async (e) => {
             if (oldDoc.exists()) {
                 const oldUsers = (oldDoc.data().allowedUsers || []).map(u => u.toLowerCase());
                 const currentUsersLower = currentlySelectedUsers.map(u => u.toLowerCase());
-                
+
                 const removedUsers = oldUsers.filter(u => !currentUsersLower.includes(u));
-                
+
                 if (removedUsers.length > 0) {
                     // Update related requests by querying Firestore — use Promise.all so awaits are respected
                     const reqSnap = await getDocs(collection(db, "requests"));
                     const restrictUpdates = [];
                     reqSnap.forEach((rDoc) => {
                         const rData = rDoc.data();
-                        if (rData.buttonId === docId && 
-                            removedUsers.includes((rData.userEmail || '').toLowerCase()) && 
+                        if (rData.buttonId === docId &&
+                            removedUsers.includes((rData.userEmail || '').toLowerCase()) &&
                             rData.status === 'approved') {
                             restrictUpdates.push(updateDoc(doc(db, "requests", rDoc.id), { status: 'restricted' }));
                         }
@@ -1039,13 +1058,13 @@ boardForm.addEventListener('submit', async (e) => {
             boardData.createdAt = new Date().toISOString();
             await addDoc(collection(db, "buttons"), boardData);
         }
-        
+
         closeAllModals();
-        await loadBoards(); 
+        await loadBoards();
         await loadRequests(); // Reload to see status changes
-    } catch (error) { 
+    } catch (error) {
         console.error("Error saving board:", error);
-        alert("Error al guardar tablero: " + (error.code || error.message || "Error desconocido")); 
+        alert("Error al guardar tablero: " + (error.code || error.message || "Error desconocido"));
     } finally { isSubmitting = false; }
 });
 
@@ -1062,9 +1081,9 @@ async function deleteDocReq(collectionName, id) {
     if (confirm("¿Estás seguro que querés eliminar esto permanentemente?")) {
         try {
             await deleteDoc(doc(db, collectionName, id));
-            if(collectionName === 'buttons') await loadBoards();
-            if(collectionName === 'categories') await loadCategories();
-            if(collectionName === 'requests') await loadRequests();
+            if (collectionName === 'buttons') await loadBoards();
+            if (collectionName === 'categories') await loadCategories();
+            if (collectionName === 'requests') await loadRequests();
         } catch (error) { console.error(error); alert("No se pudo eliminar."); }
     }
 }
@@ -1078,7 +1097,7 @@ async function loadStatisticalRequests() {
         snapshot.forEach(doc => {
             statisticalRequests.push({ id: doc.id, ...doc.data() });
         });
-        
+
         // Ordenar por fecha descending (suponiendo que existe createdAt)
         statisticalRequests.sort((a, b) => {
             const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
@@ -1098,11 +1117,11 @@ async function loadStatisticalRequests() {
 
 function updateStatisticalSummary() {
     if (!countReqTotal) return;
-    
+
     const total = statisticalRequests.length;
     const pending = statisticalRequests.filter(r => r.status === 'Pendiente').length;
     const completed = statisticalRequests.filter(r => r.status === 'Completado').length;
-    
+
     countReqTotal.textContent = total;
     countReqPending.textContent = pending;
     countReqCompleted.textContent = completed;
@@ -1110,16 +1129,16 @@ function updateStatisticalSummary() {
 
 function renderStatisticalRequests() {
     if (!pedidosTableBody) return;
-    
+
     const searchText = reqSearchFilter.toLowerCase().trim();
     const filtered = statisticalRequests.filter(req => {
-        const matchesSearch = 
+        const matchesSearch =
             (req.clientName || '').toLowerCase().includes(searchText) ||
             (req.requestTitle || '').toLowerCase().includes(searchText) ||
             (req.clientArea || '').toLowerCase().includes(searchText);
-            
+
         const matchesStatus = reqStatusFilter === 'todos' || req.status === reqStatusFilter;
-        
+
         return matchesSearch && matchesStatus;
     });
 
@@ -1131,7 +1150,7 @@ function renderStatisticalRequests() {
     pedidosTableBody.innerHTML = filtered.map(req => {
         const date = req.createdAt?.toDate ? req.createdAt.toDate().toLocaleDateString() : 'N/A';
         const statusClass = getStatusBadgeClass(req.status);
-        
+
         return `
             <tr class="hover:bg-gray-50/50 transition duration-150">
                 <td class="px-6 py-4 font-mono text-xs text-gray-400">${date}</td>
@@ -1179,7 +1198,7 @@ function getStatusBadgeClass(status) {
 // Global functions for events
 window.updateRequestStatus = async (id, newStatus) => {
     try {
-        await updateDoc(doc(db, "statistical_requests", id), { 
+        await updateDoc(doc(db, "statistical_requests", id), {
             status: newStatus,
             updatedAt: serverTimestamp()
         });
@@ -1197,20 +1216,20 @@ window.updateRequestStatus = async (id, newStatus) => {
 window.viewRequestDetails = (id) => {
     const req = statisticalRequests.find(r => r.id === id);
     if (!req) return;
-    
+
     let details = `DETALLES DEL PEDIDO\n\n`;
     details += `• CLIENTE: ${req.clientName}\n`;
     details += `• CARGO: ${req.clientPosition} - ${req.clientArea}\n`;
     details += `• JURISDICCIÓN: ${Array.isArray(req.jurisdictions) ? req.jurisdictions.join(', ') : (req.jurisdiction || 'N/A')}\n`;
     details += `• EMAIL: ${req.clientEmail}\n`;
     details += `• TELÉFONO: ${req.clientPhone}\n\n`;
-    
+
     details += `• PRODUCTO(S): ${Array.isArray(req.productTypes) ? req.productTypes.join(', ') : (req.productType || 'N/A')}\n`;
     details += `• TÍTULO: ${req.requestTitle}\n`;
     details += `• DESCRIPCIÓN: ${req.description}\n`;
     details += `• PERIODICIDAD: ${req.periodicity}\n`;
     details += `• FECHA LÍMITE: ${req.dueDate}\n\n`;
-    
+
     details += `• FORMATO(S): ${Array.isArray(req.formats) ? req.formats.join(', ') : (req.format || 'N/A')}\n`;
     details += `• PRIORIDAD: ${req.priority === '3' ? 'Alta' : req.priority === '2' ? 'Media' : 'Baja'}\n`;
     details += `• CONTACTO TÉCNICO: ${req.hasTechContact === 'si' ? 'Sí' : 'No'}\n`;
@@ -1231,7 +1250,7 @@ window.viewRequestDetails = (id) => {
             }
         });
     }
-    
+
     alert(details);
 };
 

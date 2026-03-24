@@ -51,7 +51,7 @@ onAuthStateChanged(auth, async (user) => {
         // User is signed in
         const userEmail = user.email.toLowerCase();
         const isAdmin = ['datos@riocuarto.gov.ar', 'pfabbroni@riocuarto.gov.ar'].includes(userEmail);
-        
+
         if (!user.email.endsWith(ALLOWED_DOMAIN) && !isAdmin) {
             // User is not from allowed domain nor an admin, sign them out
             await signOut(auth);
@@ -75,7 +75,7 @@ async function handleLogin() {
         const user = result.user;
         const userEmail = user.email.toLowerCase();
         const isAdmin = ['datos@riocuarto.gov.ar', 'pfabbroni@riocuarto.gov.ar'].includes(userEmail);
-        
+
         // Check domain immediately after login popup succeeds
         if (!user.email.endsWith(ALLOWED_DOMAIN) && !isAdmin) {
             await signOut(auth);
@@ -115,11 +115,11 @@ function showLoginUI() {
     userAvatar.classList.add('hidden');
     userName.classList.add('hidden');
     logoutBtn.classList.add('hidden');
-    
+
     // Show overlay & hide filters
     if (unauthOverlay) unauthOverlay.style.display = 'flex';
     if (filtersContainer) filtersContainer.classList.add('hidden');
-    
+
     // Clear grid
     const gridContainer = document.getElementById('tableros-grid');
     if (gridContainer) gridContainer.innerHTML = '';
@@ -130,10 +130,10 @@ function showUserUI(user) {
     userAvatar.classList.remove('hidden');
     userName.classList.remove('hidden');
     logoutBtn.classList.remove('hidden');
-    
+
     userAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email)}&background=009DE0&color=fff`;
     userName.textContent = user.displayName || user.email.split('@')[0];
-    
+
     // Hide overlay & show filters
     if (unauthOverlay) unauthOverlay.style.display = 'none';
     if (filtersContainer) filtersContainer.classList.remove('hidden');
@@ -142,7 +142,7 @@ function showUserUI(user) {
 async function loadUserPermissions(user) {
     const userEmail = user.email.toLowerCase();
     console.log("Loading permissions for user:", userEmail);
-    
+
     try {
         const [buttonsSnapshot, catSnapshot, userDoc, reqSnapshot] = await Promise.all([
             getDocs(collection(db, "buttons")),
@@ -150,7 +150,7 @@ async function loadUserPermissions(user) {
             getDoc(doc(db, "users", userEmail)),
             getDocs(collection(db, "requests")) // We fetch all for now, filter in memory for efficiency or query if large
         ]);
-        
+
         // Cache role
         let hasProfileInfo = false;
         if (userDoc.exists()) {
@@ -178,23 +178,23 @@ async function loadUserPermissions(user) {
 
         // Cache categories and sort by order
         allCategories = [];
-        catSnapshot.forEach(doc => allCategories.push({id: doc.id, ...doc.data()}));
+        catSnapshot.forEach(doc => allCategories.push({ id: doc.id, ...doc.data() }));
         allCategories.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
-        
+
         // Cache all enabled boards and flag those with access
         allAccessibleBoards = [];
         buttonsSnapshot.forEach((doc) => {
             const data = doc.data();
             const buttonId = doc.id;
-            
+
             if (data.enabled) {
                 const hasAccess = checkUserAccess(user, data);
                 allAccessibleBoards.push({ id: buttonId, ...data, hasAccess });
             }
         });
-        
+
         renderDashboard();
-        
+
     } catch (error) {
         console.error("Error loading user permissions:", error);
     }
@@ -203,9 +203,9 @@ async function loadUserPermissions(user) {
 function checkUserAccess(user, buttonData) {
     if (!buttonData.requireLogin) return true;
     if (!user) return false;
-    
+
     const userEmail = user.email.toLowerCase();
-    
+
     // Role status check (Full access for Lectors)
     if (currentUserRole === 'lector') return true;
 
@@ -214,7 +214,7 @@ function checkUserAccess(user, buttonData) {
         console.log("Access granted: Admin user");
         return true;
     }
-    
+
     const allowedUsers = buttonData.allowedUsers || [];
     return allowedUsers.map(email => email.toLowerCase()).includes(userEmail);
 }
@@ -223,7 +223,7 @@ function checkUserAccess(user, buttonData) {
 filterButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
         const targetBtn = e.currentTarget;
-        
+
         // UI reset
         filterButtons.forEach(b => {
             b.classList.remove('bg-white', 'text-obelisco-blue', 'border-gray-200', 'shadow-sm', 'active-filter');
@@ -231,13 +231,13 @@ filterButtons.forEach(btn => {
             const icon = b.querySelector('span.text-2xl');
             if (icon) icon.classList.add('opacity-80');
         });
-        
+
         // Set active
         targetBtn.classList.remove('bg-transparent', 'text-gray-600', 'border-transparent');
         targetBtn.classList.add('bg-white', 'text-obelisco-blue', 'border-gray-200', 'shadow-sm', 'active-filter');
         const icon = targetBtn.querySelector('span.text-2xl');
         if (icon) icon.classList.remove('opacity-80');
-        
+
         currentFilterGroup = targetBtn.getAttribute('data-group');
         currentViewLevel = 'categories';
         currentSelectedCategory = null;
@@ -249,13 +249,13 @@ function renderDashboard() {
     const gridContainer = document.getElementById('tableros-grid');
     if (!gridContainer) return;
     gridContainer.innerHTML = '';
-    
+
     // Add breadcrumb if in boards view
     let headerHtml = '';
     if (currentViewLevel === 'boards' && currentSelectedCategory) {
         const cat = allCategories.find(c => c.id === currentSelectedCategory);
         const catName = cat ? cat.name : 'Categoría';
-        
+
         headerHtml = `
             <div class="col-span-full mb-4 flex items-center">
                 <button id="btn-back-categories" class="text-obelisco-blue hover:text-blue-800 font-medium flex items-center transition">
@@ -267,13 +267,13 @@ function renderDashboard() {
             </div>
         `;
         gridContainer.innerHTML = headerHtml;
-        
+
         document.getElementById('btn-back-categories')?.addEventListener('click', () => {
             currentViewLevel = 'categories';
             currentSelectedCategory = null;
             renderDashboard();
         });
-        
+
         // Render boards for this category
         const boardsToRender = allAccessibleBoards.filter(b => b.categories && b.categories.includes(currentSelectedCategory));
         let renderedCount = 0;
@@ -281,16 +281,16 @@ function renderDashboard() {
             renderButton(gridContainer, board.id, board);
             renderedCount++;
         });
-        
+
         if (renderedCount === 0) {
             gridContainer.insertAdjacentHTML('beforeend', getEmptyStateHtml(`No hay tableros públicos o no tenés permisos en "${catName}".`));
         }
-        
+
     } else {
         // Render Categories for this Group
-        const catsToRender = allCategories.filter(c => (c.type || 'Categorías') === currentFilterGroup);
+        const catsToRender = allCategories.filter(c => (c.type || 'Categorías') === currentFilterGroup && c.visible !== false);
         // Also figure out if we have old boards that match this group but have no category, to show them directly? No, enforce category.
-        
+
         let renderedCount = 0;
         catsToRender.forEach(cat => {
             // Count accessible boards in this category
@@ -298,14 +298,14 @@ function renderDashboard() {
             renderCategoryCard(gridContainer, cat, accessibleInCat);
             renderedCount++;
         });
-        
+
         if (renderedCount === 0) {
             // Fallback for old boards that don't have categories IDs but have string group name? 
             // Better to show boards matching group directly if they have no category array
-            const boardsWithoutCatInGroup = allAccessibleBoards.filter(b => 
+            const boardsWithoutCatInGroup = allAccessibleBoards.filter(b =>
                 (!b.categories || b.categories.length === 0) && (b.category === currentFilterGroup)
             );
-            
+
             if (boardsWithoutCatInGroup.length > 0) {
                 boardsWithoutCatInGroup.forEach(board => renderButton(gridContainer, board.id, board));
                 renderedCount = boardsWithoutCatInGroup.length;
@@ -332,7 +332,7 @@ function renderCategoryCard(container, category, boardCount) {
     let hexColor = category.color || '#009DE0';
     let iconStr = category.icon || '';
     let desc = category.description || ''; // Empty if not provided
-    
+
     if (!iconStr) {
         iconStr = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" style="color: ${hexColor}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
@@ -340,7 +340,7 @@ function renderCategoryCard(container, category, boardCount) {
     } else {
         iconStr = `<span style="color: ${hexColor}; font-size: 1.5rem; display: flex; align-items: center; justify-content: center;" class="w-full h-full">${iconStr}</span>`;
     }
-                        
+
     const html = `
         <div data-cat-id="${category.id}"
             class="obelisco-card category-card bg-white border border-obelisco-border rounded-xl p-6 flex flex-col h-full hover:bg-gray-50 transition drop-shadow-sm cursor-pointer border-t-4" style="border-top-color: ${hexColor}">
@@ -362,9 +362,9 @@ function renderCategoryCard(container, category, boardCount) {
             </div>
         </div>
     `;
-    
+
     container.insertAdjacentHTML('beforeend', html);
-    
+
     // Add event listener to jump into category
     const insertedEl = container.lastElementChild;
     insertedEl.addEventListener('click', (e) => {
@@ -379,7 +379,7 @@ async function handleAccessRequest(e) {
     e.preventDefault();
     const submitBtn = e.target.querySelector('button[type="submit"]');
     if (submitBtn.disabled) return;
-    
+
     const userEmail = auth.currentUser ? auth.currentUser.email : 'Anónimo';
     const buttonId = document.getElementById('ogb-form-button-id')?.value;
     const buttonName = document.getElementById('ogb-form-button-name')?.value;
@@ -405,10 +405,10 @@ async function handleAccessRequest(e) {
         });
 
         document.getElementById('ogb-form-ok').classList.remove('hidden');
-        
+
         // Refresh local state to show "En revisión" immediately
         await loadUserPermissions(auth.currentUser);
-        
+
         setTimeout(() => {
             document.getElementById('ogb-form-ok').classList.add('hidden');
             document.getElementById('ogb-form').reset();
@@ -429,13 +429,13 @@ function renderButton(container, id, data) {
     let hexColor = '#009DE0';
     let iconStr = data.icon || '';
     let categoryNames = '';
-    
+
     if (data.categories && data.categories.length > 0) {
         const primaryCat = allCategories.find(c => c.id === data.categories[0]);
         if (primaryCat) {
             hexColor = primaryCat.color || hexColor;
             if (!iconStr) iconStr = primaryCat.icon || '';
-            
+
             // Generate list of names
             categoryNames = data.categories.map(cId => {
                 const c = allCategories.find(cat => cat.id === cId);
@@ -446,7 +446,7 @@ function renderButton(container, id, data) {
         // Fallback or old data
         categoryNames = data.category || 'Sin Categoría';
     }
-    
+
     // If STILL no icon, use default SVG
     if (!iconStr) {
         iconStr = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" style="color: ${hexColor}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -460,17 +460,17 @@ function renderButton(container, id, data) {
 
     const hasAccess = data.hasAccess !== false; // handle old data
     const restrictedClass = !hasAccess ? 'opacity-75 grayscale-[0.5] border-dashed border-red-200' : '';
-    
+
     // Check pending request
     const pendingRequest = currentUserRequests.find(r => r.buttonId === id && r.status === 'pending');
     const isUnderReview = !!pendingRequest;
 
-    const lockIcon = !hasAccess 
-        ? (isUnderReview 
+    const lockIcon = !hasAccess
+        ? (isUnderReview
             ? '<div class="absolute top-2 right-2 text-obelisco-blue bg-blue-50 px-2 py-0.5 rounded-full text-[10px] font-bold border border-blue-200 shadow-sm">En revisión</div>'
             : '<div class="absolute top-2 right-2 text-red-500 bg-red-50 p-1.5 rounded-full border border-red-100"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg></div>')
         : '<div class="absolute top-2 right-2 text-green-600 bg-green-50 p-1.5 rounded-full border border-green-100 shadow-sm" title="Acceso concedido"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" /></svg></div>';
-                        
+
     const html = `
         <a href="#" data-button-id="${id}" data-iframe="${data.iframeUrl || ''}" data-heading="${data.title}" data-access="${hasAccess}" data-new-tab="${data.openInNewTab === true}"
             class="obelisco-card dashboard-btn bg-white border border-obelisco-border rounded-xl p-6 flex flex-col h-full hover:bg-gray-50 transition drop-shadow-sm relative ${restrictedClass}">
@@ -490,7 +490,7 @@ function renderButton(container, id, data) {
             </span>
         </a>
     `;
-    
+
     container.insertAdjacentHTML('beforeend', html);
 }
 
@@ -500,35 +500,35 @@ function openModal(title, url) {
         alert("El enlace para este tablero no está disponible.");
         return;
     }
-    
+
     modalHeading.textContent = title;
-    
+
     // Reset iframe state
     modalIframe.style.opacity = '0';
     modalLoader.style.display = 'flex';
-    
+
     // Apply URL formatting fixes
     let finalSrc = ogbFixSheetUrl(url);
     finalSrc = ogbFixLookerUrl(finalSrc);
     finalSrc = ogbEnsurePBIToolbar(finalSrc);
-    
+
     // Adjust security based on source
     modalIframe.setAttribute('referrerpolicy', 'no-referrer');
     modalIframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms');
-    
+
     if (finalSrc.includes('lookerstudio.google.com')) {
         modalIframe.removeAttribute('referrerpolicy');
     }
-    
+
     // Load iframe content
     modalIframe.src = finalSrc;
-    
+
     // Listen for iframe load
     modalIframe.onload = () => {
         modalLoader.style.display = 'none';
         modalIframe.style.opacity = '1';
     };
-    
+
     // Show modal
     modal.classList.remove('hidden');
     modal.classList.add('flex');
@@ -541,7 +541,7 @@ function closeModal() {
     modal.classList.remove('flex');
     modal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
-    
+
     // Reset contents
     modalIframeWrap.classList.remove('hidden');
     const formWrap = document.getElementById('ogb-form-wrap');
@@ -549,7 +549,7 @@ function closeModal() {
         formWrap.classList.add('hidden');
         formWrap.classList.remove('flex');
     }
-    
+
     // Reset form
     const form = document.getElementById('ogb-form');
     if (form) form.reset();
@@ -559,7 +559,7 @@ function closeModal() {
     // Reset iframe
     modalIframe.src = 'about:blank';
     modalHeading.textContent = '...';
-    
+
     const card = document.getElementById('ogb-modal-card');
     if (card) {
         card.classList.remove('w-full', 'h-full', 'rounded-none');
@@ -572,7 +572,7 @@ function ogbEnsurePBIToolbar(url) {
     try {
         var host = new URL(url, window.location.origin).hostname;
         if (!/(\.|^)powerbi\.com$/.test(host)) return url;
-        
+
         var u = new URL(url, window.location.origin);
         u.searchParams.set('navContentPaneEnabled', 'true');
         u.searchParams.set('filterPaneEnabled', 'true');
@@ -592,15 +592,15 @@ function openAccessRequestForm(title, buttonId) {
         formWrap.classList.remove('hidden');
         formWrap.classList.add('flex');
     }
-    
+
     // Fill fields
     const userField = document.getElementById('ogb-form-user');
     const buttonNameField = document.getElementById('ogb-form-button-name');
-    const buttonIdField = document.createElement('input'); 
+    const buttonIdField = document.createElement('input');
     buttonIdField.type = 'hidden';
     buttonIdField.id = 'ogb-form-button-id';
     buttonIdField.value = buttonId;
-    
+
     // Check if hidden field already exists to update or add
     const existingHidden = document.getElementById('ogb-form-button-id');
     if (existingHidden) existingHidden.value = buttonId;
@@ -608,7 +608,7 @@ function openAccessRequestForm(title, buttonId) {
 
     if (userField) userField.value = auth.currentUser ? auth.currentUser.email : 'No identificado';
     if (buttonNameField) buttonNameField.value = title;
-    
+
     // Terms reset
     const termsCheck = document.getElementById('ogb-form-terms');
     if (termsCheck) termsCheck.checked = false;
@@ -638,7 +638,7 @@ function ogbFixSheetUrl(url) {
     try {
         var u = new URL(url, window.location.origin);
         var h = u.hostname;
-        
+
         // Google Sheets
         if (h.includes('docs.google.com') && u.pathname.includes('/spreadsheets/')) {
             if (!u.pathname.includes('/pubhtml')) {
@@ -676,11 +676,11 @@ document.addEventListener('click', (e) => {
         const hasAccess = btn.getAttribute('data-access') !== 'false';
         const title = btn.getAttribute('data-heading');
         const id = btn.getAttribute('data-button-id');
-        
+
         if (hasAccess) {
             const url = btn.getAttribute('data-iframe');
             const openInNewTab = btn.getAttribute('data-new-tab') === 'true';
-            
+
             if (openInNewTab) {
                 window.open(url, '_blank');
             } else {
@@ -691,7 +691,7 @@ document.addEventListener('click', (e) => {
         }
         return;
     }
-    
+
     // Click to close modal
     if (e.target.closest('[data-ogb-close]')) {
         closeModal();
@@ -767,7 +767,7 @@ if (registrationForm) {
             const userEmail = user.email.toLowerCase();
             const userRef = doc(db, "users", userEmail);
             console.log("Saving profile for:", userEmail);
-            
+
             await setDoc(userRef, {
                 email: user.email.toLowerCase(),
                 name: user.displayName || user.email.split('@')[0],

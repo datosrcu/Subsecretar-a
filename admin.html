@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,24 +21,30 @@
         }
     </script>
 </head>
+
 <body class="bg-gray-50 min-h-screen text-obelisco-dark font-sans flex flex-col">
 
     <!-- Header Admins -->
-    <header class="bg-white border-b border-obelisco-border px-6 py-4 flex justify-between items-center shadow-sm relative z-20">
+    <header
+        class="bg-white border-b border-obelisco-border px-6 py-4 flex justify-between items-center shadow-sm relative z-20">
         <div class="flex items-center space-x-3">
             <img src="Escudo.png" alt="Escudo" class="h-10">
             <div>
                 <h1 class="font-bold text-lg leading-tight">Panel Administrativo</h1>
-                <p class="text-xs text-obelisco-gray">Observatorio de Gestión <span class="bg-gray-100 px-1 rounded border border-gray-200 ml-1 text-[10px]">v1.2.1-cms</span></p>
+                <p class="text-xs text-obelisco-gray">Observatorio de Gestión <span
+                        class="bg-gray-100 px-1 rounded border border-gray-200 ml-1 text-[10px]">v1.2.1-cms</span></p>
             </div>
         </div>
-        
+
         <div id="auth-section" class="flex items-center">
             <!-- Loading State -->
             <div id="auth-loader" class="flex items-center space-x-2 text-obelisco-gray">
                 <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
+                        fill="none"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
                 </svg>
                 <span class="text-sm font-medium">Verificando...</span>
             </div>
@@ -53,36 +60,59 @@
 
     <!-- Main Content (Protected) -->
     <main id="admin-content" class="flex-grow flex flex-col hidden bg-gray-50">
-        
+
         <!-- Dashboard Principal -->
-        <div id="admin-dashboard" class="flex-grow p-8 sm:p-12 max-w-[1000px] mx-auto w-full flex flex-col justify-center">
+        <div id="admin-dashboard"
+            class="flex-grow p-8 sm:p-12 max-w-[1000px] mx-auto w-full flex flex-col justify-center">
             <div class="mb-12">
                 <h1 class="text-4xl font-black text-obelisco-dark mb-3">Panel de Control</h1>
                 <p class="text-obelisco-gray text-lg">Seleccioná la sección que deseás gestionar en el Observatorio.</p>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Tarjeta 1: Administración del OG -->
-                <button id="btn-goto-og" class="group bg-white p-8 rounded-2xl shadow-sm border-2 border-transparent hover:border-obelisco-blue hover:shadow-xl transition-all duration-300 text-left flex flex-col h-full">
-                    <div class="w-16 h-16 bg-blue-50 text-obelisco-blue rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+                <button id="btn-goto-og"
+                    class="group bg-white p-8 rounded-2xl shadow-sm border-2 border-transparent hover:border-obelisco-blue hover:shadow-xl transition-all duration-300 text-left flex flex-col h-full">
+                    <div
+                        class="w-16 h-16 bg-blue-50 text-obelisco-blue rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                        </svg>
                     </div>
                     <h2 class="text-2xl font-bold text-obelisco-dark mb-3">Administración del OG</h2>
-                    <p class="text-obelisco-gray mb-6 flex-grow">Gestioná tableros, categorías, permisos de usuarios y solicitudes de acceso al sistema.</p>
-                    <span class="text-obelisco-blue font-bold flex items-center group-hover:translate-x-2 transition-transform">
-                        Ingresar <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    <p class="text-obelisco-gray mb-6 flex-grow">Gestioná tableros, categorías, permisos de usuarios y
+                        solicitudes de acceso al sistema.</p>
+                    <span
+                        class="text-obelisco-blue font-bold flex items-center group-hover:translate-x-2 transition-transform">
+                        Ingresar <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
                     </span>
                 </button>
 
                 <!-- Tarjeta 2: Solicitudes de productos estadísticos -->
-                <button id="btn-goto-pedidos" class="group bg-white p-8 rounded-2xl shadow-sm border-2 border-transparent hover:border-obelisco-blue hover:shadow-xl transition-all duration-300 text-left flex flex-col h-full">
-                    <div class="w-16 h-16 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <button id="btn-goto-pedidos"
+                    class="group bg-white p-8 rounded-2xl shadow-sm border-2 border-transparent hover:border-obelisco-blue hover:shadow-xl transition-all duration-300 text-left flex flex-col h-full">
+                    <div
+                        class="w-16 h-16 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
                     </div>
                     <h2 class="text-2xl font-bold text-obelisco-dark mb-3">Pedidos Estadísticos</h2>
-                    <p class="text-obelisco-gray mb-6 flex-grow">Administrá las solicitudes de informes detallados, mapas, recortes de datos y productos estadísticos.</p>
-                    <span class="text-orange-600 font-bold flex items-center group-hover:translate-x-2 transition-transform">
-                        Ver Pedidos <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    <p class="text-obelisco-gray mb-6 flex-grow">Administrá las solicitudes de informes detallados,
+                        mapas, recortes de datos y productos estadísticos.</p>
+                    <span
+                        class="text-orange-600 font-bold flex items-center group-hover:translate-x-2 transition-transform">
+                        Ver Pedidos <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
                     </span>
                 </button>
             </div>
@@ -93,11 +123,16 @@
             <!-- Sub-Header con botón volver -->
             <div class="bg-white border-b border-gray-200 py-3 px-6">
                 <div class="max-w-[1600px] mx-auto flex items-center justify-between">
-                    <button class="btn-back-dashboard text-obelisco-gray hover:text-obelisco-dark flex items-center text-sm font-medium transition">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                    <button
+                        class="btn-back-dashboard text-obelisco-gray hover:text-obelisco-dark flex items-center text-sm font-medium transition">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
                         Volver al Panel
                     </button>
-                    <div id="og-title" class="text-xs font-bold text-gray-400 uppercase tracking-widest px-3 py-1 bg-gray-50 rounded-full border border-gray-200">
+                    <div id="og-title"
+                        class="text-xs font-bold text-gray-400 uppercase tracking-widest px-3 py-1 bg-gray-50 rounded-full border border-gray-200">
                         Administración del OG
                     </div>
                 </div>
@@ -107,239 +142,308 @@
             <div class="bg-white border-b border-gray-200">
                 <div class="max-w-[1600px] mx-auto px-6">
                     <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                        <button class="nav-tab border-obelisco-blue text-obelisco-blue whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-target="tab-tableros">Tableros</button>
-                        <button class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-target="tab-categorias">Categorías</button>
-                        <button class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-target="tab-usuarios">Usuarios</button>
-                        <button class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-target="tab-solicitudes">
+                        <button
+                            class="nav-tab border-obelisco-blue text-obelisco-blue whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                            data-target="tab-tableros">Tableros</button>
+                        <button
+                            class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                            data-target="tab-categorias">Categorías</button>
+                        <button
+                            class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                            data-target="tab-usuarios">Usuarios</button>
+                        <button
+                            class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                            data-target="tab-solicitudes">
                             Solicitudes de Acceso
-                            <span id="requests-badge" class="ml-2 hidden bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
+                            <span id="requests-badge"
+                                class="ml-2 hidden bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
                         </button>
                     </nav>
                 </div>
             </div>
 
             <div class="flex-grow p-6 max-w-[1600px] mx-auto w-full relative">
-            
-            <!-- CONTENIDO TABLEROS -->
-            <div id="tab-tableros" class="tab-pane hidden block"> <!-- "block" by default (active) -->
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold mb-1">Gestión de Tableros</h2>
-                        <p class="text-obelisco-gray text-sm">Creá, editá y configurá los permisos de acceso a los tableros temáticos.</p>
+
+                <!-- CONTENIDO TABLEROS -->
+                <div id="tab-tableros" class="tab-pane hidden block"> <!-- "block" by default (active) -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold mb-1">Gestión de Tableros</h2>
+                            <p class="text-obelisco-gray text-sm">Creá, editá y configurá los permisos de acceso a los
+                                tableros temáticos.</p>
+                        </div>
+                        <div class="flex space-x-3">
+                            <!-- Botón mágico eliminado a pedido del usuario -->
+                            <button id="add-board-btn"
+                                class="bg-obelisco-blue hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition flex items-center text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                Nuevo Tablero
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex space-x-3">
-                        <!-- Botón mágico eliminado a pedido del usuario -->
-                        <button id="add-board-btn" class="bg-obelisco-blue hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition flex items-center text-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+
+                    <!-- Tarjetas de Resumen -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-white p-4 rounded-xl border-l-4 shadow-sm flex items-center space-x-4 transition hover:shadow-md"
+                            style="border-left-color: #009de0;">
+                            <div class="p-3 rounded-full bg-blue-50 text-[#009de0]">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-500 uppercase">Total Tableros</p>
+                                <p id="count-total" class="text-2xl font-black text-gray-800">0</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border-l-4 shadow-sm flex items-center space-x-4 transition hover:shadow-md"
+                            style="border-left-color: #00c96b;">
+                            <div class="p-3 rounded-full bg-green-50 text-[#00c96b]">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-500 uppercase">Activos</p>
+                                <p id="count-active" class="text-2xl font-black text-gray-800">0</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border-l-4 shadow-sm flex items-center space-x-4 transition hover:shadow-md"
+                            style="border-left-color: #ff7d00;">
+                            <div class="p-3 rounded-full bg-orange-50 text-[#ff7d00]">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-500 uppercase">Inactivos</p>
+                                <p id="count-inactive" class="text-2xl font-black text-gray-800">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Buscador y Filtro de Categorías -->
+                    <div class="flex flex-wrap items-center gap-4 mb-6">
+                        <div class="relative min-w-[240px]">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </span>
+                            <input type="text" id="filter-board-search" placeholder="Buscar por nombre..."
+                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue outline-none transition text-sm">
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Categoría:</label>
+                            <select id="filter-board-category"
+                                class="border border-gray-300 rounded-lg px-3 py-2 bg-white outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition text-sm min-w-[180px]">
+                                <option value="all">Todas las categorías</option>
+                                <option value="_ge_direct">🌐 Gestores Externos (Directos)</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Estado:</label>
+                            <select id="filter-board-status"
+                                class="border border-gray-300 rounded-lg px-3 py-2 bg-white outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition text-sm">
+                                <option value="all">Todos</option>
+                                <option value="active">🟢 Activos</option>
+                                <option value="inactive">🔴 Inactivos</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
+                            <thead>
+                                <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
+                                    <th class="py-3 px-4 font-semibold w-12">Estado</th>
+                                    <th class="py-3 px-4 font-semibold">Título</th>
+                                    <th class="py-3 px-4 font-semibold">Categoría</th>
+                                    <th class="py-3 px-4 font-semibold">Permisos</th>
+                                    <th class="py-3 px-4 font-semibold w-20">Orden</th>
+                                    <th class="py-3 px-4 font-semibold text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="boards-tbody" class="divide-y divide-obelisco-border">
+                                <tr>
+                                    <td colspan="6" class="text-center py-8 text-obelisco-gray">Cargando tableros...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CONTENIDO CATEGORÍAS -->
+                <div id="tab-categorias" class="tab-pane hidden">
+                    <div class="flex justify-between items-end mb-4">
+                        <div>
+                            <h2 class="text-2xl font-bold mb-1">Categorías de Tableros</h2>
+                            <p class="text-obelisco-gray text-sm">Administrá las categorías que se muestran en la
+                                cuadrícula de tableros.</p>
+                        </div>
+                        <button id="add-cat-btn"
+                            class="bg-obelisco-blue hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition flex items-center text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                    clip-rule="evenodd" />
                             </svg>
-                            Nuevo Tablero
+                            Nueva Categoría
                         </button>
                     </div>
-                </div>
-                
-                <!-- Tarjetas de Resumen -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="bg-white p-4 rounded-xl border-l-4 shadow-sm flex items-center space-x-4 transition hover:shadow-md" style="border-left-color: #009de0;">
-                        <div class="p-3 rounded-full bg-blue-50 text-[#009de0]">
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                        </div>
-                        <div>
-                            <p class="text-xs font-bold text-gray-500 uppercase">Total Tableros</p>
-                            <p id="count-total" class="text-2xl font-black text-gray-800">0</p>
-                        </div>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl border-l-4 shadow-sm flex items-center space-x-4 transition hover:shadow-md" style="border-left-color: #00c96b;">
-                        <div class="p-3 rounded-full bg-green-50 text-[#00c96b]">
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <div>
-                            <p class="text-xs font-bold text-gray-500 uppercase">Activos</p>
-                            <p id="count-active" class="text-2xl font-black text-gray-800">0</p>
-                        </div>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl border-l-4 shadow-sm flex items-center space-x-4 transition hover:shadow-md" style="border-left-color: #ff7d00;">
-                        <div class="p-3 rounded-full bg-orange-50 text-[#ff7d00]">
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        </div>
-                        <div>
-                            <p class="text-xs font-bold text-gray-500 uppercase">Inactivos</p>
-                            <p id="count-inactive" class="text-2xl font-black text-gray-800">0</p>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Buscador y Filtro de Categorías -->
-                <div class="flex flex-wrap items-center gap-4 mb-6">
-                    <div class="relative min-w-[240px]">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        </span>
-                        <input type="text" id="filter-board-search" placeholder="Buscar por nombre..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue outline-none transition text-sm">
+                    <!-- Filtros de tipo -->
+                    <div class="flex gap-2 mb-5 bg-gray-100 p-1.5 rounded-xl w-fit">
+                        <button
+                            class="cat-filter-btn active-cat-filter bg-white text-obelisco-blue shadow-sm text-sm font-medium px-4 py-1.5 rounded-lg transition"
+                            data-type="Categorías">
+                            📁 Categorías
+                        </button>
+                        <button
+                            class="cat-filter-btn text-gray-600 hover:bg-gray-200 text-sm font-medium px-4 py-1.5 rounded-lg transition"
+                            data-type="Gestores Internos">
+                            🏛️ Gestores Internos
+                        </button>
+                        <button
+                            class="cat-filter-btn text-gray-600 hover:bg-gray-200 text-sm font-medium px-4 py-1.5 rounded-lg transition"
+                            data-type="Gestores Externos">
+                            🌐 Gestores Externos
+                        </button>
                     </div>
 
-                    <div class="flex items-center space-x-2">
-                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Categoría:</label>
-                        <select id="filter-board-category" class="border border-gray-300 rounded-lg px-3 py-2 bg-white outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition text-sm min-w-[180px]">
-                            <option value="all">Todas las categorías</option>
-                            <option value="_ge_direct">🌐 Gestores Externos (Directos)</option>
-                        </select>
-                    </div>
-
-                    <div class="flex items-center space-x-2">
-                        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Estado:</label>
-                        <select id="filter-board-status" class="border border-gray-300 rounded-lg px-3 py-2 bg-white outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition text-sm">
-                            <option value="all">Todos</option>
-                            <option value="active">🟢 Activos</option>
-                            <option value="inactive">🔴 Inactivos</option>
-                        </select>
+                    <div
+                        class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden max-w-[1600px]">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
+                                    <th class="py-3 px-4 font-semibold w-12">Ícono</th>
+                                    <th class="py-3 px-4 font-semibold">Nombre de Categoría</th>
+                                    <th class="py-3 px-4 font-semibold">Grupo Visual (Tipo)</th>
+                                    <th class="py-3 px-4 font-semibold w-24">Color Hex</th>
+                                    <th class="py-3 px-4 font-semibold w-16">Visible</th>
+                                    <th class="py-3 px-4 font-semibold w-20">Orden</th>
+                                    <th class="py-3 px-4 font-semibold text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categories-tbody" class="divide-y divide-obelisco-border">
+                                <tr>
+                                    <td colspan="6" class="text-center py-8 text-obelisco-gray">Cargando categorías...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden">
-                    <table class="w-full text-left border-collapse min-w-[700px]">
-                        <thead>
-                            <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
-                                <th class="py-3 px-4 font-semibold w-12">Estado</th>
-                                <th class="py-3 px-4 font-semibold">Título</th>
-                                <th class="py-3 px-4 font-semibold">Categoría</th>
-                                <th class="py-3 px-4 font-semibold">Permisos</th>
-                                <th class="py-3 px-4 font-semibold w-20">Orden</th>
-                                <th class="py-3 px-4 font-semibold text-right">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="boards-tbody" class="divide-y divide-obelisco-border">
-                            <tr><td colspan="6" class="text-center py-8 text-obelisco-gray">Cargando tableros...</td></tr>
-                        </tbody>
-                    </table>
+                <!-- CONTENIDO USUARIOS -->
+                <div id="tab-usuarios" class="tab-pane hidden text-sm">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold mb-1">Directorio de Usuarios</h2>
+                        <p class="text-obelisco-gray text-sm">Listado de todos los usuarios que han iniciado sesión al
+                            menos una vez en el portal.</p>
+                    </div>
+
+                    <!-- Filtros de Usuarios -->
+                    <div
+                        class="mb-6 bg-gray-50 p-4 rounded-xl border border-obelisco-border flex flex-wrap gap-4 items-end">
+                        <div class="flex-grow min-w-[300px]">
+                            <label class="block text-[10px] uppercase font-bold text-obelisco-gray mb-1">Buscar por
+                                Nombre, Email u Organización</label>
+                            <input type="text" id="filter-user-search"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-obelisco-blue"
+                                placeholder="Buscar usuario...">
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden max-w-[1600px]">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
+                                    <th class="py-3 px-4 font-semibold">Usuario</th>
+                                    <th class="py-3 px-4 font-semibold">Organización / Cargo</th>
+                                    <th class="py-3 px-4 font-semibold">Registro / Acceso</th>
+                                    <th class="py-3 px-4 font-semibold">Rol App</th>
+                                    <th class="py-3 px-4 font-semibold text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-tbody" class="divide-y divide-obelisco-border">
+                                <!-- v1.2 - Advanced User Directory -->
+                                <tr>
+                                    <td colspan="5" class="text-center py-8 text-obelisco-gray">Cargando usuarios...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+
+                <!-- CONTENIDO SOLICITUDES -->
+                <div id="tab-solicitudes" class="tab-pane hidden text-sm">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold mb-1">Solicitudes de Acceso</h2>
+                        <p class="text-obelisco-gray text-sm">Gestioná las peticiones de los usuarios para visualizar
+                            tableros restringidos.</p>
+                    </div>
+
+                    <!-- Filtros de Solicitudes -->
+                    <div
+                        class="mb-6 flex flex-wrap gap-4 items-end bg-gray-50 p-4 rounded-xl border border-obelisco-border">
+                        <div class="flex-grow">
+                            <label class="block text-[10px] uppercase font-bold text-obelisco-gray mb-1">Filtrar por
+                                Usuario / Email</label>
+                            <input type="text" id="filter-request-user"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-obelisco-blue"
+                                placeholder="Buscar email...">
+                        </div>
+                        <div class="w-48">
+                            <label class="block text-[10px] uppercase font-bold text-obelisco-gray mb-1">Estado</label>
+                            <select id="filter-request-status"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-obelisco-blue bg-white">
+                                <option value="all" selected>Todos los estados</option>
+                                <option value="pending">Pendientes</option>
+                                <option value="approved">Aprobadas</option>
+                                <option value="rejected">Rechazadas</option>
+                                <option value="restricted">Restringidas</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
+                            <thead>
+                                <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
+                                    <th class="py-3 px-4 font-semibold">Fecha</th>
+                                    <th class="py-3 px-4 font-semibold">Usuario</th>
+                                    <th class="py-3 px-4 font-semibold">Tablero</th>
+                                    <th class="py-3 px-4 font-semibold">Motivo</th>
+                                    <th class="py-3 px-4 font-semibold text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="requests-tbody" class="divide-y divide-obelisco-border">
+                                <tr>
+                                    <td colspan="5" class="text-center py-8 text-obelisco-gray">No hay solicitudes
+                                        pendientes.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
-
-            <!-- CONTENIDO CATEGORÍAS -->
-            <div id="tab-categorias" class="tab-pane hidden">
-                <div class="flex justify-between items-end mb-4">
-                    <div>
-                        <h2 class="text-2xl font-bold mb-1">Categorías de Tableros</h2>
-                        <p class="text-obelisco-gray text-sm">Administrá las categorías que se muestran en la cuadrícula de tableros.</p>
-                    </div>
-                    <button id="add-cat-btn" class="bg-obelisco-blue hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition flex items-center text-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-                        </svg>
-                        Nueva Categoría
-                    </button>
-                </div>
-
-                <!-- Filtros de tipo -->
-                <div class="flex gap-2 mb-5 bg-gray-100 p-1.5 rounded-xl w-fit">
-                    <button class="cat-filter-btn active-cat-filter bg-white text-obelisco-blue shadow-sm text-sm font-medium px-4 py-1.5 rounded-lg transition" data-type="Categorías">
-                        📁 Categorías
-                    </button>
-                    <button class="cat-filter-btn text-gray-600 hover:bg-gray-200 text-sm font-medium px-4 py-1.5 rounded-lg transition" data-type="Gestores Internos">
-                        🏛️ Gestores Internos
-                    </button>
-                    <button class="cat-filter-btn text-gray-600 hover:bg-gray-200 text-sm font-medium px-4 py-1.5 rounded-lg transition" data-type="Gestores Externos">
-                        🌐 Gestores Externos
-                    </button>
-                </div>
-
-                <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden max-w-[1600px]">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
-                                <th class="py-3 px-4 font-semibold w-12">Ícono</th>
-                                <th class="py-3 px-4 font-semibold">Nombre de Categoría</th>
-                                <th class="py-3 px-4 font-semibold">Grupo Visual (Tipo)</th>
-                                <th class="py-3 px-4 font-semibold w-24">Color Hex</th>
-                                <th class="py-3 px-4 font-semibold w-20">Orden</th>
-                                <th class="py-3 px-4 font-semibold text-right">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="categories-tbody" class="divide-y divide-obelisco-border">
-                            <tr><td colspan="6" class="text-center py-8 text-obelisco-gray">Cargando categorías...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- CONTENIDO USUARIOS -->
-            <div id="tab-usuarios" class="tab-pane hidden text-sm">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold mb-1">Directorio de Usuarios</h2>
-                    <p class="text-obelisco-gray text-sm">Listado de todos los usuarios que han iniciado sesión al menos una vez en el portal.</p>
-                </div>
-
-                <!-- Filtros de Usuarios -->
-                <div class="mb-6 bg-gray-50 p-4 rounded-xl border border-obelisco-border flex flex-wrap gap-4 items-end">
-                    <div class="flex-grow min-w-[300px]">
-                        <label class="block text-[10px] uppercase font-bold text-obelisco-gray mb-1">Buscar por Nombre, Email u Organización</label>
-                        <input type="text" id="filter-user-search" class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-obelisco-blue" placeholder="Buscar usuario...">
-                    </div>
-                </div>
-
-                <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden max-w-[1600px]">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
-                                <th class="py-3 px-4 font-semibold">Usuario</th>
-                                <th class="py-3 px-4 font-semibold">Organización / Cargo</th>
-                                <th class="py-3 px-4 font-semibold">Registro / Acceso</th>
-                                <th class="py-3 px-4 font-semibold">Rol App</th>
-                                <th class="py-3 px-4 font-semibold text-right">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="users-tbody" class="divide-y divide-obelisco-border">
-                            <!-- v1.2 - Advanced User Directory -->
-                            <tr><td colspan="5" class="text-center py-8 text-obelisco-gray">Cargando usuarios...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- CONTENIDO SOLICITUDES -->
-            <div id="tab-solicitudes" class="tab-pane hidden text-sm">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold mb-1">Solicitudes de Acceso</h2>
-                    <p class="text-obelisco-gray text-sm">Gestioná las peticiones de los usuarios para visualizar tableros restringidos.</p>
-                </div>
-
-                <!-- Filtros de Solicitudes -->
-                <div class="mb-6 flex flex-wrap gap-4 items-end bg-gray-50 p-4 rounded-xl border border-obelisco-border">
-                    <div class="flex-grow">
-                        <label class="block text-[10px] uppercase font-bold text-obelisco-gray mb-1">Filtrar por Usuario / Email</label>
-                        <input type="text" id="filter-request-user" class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-obelisco-blue" placeholder="Buscar email...">
-                    </div>
-                    <div class="w-48">
-                        <label class="block text-[10px] uppercase font-bold text-obelisco-gray mb-1">Estado</label>
-                        <select id="filter-request-status" class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-obelisco-blue bg-white">
-                            <option value="all" selected>Todos los estados</option>
-                            <option value="pending">Pendientes</option>
-                            <option value="approved">Aprobadas</option>
-                            <option value="rejected">Rechazadas</option>
-                            <option value="restricted">Restringidas</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden">
-                    <table class="w-full text-left border-collapse min-w-[700px]">
-                        <thead>
-                            <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
-                                <th class="py-3 px-4 font-semibold">Fecha</th>
-                                <th class="py-3 px-4 font-semibold">Usuario</th>
-                                <th class="py-3 px-4 font-semibold">Tablero</th>
-                                <th class="py-3 px-4 font-semibold">Motivo</th>
-                                <th class="py-3 px-4 font-semibold text-right">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="requests-tbody" class="divide-y divide-obelisco-border">
-                            <tr><td colspan="5" class="text-center py-8 text-obelisco-gray">No hay solicitudes pendientes.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
     </main>
 
     <!-- Error Screen (Unauth) -->
@@ -347,15 +451,19 @@
         <div class="text-center max-w-md bg-white p-8 rounded-2xl shadow-sm border border-red-100">
             <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
             </div>
             <h2 class="text-xl font-bold mb-2">Acceso Denegado</h2>
-            <p id="error-message" class="text-obelisco-gray mb-6">No tenés privilegios de administrador para ver esta página.</p>
-            <button id="error-login-btn" class="w-full bg-obelisco-dark hover:bg-gray-800 text-white font-medium py-3 rounded-lg transition">
+            <p id="error-message" class="text-obelisco-gray mb-6">No tenés privilegios de administrador para ver esta
+                página.</p>
+            <button id="error-login-btn"
+                class="w-full bg-obelisco-dark hover:bg-gray-800 text-white font-medium py-3 rounded-lg transition">
                 Intentar Iniciar Sesión de Nuevo
             </button>
-            <a href="observatorio-gestion.html" class="block mt-4 text-obelisco-blue text-sm hover:underline">← Volver al inicio</a>
+            <a href="observatorio-gestion.html" class="block mt-4 text-obelisco-blue text-sm hover:underline">← Volver
+                al inicio</a>
         </div>
     </div>
 
@@ -363,35 +471,47 @@
     <div id="board-modal" class="fixed inset-0 hidden items-center justify-center z-[100]">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-close="board"></div>
         <div class="bg-white w-[600px] max-w-[95vw] rounded-xl shadow-2xl relative z-10 flex flex-col max-h-[90vh]">
-            
-            <div class="px-6 py-4 border-b border-obelisco-border flex justify-between items-center bg-gray-50 rounded-t-xl shrink-0">
+
+            <div
+                class="px-6 py-4 border-b border-obelisco-border flex justify-between items-center bg-gray-50 rounded-t-xl shrink-0">
                 <h3 id="board-modal-title" class="text-lg font-bold">Nuevo Tablero</h3>
                 <button data-close="board" class="text-gray-400 hover:text-gray-600">
-                    <svg class="h-5 w-5 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                    <svg class="h-5 w-5 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clip-rule="evenodd" />
+                    </svg>
                 </button>
             </div>
 
             <form id="board-form" class="p-6 overflow-y-auto space-y-4 text-sm">
                 <input type="hidden" id="board-id">
-                
+
                 <div class="flex items-center space-x-2 mb-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <input type="checkbox" id="field-board-enabled" class="w-4 h-4 text-obelisco-blue rounded focus:ring-obelisco-blue" checked>
-                    <label for="field-board-enabled" class="font-medium cursor-pointer">Tablero Activo (Visible en el inicio)</label>
+                    <input type="checkbox" id="field-board-enabled"
+                        class="w-4 h-4 text-obelisco-blue rounded focus:ring-obelisco-blue" checked>
+                    <label for="field-board-enabled" class="font-medium cursor-pointer">Tablero Activo (Visible en el
+                        inicio)</label>
                 </div>
 
                 <div>
                     <label class="block font-medium mb-1">Título</label>
-                    <input type="text" id="field-board-title" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue" required placeholder="Ej: Recaudación Mensual">
+                    <input type="text" id="field-board-title"
+                        class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue"
+                        required placeholder="Ej: Recaudación Mensual">
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block font-medium mb-1">Elegir Ícono (Emoji/SVG)</label>
-                        <input type="text" id="field-board-icon" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue" placeholder="Ej: 📊">
+                        <input type="text" id="field-board-icon"
+                            class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue"
+                            placeholder="Ej: 📊">
                     </div>
                     <div>
                         <label class="block font-medium mb-1">Requiere Login</label>
-                        <select id="field-board-req-login" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue bg-white">
+                        <select id="field-board-req-login"
+                            class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue bg-white">
                             <option value="true">Sí (Privado)</option>
                             <option value="false">No (Público)</option>
                         </select>
@@ -409,120 +529,169 @@
 
                 <div>
                     <label class="block font-medium mb-1">URL del Iframe (Looker, PowerBI, Sheets)</label>
-                    <input type="url" id="field-board-url" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue" placeholder="https://...">
+                    <input type="url" id="field-board-url"
+                        class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue"
+                        placeholder="https://...">
                 </div>
 
                 <div class="flex items-center space-x-2 p-3 bg-blue-50/50 rounded-lg border border-blue-100">
-                    <input type="checkbox" id="field-board-new-tab" class="w-4 h-4 text-obelisco-blue rounded focus:ring-obelisco-blue">
-                    <label for="field-board-new-tab" class="font-medium cursor-pointer text-obelisco-blue">Abrir en pestaña nueva <span class="text-xs font-normal text-gray-500 ml-1">(Usar para links que rechazan conexión en el cuadro)</span></label>
+                    <input type="checkbox" id="field-board-new-tab"
+                        class="w-4 h-4 text-obelisco-blue rounded focus:ring-obelisco-blue">
+                    <label for="field-board-new-tab" class="font-medium cursor-pointer text-obelisco-blue">Abrir en
+                        pestaña nueva <span class="text-xs font-normal text-gray-500 ml-1">(Usar para links que rechazan
+                            conexión en el cuadro)</span></label>
                 </div>
 
                 <div>
                     <label class="block font-medium mb-2">Usuarios Permitidos</label>
                     <div class="border border-gray-300 rounded-lg overflow-hidden flex flex-col max-h-48">
                         <div class="p-2 bg-gray-50 border-b border-gray-200">
-                            <input type="text" id="user-search" class="w-full text-xs px-2 py-1.5 border border-gray-300 rounded outline-none focus:border-obelisco-blue" placeholder="Buscar usuario para autorizar...">
+                            <input type="text" id="user-search"
+                                class="w-full text-xs px-2 py-1.5 border border-gray-300 rounded outline-none focus:border-obelisco-blue"
+                                placeholder="Buscar usuario para autorizar...">
                         </div>
                         <div id="users-checklist" class="overflow-y-auto p-2 space-y-1 bg-white flex-grow">
                             <!-- Los checkboxes de usuarios se renderizarán aquí -->
                             <p class="text-xs text-center text-gray-400 py-4">Cargando directorio...</p>
                         </div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-2">Los administradores siempre tienen acceso. Si no marcás ninguno y es un tablero "Privado", nadie más lo verá.</p>
+                    <p class="text-xs text-gray-500 mt-2">Los administradores siempre tienen acceso. Si no marcás
+                        ninguno y es un tablero "Privado", nadie más lo verá.</p>
                 </div>
-                
+
             </form>
 
-            <div class="px-6 py-4 border-t border-obelisco-border bg-gray-50 flex justify-end space-x-3 rounded-b-xl shrink-0">
-                <button type="button" data-close="board" class="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded transition font-medium text-sm">Cancelar</button>
-                <button type="submit" form="board-form" id="save-board-btn" class="px-4 py-2 bg-obelisco-blue hover:bg-blue-700 text-white rounded shadow-sm transition font-medium flex items-center text-sm">
+            <div
+                class="px-6 py-4 border-t border-obelisco-border bg-gray-50 flex justify-end space-x-3 rounded-b-xl shrink-0">
+                <button type="button" data-close="board"
+                    class="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded transition font-medium text-sm">Cancelar</button>
+                <button type="submit" form="board-form" id="save-board-btn"
+                    class="px-4 py-2 bg-obelisco-blue hover:bg-blue-700 text-white rounded shadow-sm transition font-medium flex items-center text-sm">
                     Guardar Tablero
                 </button>
             </div>
         </div>
     </div>
 
-            </div>
-        </div> <!-- Fin de section-admin-og -->
+    </div>
+    </div> <!-- Fin de section-admin-og -->
 
-        <!-- SECCIÓN PEDIDOS ESTADÍSTICOS -->
-        <div id="section-admin-pedidos" class="hidden flex-grow flex flex-col">
-            <!-- Sub-Header con botón volver -->
-            <div class="bg-white border-b border-gray-200 py-3 px-6">
-                <div class="max-w-[1600px] mx-auto flex items-center justify-between">
-                    <button class="btn-back-dashboard text-obelisco-gray hover:text-obelisco-dark flex items-center text-sm font-medium transition">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                        Volver al Panel
-                    </button>
-                    <div class="text-xs font-bold text-orange-400 uppercase tracking-widest px-3 py-1 bg-orange-50 rounded-full border border-orange-200">
-                        Pedidos Estadísticos
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex-grow p-6 max-w-[1600px] mx-auto w-full relative">
-                
-                <!-- Tarjetas de Resumen de Pedidos -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="bg-white p-4 rounded-xl border-l-4 border-blue-500 shadow-sm flex items-center space-x-4">
-                        <div class="p-3 rounded-full bg-blue-50 text-blue-500 shadow-inner"><svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
-                        <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Pedidos</p><p id="count-req-total" class="text-2xl font-black text-gray-800 leading-none mt-1">0</p></div>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl border-l-4 border-yellow-500 shadow-sm flex items-center space-x-4">
-                        <div class="p-3 rounded-full bg-yellow-50 text-yellow-600 shadow-inner"><svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
-                        <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pendientes</p><p id="count-req-pending" class="text-2xl font-black text-gray-800 leading-none mt-1">0</p></div>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl border-l-4 border-green-500 shadow-sm flex items-center space-x-4">
-                        <div class="p-3 rounded-full bg-green-50 text-green-600 shadow-inner"><svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>
-                        <div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Completados</p><p id="count-req-completed" class="text-2xl font-black text-gray-800 leading-none mt-1">0</p></div>
-                    </div>
-                </div>
-
-                <div class="bg-white border border-obelisco-border rounded-xl shadow-sm overflow-hidden flex flex-col">
-                    <!-- Buscador y Filtro -->
-                    <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row gap-4">
-                        <div class="relative flex-grow">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                            </span>
-                            <input type="text" id="filter-req-search" class="w-full border border-gray-200 rounded-lg pl-10 pr-4 py-2 text-sm focus:border-obelisco-blue outline-none transition" placeholder="Buscar por título, área o solicitante...">
-                        </div>
-                        <select id="filter-req-status" class="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:border-obelisco-blue outline-none bg-white transition min-w-[180px]">
-                            <option value="todos">Todos los estados</option>
-                            <option value="Pendiente">Pendiente</option>
-                            <option value="En Proceso">En Proceso</option>
-                            <option value="Completado">Completado</option>
-                            <option value="Rechazado">Rechazado</option>
-                        </select>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead class="bg-gray-50 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200">
-                                <tr>
-                                    <th class="px-6 py-4">Fecha</th>
-                                    <th class="px-6 py-4">Solicitante / Área</th>
-                                    <th class="px-6 py-4">Producto / Título</th>
-                                    <th class="px-6 py-4">Estado</th>
-                                    <th class="px-6 py-4 text-right">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="pedidos-table-body" class="divide-y divide-gray-100 text-sm">
-                                <!-- Se llena dinámicamente -->
-                                <tr>
-                                    <td colspan="5" class="px-6 py-16 text-center text-gray-400">
-                                        <div class="flex flex-col items-center">
-                                            <svg class="animate-spin h-8 w-8 text-obelisco-blue mb-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                            <p class="font-medium">Cargando pedidos de productos estadísticos...</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+    <!-- SECCIÓN PEDIDOS ESTADÍSTICOS -->
+    <div id="section-admin-pedidos" class="hidden flex-grow flex flex-col">
+        <!-- Sub-Header con botón volver -->
+        <div class="bg-white border-b border-gray-200 py-3 px-6">
+            <div class="max-w-[1600px] mx-auto flex items-center justify-between">
+                <button
+                    class="btn-back-dashboard text-obelisco-gray hover:text-obelisco-dark flex items-center text-sm font-medium transition">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Volver al Panel
+                </button>
+                <div
+                    class="text-xs font-bold text-orange-400 uppercase tracking-widest px-3 py-1 bg-orange-50 rounded-full border border-orange-200">
+                    Pedidos Estadísticos
                 </div>
             </div>
         </div>
+
+        <div class="flex-grow p-6 max-w-[1600px] mx-auto w-full relative">
+
+            <!-- Tarjetas de Resumen de Pedidos -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white p-4 rounded-xl border-l-4 border-blue-500 shadow-sm flex items-center space-x-4">
+                    <div class="p-3 rounded-full bg-blue-50 text-blue-500 shadow-inner"><svg class="h-6 w-6" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg></div>
+                    <div>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Pedidos</p>
+                        <p id="count-req-total" class="text-2xl font-black text-gray-800 leading-none mt-1">0</p>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border-l-4 border-yellow-500 shadow-sm flex items-center space-x-4">
+                    <div class="p-3 rounded-full bg-yellow-50 text-yellow-600 shadow-inner"><svg class="h-6 w-6"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg></div>
+                    <div>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pendientes</p>
+                        <p id="count-req-pending" class="text-2xl font-black text-gray-800 leading-none mt-1">0</p>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border-l-4 border-green-500 shadow-sm flex items-center space-x-4">
+                    <div class="p-3 rounded-full bg-green-50 text-green-600 shadow-inner"><svg class="h-6 w-6"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg></div>
+                    <div>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Completados</p>
+                        <p id="count-req-completed" class="text-2xl font-black text-gray-800 leading-none mt-1">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white border border-obelisco-border rounded-xl shadow-sm overflow-hidden flex flex-col">
+                <!-- Buscador y Filtro -->
+                <div class="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row gap-4">
+                    <div class="relative flex-grow">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </span>
+                        <input type="text" id="filter-req-search"
+                            class="w-full border border-gray-200 rounded-lg pl-10 pr-4 py-2 text-sm focus:border-obelisco-blue outline-none transition"
+                            placeholder="Buscar por título, área o solicitante...">
+                    </div>
+                    <select id="filter-req-status"
+                        class="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:border-obelisco-blue outline-none bg-white transition min-w-[180px]">
+                        <option value="todos">Todos los estados</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="En Proceso">En Proceso</option>
+                        <option value="Completado">Completado</option>
+                        <option value="Rechazado">Rechazado</option>
+                    </select>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead
+                            class="bg-gray-50 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200">
+                            <tr>
+                                <th class="px-6 py-4">Fecha</th>
+                                <th class="px-6 py-4">Solicitante / Área</th>
+                                <th class="px-6 py-4">Producto / Título</th>
+                                <th class="px-6 py-4">Estado</th>
+                                <th class="px-6 py-4 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pedidos-table-body" class="divide-y divide-gray-100 text-sm">
+                            <!-- Se llena dinámicamente -->
+                            <tr>
+                                <td colspan="5" class="px-6 py-16 text-center text-gray-400">
+                                    <div class="flex flex-col items-center">
+                                        <svg class="animate-spin h-8 w-8 text-obelisco-blue mb-4" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                            </path>
+                                        </svg>
+                                        <p class="font-medium">Cargando pedidos de productos estadísticos...</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
     </main>
 
@@ -530,35 +699,55 @@
     <div id="cat-modal" class="fixed inset-0 hidden items-center justify-center z-[100]">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-close="cat"></div>
         <div class="bg-white w-[400px] max-w-[95vw] rounded-xl shadow-2xl relative z-10 flex flex-col">
-            
-            <div class="px-5 py-4 border-b border-obelisco-border flex justify-between items-center bg-gray-50 rounded-t-xl shrink-0">
+
+            <div
+                class="px-5 py-4 border-b border-obelisco-border flex justify-between items-center bg-gray-50 rounded-t-xl shrink-0">
                 <h3 id="cat-modal-title" class="text-lg font-bold">Nueva Categoría</h3>
                 <button data-close="cat" class="text-gray-400 hover:text-gray-600">
-                    <svg class="h-5 w-5 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                    <svg class="h-5 w-5 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clip-rule="evenodd" />
+                    </svg>
                 </button>
             </div>
 
             <form id="cat-form" class="p-5 space-y-4 text-sm">
                 <input type="hidden" id="cat-id">
 
+                <div class="flex items-center space-x-2 mb-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <input type="checkbox" id="field-cat-visible"
+                        class="w-4 h-4 text-obelisco-blue rounded focus:ring-obelisco-blue" checked>
+                    <label for="field-cat-visible" class="font-medium cursor-pointer">Categoría Visible (Se muestra en
+                        el inicio)</label>
+                </div>
+
                 <div>
                     <label class="block font-medium mb-1">Nombre</label>
-                    <input type="text" id="field-cat-name" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue" required placeholder="Ej: Seguridad">
+                    <input type="text" id="field-cat-name"
+                        class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue"
+                        required placeholder="Ej: Seguridad">
                 </div>
 
                 <div>
                     <label class="block font-medium mb-1">Descripción</label>
-                    <textarea id="field-cat-desc" rows="2" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue" placeholder="Breve descripción de la categoría..."></textarea>
+                    <textarea id="field-cat-desc" rows="2"
+                        class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue"
+                        placeholder="Breve descripción de la categoría..."></textarea>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block font-medium mb-1">Elegir Ícono (Emoji/SVG)</label>
-                        <input type="text" id="field-cat-icon" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue" placeholder="Ej: 🛡️">
+                        <input type="text" id="field-cat-icon"
+                            class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue"
+                            placeholder="Ej: 🛡️">
                     </div>
                     <div>
                         <label class="block font-medium mb-1">Grupo Visual</label>
-                        <select id="field-cat-type" class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue bg-white" required>
+                        <select id="field-cat-type"
+                            class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue bg-white"
+                            required>
                             <option value="Categorías">Categorías</option>
                             <option value="Gestores Internos">Gestores Internos</option>
                             <option value="Gestores Externos">Gestores Externos</option>
@@ -570,16 +759,21 @@
                     <div>
                         <label class="block font-medium mb-1">Color Identificativo (Hex)</label>
                         <div class="flex items-center space-x-2">
-                            <input type="color" id="field-cat-color-picker" class="h-9 w-9 p-0 border-0 rounded cursor-pointer" value="#009DE0">
-                            <input type="text" id="field-cat-color" class="flex-grow border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue font-mono text-xs" required placeholder="#009DE0" value="#009DE0">
+                            <input type="color" id="field-cat-color-picker"
+                                class="h-9 w-9 p-0 border-0 rounded cursor-pointer" value="#009DE0">
+                            <input type="text" id="field-cat-color"
+                                class="flex-grow border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue font-mono text-xs"
+                                required placeholder="#009DE0" value="#009DE0">
                         </div>
                     </div>
                 </div>
             </form>
 
             <div class="px-5 py-3 border-t border-obelisco-border bg-gray-50 flex justify-end space-x-2 rounded-b-xl">
-                <button type="button" data-close="cat" class="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded transition font-medium text-sm">Cancelar</button>
-                <button type="submit" form="cat-form" id="save-cat-btn" class="px-4 py-2 bg-obelisco-blue hover:bg-blue-700 text-white rounded shadow-sm transition font-medium flex items-center text-sm">
+                <button type="button" data-close="cat"
+                    class="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded transition font-medium text-sm">Cancelar</button>
+                <button type="submit" form="cat-form" id="save-cat-btn"
+                    class="px-4 py-2 bg-obelisco-blue hover:bg-blue-700 text-white rounded shadow-sm transition font-medium flex items-center text-sm">
                     Guardar
                 </button>
             </div>
@@ -590,4 +784,5 @@
     <script type="module" src="firebase-config.js"></script>
     <script type="module" src="admin.js"></script>
 </body>
+
 </html>
