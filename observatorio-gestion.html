@@ -72,20 +72,24 @@
                     </svg>
                     <span class="font-medium">Buscar</span>
                 </button>
-                
+
                 <!-- Authentication UI -->
                 <div id="auth-section" class="flex items-center space-x-3 ml-4 border-l pl-4 border-gray-300">
-                    <button id="login-btn" class="flex items-center space-x-2 bg-obelisco-yellow hover:bg-obelisco-yellowHover text-white font-medium rounded-lg px-4 py-2 transition shadow-sm">
+                    <button id="login-btn"
+                        class="flex items-center space-x-2 bg-obelisco-yellow hover:bg-obelisco-yellowHover text-white font-medium rounded-lg px-4 py-2 transition shadow-sm">
                         <svg class="w-5 h-5 mr-1" viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
+                            <path fill="currentColor"
+                                d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
                         </svg>
                         <span>Iniciar Sesión</span>
                     </button>
 
                     <div class="flex items-center space-x-3">
-                        <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full hidden border border-gray-200 object-cover">
+                        <img id="user-avatar" src="" alt="Avatar"
+                            class="w-10 h-10 rounded-full hidden border border-gray-200 object-cover">
                         <span id="user-name" class="font-medium text-sm text-obelisco-dark hidden"></span>
-                        <button id="logout-btn" class="text-sm text-obelisco-gray hover:text-red-500 font-medium hidden underline ml-2 transition-colors">
+                        <button id="logout-btn"
+                            class="text-sm text-obelisco-gray hover:text-red-500 font-medium hidden underline ml-2 transition-colors">
                             Salir
                         </button>
                     </div>
@@ -130,7 +134,7 @@
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
             <!-- Resumen de impacto -->
-            <div class="mb-12">
+            <div class="mb-12 hidden">
                 <div class="flex flex-col md:flex-row md:items-end justify-between mb-8">
                     <div>
                         <h2 class="text-2xl font-bold text-obelisco-dark">Indicadores clave de desempeño de la
@@ -222,16 +226,23 @@
                 </div>
 
                 <!-- Group Filters (Hidden until login) -->
-                <div id="dashboard-filters" class="hidden mb-10 flex flex-col md:flex-row gap-4 bg-gray-100 p-2 rounded-2xl">
-                    <button class="filter-btn flex-1 bg-transparent hover:bg-gray-200 text-gray-600 font-semibold text-lg px-6 py-4 rounded-xl transition flex items-center justify-center space-x-3 border border-transparent" data-group="Categorías">
+                <div id="dashboard-filters"
+                    class="hidden mb-10 flex flex-col md:flex-row gap-4 bg-gray-100 p-2 rounded-2xl">
+                    <button
+                        class="filter-btn flex-1 bg-transparent hover:bg-gray-200 text-gray-600 font-semibold text-lg px-6 py-4 rounded-xl transition flex items-center justify-center space-x-3 border border-transparent"
+                        data-group="Categorías">
                         <span class="text-2xl drop-shadow-sm opacity-80">📁</span>
                         <span>Categorías Temáticas</span>
                     </button>
-                    <button class="filter-btn active-filter flex-1 bg-white text-obelisco-blue border border-gray-200 font-bold text-lg px-6 py-4 rounded-xl shadow-sm transition flex items-center justify-center space-x-3" data-group="Gestores Internos">
+                    <button
+                        class="filter-btn active-filter flex-1 bg-white text-obelisco-blue border border-gray-200 font-bold text-lg px-6 py-4 rounded-xl shadow-sm transition flex items-center justify-center space-x-3"
+                        data-group="Gestores Internos">
                         <span class="text-2xl drop-shadow-sm">🏢</span>
                         <span>Gestores Internos</span>
                     </button>
-                    <button class="filter-btn flex-1 bg-transparent hover:bg-gray-200 text-gray-600 font-semibold text-lg px-6 py-4 rounded-xl transition flex items-center justify-center space-x-3 border border-transparent" data-group="Gestores Externos">
+                    <button
+                        class="filter-btn flex-1 bg-transparent hover:bg-gray-200 text-gray-600 font-semibold text-lg px-6 py-4 rounded-xl transition flex items-center justify-center space-x-3 border border-transparent"
+                        data-group="Gestores Externos">
                         <span class="text-2xl drop-shadow-sm opacity-80">🤝</span>
                         <span>Gestores Externos</span>
                     </button>
@@ -240,14 +251,18 @@
                 <div>
 
                     <!-- Overlay for unauthenticated state -->
-                    <div id="unauth-overlay" class="hidden flex-col items-center justify-center bg-blue-50/95 rounded-2xl border border-blue-100 py-16 shadow-inner mx-4 mb-20 text-center">
+                    <div id="unauth-overlay"
+                        class="hidden flex-col items-center justify-center bg-blue-50/95 rounded-2xl border border-blue-100 py-16 shadow-inner mx-4 mb-20 text-center">
                         <div class="bg-blue-100 p-4 rounded-full mb-4 shadow-sm">
-                            <svg class="w-10 h-10 text-obelisco-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            <svg class="w-10 h-10 text-obelisco-blue" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                         </div>
                         <h3 class="text-2xl font-bold text-obelisco-dark mb-2">Acceso Restringido</h3>
-                        <p class="text-obelisco-gray mb-6 text-center max-w-md px-6">Para visualizar los tableros debés iniciar sesión con tu cuenta institucional de **@riocuarto.gov.ar**</p>
+                        <p class="text-obelisco-gray mb-6 text-center max-w-md px-6">Para visualizar los tableros debés
+                            iniciar sesión con tu cuenta institucional de **@riocuarto.gov.ar**</p>
                     </div>
 
                     <!-- Cuadrícula de Tableros/Categorías -->
@@ -271,7 +286,8 @@
                         <h3 class="text-xl font-bold text-obelisco-dark mb-2">Solicitar Informe Detallado</h3>
                         <p class="text-obelisco-gray mb-4">¿Necesitás un recorte específico de datos para investigación
                             o prensa?</p>
-                        <button id="open-request-modal" class="text-obelisco-blue font-bold hover:underline flex items-center">
+                        <button id="open-request-modal"
+                            class="text-obelisco-blue font-bold hover:underline flex items-center">
                             Llenar formulario de solicitud &rarr;
                         </button>
                     </div>
@@ -436,15 +452,18 @@
                     <span><strong>911</strong> - Policía</span>
                     <span><strong>144</strong> - Violencia de género</span>
                     <span><strong>147</strong> - Atención ciudadana</span>
-                    <a href="#" class="text-obelisco-yellow hover:underline ml-auto block w-full mt-2 md:w-auto md:mt-0">Ver todos los teléfonos</a>
+                    <a href="#"
+                        class="text-obelisco-yellow hover:underline ml-auto block w-full mt-2 md:w-auto md:mt-0">Ver
+                        todos los teléfonos</a>
                 </div>
             </div>
 
-            <div class="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-start md:items-center">
+            <div
+                class="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-start md:items-center">
 
                 <div class="flex flex-col mb-6 md:mb-0 space-y-4">
                     <div class="flex items-center space-x-4">
-                         <!-- Logos Placeholder -->
+                        <!-- Logos Placeholder -->
                     </div>
                 </div>
 
@@ -462,42 +481,58 @@
     <!-- Iframe Modal UI -->
     <div id="ogb-modal" class="fixed inset-0 hidden items-center justify-center z-[99999]" aria-hidden="true">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-ogb-close></div>
-        
-        <div id="ogb-modal-card" class="relative w-[min(96vw,1100px)] h-[min(94vh,820px)] bg-white rounded-xl overflow-hidden shadow-2xl flex flex-col transition-all duration-300">
+
+        <div id="ogb-modal-card"
+            class="relative w-[min(96vw,1100px)] h-[min(94vh,820px)] bg-white rounded-xl overflow-hidden shadow-2xl flex flex-col transition-all duration-300">
             <!-- Modal Header -->
-            <button class="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-full transition" id="ogb-close" data-ogb-close aria-label="Cerrar">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <button
+                class="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-full transition"
+                id="ogb-close" data-ogb-close aria-label="Cerrar">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-            
+
             <div class="flex items-center justify-between p-4 px-6 border-b border-gray-200 shrink-0 bg-gray-50">
                 <h2 id="ogb-heading" class="text-xl font-bold text-obelisco-dark pr-12 truncate">...</h2>
-                <button id="ogb-full" class="p-2 mr-10 hover:bg-gray-200 rounded-md transition text-obelisco-gray" aria-label="Pantalla completa">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+                <button id="ogb-full" class="p-2 mr-10 hover:bg-gray-200 rounded-md transition text-obelisco-gray"
+                    aria-label="Pantalla completa">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
                     </svg>
                 </button>
             </div>
-            
+
             <!-- Iframe Container -->
             <div id="ogb-iframe-wrap" class="flex flex-col h-full min-h-0 overflow-auto bg-gray-100 relative">
                 <!-- Loader inside framing -->
                 <div id="iframe-loader" class="absolute inset-0 flex items-center justify-center bg-white z-0">
-                    <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-obelisco-blue" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-obelisco-blue" xmlns="http://www.w3.org/2000/svg"
+                        fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
                     </svg>
                 </div>
                 <!-- Actual Iframe -->
-                <iframe id="ogb-iframe" class="flex-1 w-full h-full min-h-[500px] border-0 z-10 relative opacity-0 transition-opacity duration-300" allowfullscreen loading="lazy"></iframe>
+                <iframe id="ogb-iframe"
+                    class="flex-1 w-full h-full min-h-[500px] border-0 z-10 relative opacity-0 transition-opacity duration-300"
+                    allowfullscreen loading="lazy"></iframe>
             </div>
-            
+
             <!-- Access Request Form Container -->
             <div id="ogb-form-wrap" class="hidden p-8 flex-col justify-center max-w-lg mx-auto h-full text-center">
-                <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                <div
+                    class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                 </div>
                 <h3 class="text-2xl font-bold text-obelisco-dark mb-2">Acceso Denegado</h3>
@@ -505,30 +540,47 @@
                 <form id="ogb-form" class="space-y-4 text-left">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Usuario solicitante</label>
-                        <input type="text" id="ogb-form-user" class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-500" readonly>
+                        <input type="text" id="ogb-form-user"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-500"
+                            readonly>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Tablero</label>
-                        <input type="text" id="ogb-form-button-name" class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-500" readonly>
+                        <input type="text" id="ogb-form-button-name"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 text-gray-500"
+                            readonly>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Motivo de solicitud <span class="text-red-500">*</span></label>
-                        <textarea id="ogb-form-motivo" rows="2" class="w-full border border-gray-300 outline-none focus:border-obelisco-blue rounded-lg px-4 py-2" required placeholder="Indica brevemente por qué necesitás acceso..."></textarea>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Motivo de solicitud <span
+                                class="text-red-500">*</span></label>
+                        <textarea id="ogb-form-motivo" rows="2"
+                            class="w-full border border-gray-300 outline-none focus:border-obelisco-blue rounded-lg px-4 py-2"
+                            required placeholder="Indica brevemente por qué necesitás acceso..."></textarea>
                     </div>
 
                     <div class="flex items-start space-x-3 py-4 border-t border-gray-100 mt-2">
-                        <input type="checkbox" id="ogb-form-terms" class="mt-1 w-4 h-4 text-obelisco-blue rounded focus:ring-obelisco-blue cursor-pointer" required>
-                        <label for="ogb-form-terms" class="text-xs font-medium text-obelisco-dark cursor-pointer select-none leading-relaxed">
-                            Acepto los <button type="button" id="open-terms-modal" class="text-obelisco-blue font-bold hover:underline underline-offset-2">términos de uso y confidencialidad</button> de los datos.
+                        <input type="checkbox" id="ogb-form-terms"
+                            class="mt-1 w-4 h-4 text-obelisco-blue rounded focus:ring-obelisco-blue cursor-pointer"
+                            required>
+                        <label for="ogb-form-terms"
+                            class="text-xs font-medium text-obelisco-dark cursor-pointer select-none leading-relaxed">
+                            Acepto los <button type="button" id="open-terms-modal"
+                                class="text-obelisco-blue font-bold hover:underline underline-offset-2">términos de uso
+                                y confidencialidad</button> de los datos.
                         </label>
                     </div>
 
-                    <button type="submit" id="ogb-submit-btn" class="w-full bg-obelisco-blue hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg transition" disabled>
+                    <button type="submit" id="ogb-submit-btn"
+                        class="w-full bg-obelisco-blue hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg transition"
+                        disabled>
                         Solicitar Aprobación
                     </button>
                 </form>
-                <div id="ogb-form-ok" class="hidden mt-6 p-4 bg-green-50 text-green-700 rounded-lg flex items-center justify-center font-medium">
-                    <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <div id="ogb-form-ok"
+                    class="hidden mt-6 p-4 bg-green-50 text-green-700 rounded-lg flex items-center justify-center font-medium">
+                    <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
                     Tu solicitud ha sido registrada correctamente.
                 </div>
             </div>
@@ -544,13 +596,19 @@
                 <p>Al solicitar acceso a este tablero, usted reconoce y acepta que:</p>
                 <ul class="list-disc pl-5 space-y-2">
                     <li>La información visualizada es estrictamente para uso laboral y oficial.</li>
-                    <li>Se compromete a mantener la **máxima confidencialidad** de los datos sensibles, prohibiéndose su copia, captura o reproducción no autorizada.</li>
-                    <li>Cualquier divulgación de información a terceros ajenos a la administración municipal será considerada una falta grave.</li>
-                    <li>El acceso es personal e intransferible. El uso de su cuenta por parte de terceros es su responsabilidad.</li>
-                    <li>El incumplimiento de estos términos podrá dar lugar a la revocación inmediata del acceso y a las sanciones administrativas correspondientes según la normativa de la Subsecretaría de Estadística.</li>
+                    <li>Se compromete a mantener la **máxima confidencialidad** de los datos sensibles, prohibiéndose su
+                        copia, captura o reproducción no autorizada.</li>
+                    <li>Cualquier divulgación de información a terceros ajenos a la administración municipal será
+                        considerada una falta grave.</li>
+                    <li>El acceso es personal e intransferible. El uso de su cuenta por parte de terceros es su
+                        responsabilidad.</li>
+                    <li>El incumplimiento de estos términos podrá dar lugar a la revocación inmediata del acceso y a las
+                        sanciones administrativas correspondientes según la normativa de la Subsecretaría de
+                        Estadística.</li>
                 </ul>
             </div>
-            <button type="button" id="close-terms-btn" class="mt-8 w-full bg-obelisco-dark text-white font-bold py-3 rounded-lg hover:bg-gray-800 transition">
+            <button type="button" id="close-terms-btn"
+                class="mt-8 w-full bg-obelisco-dark text-white font-bold py-3 rounded-lg hover:bg-gray-800 transition">
                 Entendido
             </button>
         </div>
@@ -559,22 +617,29 @@
     <!-- Registration Info Modal (Appears for new users or missing info) -->
     <div id="registration-modal" class="fixed inset-0 hidden items-center justify-center z-[100001]" aria-hidden="true">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
-        <div class="relative bg-white w-[600px] max-w-[95vw] rounded-2xl shadow-2xl p-8 flex flex-col max-h-[90vh] overflow-y-auto">
+        <div
+            class="relative bg-white w-[600px] max-w-[95vw] rounded-2xl shadow-2xl p-8 flex flex-col max-h-[90vh] overflow-y-auto">
             <div class="text-center mb-8">
-                <div class="w-16 h-16 bg-blue-50 text-obelisco-blue rounded-full flex items-center justify-center mx-auto mb-4">
+                <div
+                    class="w-16 h-16 bg-blue-50 text-obelisco-blue rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                 </div>
                 <h3 class="text-2xl font-bold text-obelisco-dark">Completá tu perfil</h3>
-                <p class="text-obelisco-gray">Para brindarte una mejor experiencia, necesitamos que nos cuentes un poco más sobre vos.</p>
+                <p class="text-obelisco-gray">Para brindarte una mejor experiencia, necesitamos que nos cuentes un poco
+                    más sobre vos.</p>
             </div>
 
             <form id="registration-form" class="space-y-6">
                 <!-- Tipo de Organización -->
                 <div>
-                    <label class="block text-sm font-bold text-obelisco-dark mb-2">Tipo de organización <span class="text-red-500">*</span></label>
-                    <select id="reg-org-type" class="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-obelisco-blue bg-white" required>
+                    <label class="block text-sm font-bold text-obelisco-dark mb-2">Tipo de organización <span
+                            class="text-red-500">*</span></label>
+                    <select id="reg-org-type"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-obelisco-blue bg-white"
+                        required>
                         <option value="" disabled selected>Seleccioná una opción</option>
                         <option value="Municipalidad">Municipalidad</option>
                         <option value="Gobierno provincial">Gobierno provincial</option>
@@ -582,14 +647,17 @@
                         <option value="Universidad">Universidad</option>
                         <option value="Instituto terciario">Instituto terciario</option>
                         <option value="Escuela (primaria o secundaria)">Escuela (primaria o secundaria)</option>
-                        <option value="Organización de la sociedad civil / ONG">Organización de la sociedad civil / ONG</option>
+                        <option value="Organización de la sociedad civil / ONG">Organización de la sociedad civil / ONG
+                        </option>
                         <option value="Empresa / Industria privada">Empresa / Industria privada</option>
                         <option value="Cámara empresarial / Gremial">Cámara empresarial / Gremial</option>
                         <option value="Centro de investigación">Centro de investigación</option>
                         <option value="Colegio profesional">Colegio profesional</option>
-                        <option value="Sindicato / Asociación de trabajadores">Sindicato / Asociación de trabajadores</option>
+                        <option value="Sindicato / Asociación de trabajadores">Sindicato / Asociación de trabajadores
+                        </option>
                         <option value="Medios de comunicación">Medios de comunicación</option>
-                        <option value="Consultora o profesional independiente">Consultora o profesional independiente</option>
+                        <option value="Consultora o profesional independiente">Consultora o profesional independiente
+                        </option>
                         <option value="Particular sin afiliación">Particular sin afiliación</option>
                         <option value="Otra">Otra</option>
                     </select>
@@ -597,16 +665,23 @@
 
                 <!-- Nombre de la Organización -->
                 <div>
-                    <label class="block text-sm font-bold text-obelisco-dark mb-2">Nombre de la organización <span class="text-red-500">*</span></label>
-                    <input type="text" id="reg-org-name" class="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-obelisco-blue" placeholder="Ej: Municipalidad de Río Cuarto" required>
+                    <label class="block text-sm font-bold text-obelisco-dark mb-2">Nombre de la organización <span
+                            class="text-red-500">*</span></label>
+                    <input type="text" id="reg-org-name"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-obelisco-blue"
+                        placeholder="Ej: Municipalidad de Río Cuarto" required>
                 </div>
 
                 <!-- Rol en la Organización -->
                 <div>
-                    <label class="block text-sm font-bold text-obelisco-dark mb-2">Rol en la organización <span class="text-red-500">*</span></label>
-                    <select id="reg-org-role" class="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-obelisco-blue bg-white" required>
+                    <label class="block text-sm font-bold text-obelisco-dark mb-2">Rol en la organización <span
+                            class="text-red-500">*</span></label>
+                    <select id="reg-org-role"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-obelisco-blue bg-white"
+                        required>
                         <option value="" disabled selected>Seleccioná tu rol</option>
-                        <option value="Autoridad / Funcionario (Intendente, Secretario/a, Director/a)">Autoridad / Funcionario (Intendente, Secretario/a, Director/a)</option>
+                        <option value="Autoridad / Funcionario (Intendente, Secretario/a, Director/a)">Autoridad /
+                            Funcionario (Intendente, Secretario/a, Director/a)</option>
                         <option value="Jefe/a de área / Coordinador/a">Jefe/a de área / Coordinador/a</option>
                         <option value="Técnico/a / Profesional">Técnico/a / Profesional</option>
                         <option value="Investigador/a">Investigador/a</option>
@@ -625,7 +700,8 @@
                     </select>
                 </div>
 
-                <button type="submit" class="w-full bg-obelisco-blue hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform hover:-translate-y-0.5">
+                <button type="submit"
+                    class="w-full bg-obelisco-blue hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform hover:-translate-y-0.5">
                     Guardar y Continuar
                 </button>
             </form>
@@ -649,52 +725,70 @@
     <!-- Modal de Solicitud de Producto Estadístico -->
     <div id="request-modal" class="fixed inset-0 hidden items-center justify-center z-[200] p-4 sm:p-6 overflow-y-auto">
         <div class="absolute inset-0 bg-obelisco-dark/60 backdrop-blur-sm" id="close-request-bg"></div>
-        <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl relative z-10 flex flex-col max-h-[90vh] overflow-hidden">
-            
+        <div
+            class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl relative z-10 flex flex-col max-h-[90vh] overflow-hidden">
+
             <!-- Header Modal -->
-            <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
+            <div
+                class="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
                 <div>
                     <h3 class="text-2xl font-black text-obelisco-dark">Solicitud de Producto Estadístico</h3>
-                    <p class="text-obelisco-gray text-xs font-bold uppercase tracking-widest mt-1">Formulario de Requerimiento Técnico</p>
+                    <p class="text-obelisco-gray text-xs font-bold uppercase tracking-widest mt-1">Formulario de
+                        Requerimiento Técnico</p>
                 </div>
                 <button id="close-request-btn" class="text-gray-400 hover:text-gray-600 transition">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
             </div>
 
             <!-- Progress Bar -->
             <div class="bg-gray-100 h-1.5 flex w-full">
-                <div id="request-progress" class="bg-obelisco-blue h-full transition-all duration-500" style="width: 33.33%;"></div>
+                <div id="request-progress" class="bg-obelisco-blue h-full transition-all duration-500"
+                    style="width: 33.33%;"></div>
             </div>
 
             <!-- Form Content -->
             <form id="statistical-request-form" class="flex-grow overflow-y-auto p-8 lg:p-12 space-y-8 scroll-smooth">
-                
+
                 <!-- STEP 1: Información del Cliente -->
                 <div id="step-1" class="request-step space-y-6">
                     <div class="border-b border-gray-100 pb-4 mb-6">
-                        <span class="text-xs font-bold text-obelisco-blue bg-blue-50 px-2 py-1 rounded mb-2 inline-block">PASO 1 DE 3</span>
+                        <span
+                            class="text-xs font-bold text-obelisco-blue bg-blue-50 px-2 py-1 rounded mb-2 inline-block">PASO
+                            1 DE 3</span>
                         <h4 class="text-xl font-bold">Información del Solicitante</h4>
-                        <div id="request-error-msg" class="hidden mt-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg animate-pulse">
+                        <div id="request-error-msg"
+                            class="hidden mt-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg animate-pulse">
                             <!-- Error message will be injected here -->
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block font-bold mb-1 text-sm">01. Nombre y Apellido*</label>
-                            <input type="text" name="clientName" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition bg-white" placeholder="Tu nombre completo" required>
+                            <input type="text" name="clientName"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition bg-white"
+                                placeholder="Tu nombre completo" required>
                         </div>
                         <div>
                             <label class="block font-bold mb-1 text-sm">04. Correo electrónico*</label>
-                            <input type="email" name="clientEmail" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition bg-white" placeholder="tu@correo.gob.ar" required>
+                            <input type="email" name="clientEmail"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition bg-white"
+                                placeholder="tu@correo.gob.ar" required>
                         </div>
                         <div>
                             <label class="block font-bold mb-1 text-sm">05. Teléfono de contacto*</label>
-                            <input type="tel" name="clientPhone" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition bg-white" placeholder="Ej: 358 1234567" required>
+                            <input type="tel" name="clientPhone"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition bg-white"
+                                placeholder="Ej: 358 1234567" required>
                         </div>
                         <div>
                             <label class="block font-bold mb-1 text-sm">03. Cargo*</label>
-                            <select name="clientPosition" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition bg-white" required>
+                            <select name="clientPosition"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition bg-white"
+                                required>
                                 <option value="" disabled selected>Seleccioná tu cargo</option>
                                 <option value="Intendente">Intendente</option>
                                 <option value="Secretario">Secretario</option>
@@ -708,33 +802,85 @@
                     </div>
 
                     <div>
-                        <label class="block font-bold mb-3 text-sm">02. Indique la Jurisdicción/Poder que Inicia el Pedido:*</label>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 bg-gray-50 p-4 rounded-xl border border-gray-100">
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="jurisdiction" value="Gobierno y Relaciones Comunitarias" class="rounded text-obelisco-blue"> <span>Gobierno y Relaciones Com.</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="jurisdiction" value="Gestión y Participación Ciudadana" class="rounded text-obelisco-blue"> <span>Gestión y Participación</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="jurisdiction" value="Obras y Servicios Públicos" class="rounded text-obelisco-blue"> <span>Obras y Serv. Públicos</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="jurisdiction" value="Prevención y Convivencia Ciudadana" class="rounded text-obelisco-blue"> <span>Prevención y Convivencia</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="jurisdiction" value="Economía e Innovación" class="rounded text-obelisco-blue"> <span>Economía e Innovación</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="jurisdiction" value="Deporte y Turismo" class="rounded text-obelisco-blue"> <span>Deporte y Turismo</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="jurisdiction" value="Desarrollo Económico" class="rounded text-obelisco-blue"> <span>Desarrollo Económico</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="jurisdiction" value="Desarrollo Humano" class="rounded text-obelisco-blue"> <span>Desarrollo Humano</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="jurisdiction" value="Trabajo y Empleo" class="rounded text-obelisco-blue"> <span>Trabajo y Empleo</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="jurisdiction" value="Salud" class="rounded text-obelisco-blue"> <span>Salud</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="jurisdiction" value="Concejo Deliberante" class="rounded text-obelisco-blue"> <span>Concejo Deliberante</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="jurisdiction" value="Tribunal de Cuentas" class="rounded text-obelisco-blue"> <span>Tribunal de Cuentas</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="jurisdiction" value="Defensoría del Pueblo" class="rounded text-obelisco-blue"> <span>Defensoría del Pueblo</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="jurisdiction" value="Ente Municipal de Obras Sanitarias (EMOS)" class="rounded text-obelisco-blue"> <span>E.M.O.S.</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition col-span-full border-t border-gray-100 pt-2 mt-1">
-                                <input type="checkbox" name="jurisdiction" value="Otro" class="rounded text-obelisco-blue"> 
+                        <label class="block font-bold mb-3 text-sm">02. Indique la Jurisdicción/Poder que Inicia el
+                            Pedido:*</label>
+                        <div
+                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="jurisdiction" value="Gobierno y Relaciones Comunitarias"
+                                    class="rounded text-obelisco-blue"> <span>Gobierno y Relaciones Com.</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="jurisdiction" value="Gestión y Participación Ciudadana"
+                                    class="rounded text-obelisco-blue"> <span>Gestión y Participación</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="jurisdiction" value="Obras y Servicios Públicos"
+                                    class="rounded text-obelisco-blue"> <span>Obras y Serv. Públicos</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="jurisdiction" value="Prevención y Convivencia Ciudadana"
+                                    class="rounded text-obelisco-blue"> <span>Prevención y Convivencia</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="jurisdiction" value="Economía e Innovación"
+                                    class="rounded text-obelisco-blue"> <span>Economía e Innovación</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="jurisdiction" value="Deporte y Turismo"
+                                    class="rounded text-obelisco-blue"> <span>Deporte y Turismo</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="jurisdiction" value="Desarrollo Económico"
+                                    class="rounded text-obelisco-blue"> <span>Desarrollo Económico</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="jurisdiction" value="Desarrollo Humano"
+                                    class="rounded text-obelisco-blue"> <span>Desarrollo Humano</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="jurisdiction" value="Trabajo y Empleo"
+                                    class="rounded text-obelisco-blue"> <span>Trabajo y Empleo</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="jurisdiction" value="Salud"
+                                    class="rounded text-obelisco-blue"> <span>Salud</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="jurisdiction" value="Concejo Deliberante"
+                                    class="rounded text-obelisco-blue"> <span>Concejo Deliberante</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="jurisdiction" value="Tribunal de Cuentas"
+                                    class="rounded text-obelisco-blue"> <span>Tribunal de Cuentas</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="jurisdiction" value="Defensoría del Pueblo"
+                                    class="rounded text-obelisco-blue"> <span>Defensoría del Pueblo</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="jurisdiction"
+                                    value="Ente Municipal de Obras Sanitarias (EMOS)"
+                                    class="rounded text-obelisco-blue"> <span>E.M.O.S.</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition col-span-full border-t border-gray-100 pt-2 mt-1">
+                                <input type="checkbox" name="jurisdiction" value="Otro"
+                                    class="rounded text-obelisco-blue">
                                 <span>Otros:</span>
-                                <input type="text" name="jurisdiction_other" class="flex-grow border-b border-gray-300 text-[10px] outline-none focus:border-obelisco-blue ml-2 bg-transparent" placeholder="Especifique...">
+                                <input type="text" name="jurisdiction_other"
+                                    class="flex-grow border-b border-gray-300 text-[10px] outline-none focus:border-obelisco-blue ml-2 bg-transparent"
+                                    placeholder="Especifique...">
                             </label>
                         </div>
                     </div>
 
                     <div>
-                        <label class="block font-bold mb-2 text-sm">02.1. Indique el área de acuerdo a las Selección en 02*</label>
-                        <select name="clientArea" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition bg-white" required>
+                        <label class="block font-bold mb-2 text-sm">02.1. Indique el área de acuerdo a las Selección en
+                            02*</label>
+                        <select name="clientArea"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition bg-white"
+                            required>
                             <option value="" disabled selected>Seleccioná el área</option>
                             <option value="1. Gobierno">1. Gobierno</option>
                             <option value="2. Cultura">2. Cultura</option>
@@ -742,20 +888,23 @@
                             <option value="4. Desarrollo Estratégico">4. Desarrollo Estratégico</option>
                             <option value="5. Estadística">5. Estadística</option>
                             <option value="6. Servicios Públicos">6. Servicios Públicos</option>
-                            <option value="7. Planificación y Movilidad Urbana">7. Planificación y Movilidad Urbana</option>
+                            <option value="7. Planificación y Movilidad Urbana">7. Planificación y Movilidad Urbana
+                            </option>
                             <option value="8. Obras Públicas">8. Obras Públicas</option>
                             <option value="9. Hábitat">9. Hábitat</option>
                             <option value="10. Ambiente">10. Ambiente</option>
                             <option value="11. Seguridad">11. Seguridad</option>
                             <option value="12. Tránsito y Transporte">12. Tránsito y Transporte</option>
                             <option value="13. Comunicación y Prensa">13. Comunicación y Prensa</option>
-                            <option value="14. Hacienda y Gestión Tecnológica">14. Hacienda y Gestión Tecnológica</option>
+                            <option value="14. Hacienda y Gestión Tecnológica">14. Hacienda y Gestión Tecnológica
+                            </option>
                             <option value="15. Innovación y Tecnología">15. Innovación y Tecnología</option>
                             <option value="16. Turismo">16. Turismo</option>
                             <option value="17. Deporte">17. Deporte</option>
                             <option value="18. Desarrollo Económico">18. Desarrollo Económico</option>
                             <option value="19. Niñez, Adolescencia y Familia">19. Niñez, Adolescencia y Familia</option>
-                            <option value="20. Género, Diversidad y Discapacidad">20. Género, Diversidad y Discapacidad</option>
+                            <option value="20. Género, Diversidad y Discapacidad">20. Género, Diversidad y Discapacidad
+                            </option>
                             <option value="21. Educación y Derechos Humanos">21. Educación y Derechos Humanos</option>
                             <option value="22. Empleo">22. Empleo</option>
                             <option value="23. Salud">23. Salud</option>
@@ -767,42 +916,101 @@
                 <!-- STEP 2: Detalle de la Solicitud -->
                 <div id="step-2" class="request-step hidden space-y-6">
                     <div class="border-b border-gray-100 pb-4 mb-6">
-                        <span class="text-xs font-bold text-obelisco-blue bg-blue-50 px-2 py-1 rounded mb-2 inline-block">PASO 2 DE 3</span>
+                        <span
+                            class="text-xs font-bold text-obelisco-blue bg-blue-50 px-2 py-1 rounded mb-2 inline-block">PASO
+                            2 DE 3</span>
                         <h4 class="text-xl font-bold">Solicitud de Producto Estadístico</h4>
                     </div>
 
                     <div>
-                        <label class="block font-bold mb-3 text-sm">03. Indique el Producto Estadístico a Requerir *</label>
-                        <p class="text-[10px] text-gray-400 mb-2 uppercase tracking-widest font-black">Seleccione una o más opciones</p>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-gray-50 p-4 rounded-xl border border-gray-100">
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="productType" value="Solicitud de datos estadísticos específicos" class="rounded text-obelisco-blue"> <span>Solicitud de datos estadísticos específicos</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="productType" value="Solicitud de informe o presentación" class="rounded text-obelisco-blue"> <span>Solicitud de informe o presentación</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="productType" value="Solicitud de mapas y mapeos" class="rounded text-obelisco-blue"> <span>Solicitud de mapas y mapeos</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="productType" value="Solicitud de análisis de datos" class="rounded text-obelisco-blue"> <span>Solicitud de análisis de datos</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="productType" value="Solicitud de padrones" class="rounded text-obelisco-blue"> <span>Solicitud de padrones</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="productType" value="Solicitud de diagnóstico previo a implementación de programa/política públicas" class="rounded text-obelisco-blue"> <span>Solicitud de diagnóstico previo</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="productType" value="Solicitud de análisis de impacto de programa/política pública" class="rounded text-obelisco-blue"> <span>Solicitud de análisis de impacto</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="productType" value="Solicitud de seguimiento de programa/política pública" class="rounded text-obelisco-blue"> <span>Solicitud de seguimiento</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="productType" value="Solicitud de visualización de datos en tablero" class="rounded text-obelisco-blue"> <span>Solicitud de visualización en tablero</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="productType" value="Solicitud de encuestas o relevamientos" class="rounded text-obelisco-blue"> <span>Solicitud de encuestas o relevamientos</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="productType" value="Solicitud de capacitación o talleres" class="rounded text-obelisco-blue"> <span>Solicitud de capacitación o talleres</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition col-span-full border-t border-gray-100 pt-2 mt-1">
-                                <input type="checkbox" name="productType" value="Otra" class="rounded text-obelisco-blue"> 
+                        <label class="block font-bold mb-3 text-sm">03. Indique el Producto Estadístico a Requerir
+                            *</label>
+                        <p class="text-[10px] text-gray-400 mb-2 uppercase tracking-widest font-black">Seleccione una o
+                            más opciones</p>
+                        <div
+                            class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="productType"
+                                    value="Solicitud de datos estadísticos específicos"
+                                    class="rounded text-obelisco-blue"> <span>Solicitud de datos estadísticos
+                                    específicos</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="productType" value="Solicitud de informe o presentación"
+                                    class="rounded text-obelisco-blue"> <span>Solicitud de informe o
+                                    presentación</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="productType" value="Solicitud de mapas y mapeos"
+                                    class="rounded text-obelisco-blue"> <span>Solicitud de mapas y mapeos</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="productType" value="Solicitud de análisis de datos"
+                                    class="rounded text-obelisco-blue"> <span>Solicitud de análisis de
+                                    datos</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="productType" value="Solicitud de padrones"
+                                    class="rounded text-obelisco-blue"> <span>Solicitud de padrones</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="productType"
+                                    value="Solicitud de diagnóstico previo a implementación de programa/política públicas"
+                                    class="rounded text-obelisco-blue"> <span>Solicitud de diagnóstico
+                                    previo</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="productType"
+                                    value="Solicitud de análisis de impacto de programa/política pública"
+                                    class="rounded text-obelisco-blue"> <span>Solicitud de análisis de
+                                    impacto</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="productType"
+                                    value="Solicitud de seguimiento de programa/política pública"
+                                    class="rounded text-obelisco-blue"> <span>Solicitud de seguimiento</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="productType"
+                                    value="Solicitud de visualización de datos en tablero"
+                                    class="rounded text-obelisco-blue"> <span>Solicitud de visualización en
+                                    tablero</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="productType" value="Solicitud de encuestas o relevamientos"
+                                    class="rounded text-obelisco-blue"> <span>Solicitud de encuestas o
+                                    relevamientos</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="productType" value="Solicitud de capacitación o talleres"
+                                    class="rounded text-obelisco-blue"> <span>Solicitud de capacitación o
+                                    talleres</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition col-span-full border-t border-gray-100 pt-2 mt-1">
+                                <input type="checkbox" name="productType" value="Otra"
+                                    class="rounded text-obelisco-blue">
                                 <span>Otra:</span>
-                                <input type="text" name="productType_other" class="flex-grow border-b border-gray-300 text-[10px] outline-none focus:border-obelisco-blue ml-2 bg-transparent" placeholder="Especifique...">
+                                <input type="text" name="productType_other"
+                                    class="flex-grow border-b border-gray-300 text-[10px] outline-none focus:border-obelisco-blue ml-2 bg-transparent"
+                                    placeholder="Especifique...">
                             </label>
                         </div>
                     </div>
 
                     <div>
                         <label class="block font-bold mb-2 text-sm">04. Título o asunto*</label>
-                        <input type="text" name="requestTitle" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition" required placeholder='Ej: "Análisis de vacunación 2025"'>
+                        <input type="text" name="requestTitle"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition"
+                            required placeholder='Ej: "Análisis de vacunación 2025"'>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block font-bold mb-2 text-sm">Periodicidad*</label>
-                            <select name="periodicity" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition bg-white" required>
+                            <select name="periodicity"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition bg-white"
+                                required>
                                 <option value="Singular">Singular (Una vez)</option>
                                 <option value="Mensual">Mensual</option>
                                 <option value="Trimestral">Trimestral</option>
@@ -811,85 +1019,150 @@
                         </div>
                         <div>
                             <label class="block font-bold mb-2 text-sm">05. Fecha límite estimada*</label>
-                            <input type="date" name="dueDate" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition" required>
+                            <input type="date" name="dueDate"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition"
+                                required>
                         </div>
                     </div>
 
                     <div>
                         <label class="block font-bold mb-2 text-sm">04.01. Descripción detallada*</label>
-                        <textarea name="description" rows="4" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition" required placeholder="Describí los datos o el análisis que necesitás..."></textarea>
+                        <textarea name="description" rows="4"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition"
+                            required placeholder="Describí los datos o el análisis que necesitás..."></textarea>
                     </div>
                 </div>
 
                 <!-- STEP 3: Entrega y Prioridad -->
                 <div id="step-3" class="request-step hidden space-y-6">
                     <div class="border-b border-gray-100 pb-4 mb-6">
-                        <span class="text-xs font-bold text-obelisco-blue bg-blue-50 px-2 py-1 rounded mb-2 inline-block">PASO 3 DE 3</span>
+                        <span
+                            class="text-xs font-bold text-obelisco-blue bg-blue-50 px-2 py-1 rounded mb-2 inline-block">PASO
+                            3 DE 3</span>
                         <h4 class="text-xl font-bold">Entrega y Prioridad</h4>
                     </div>
 
                     <div>
                         <label class="block font-bold mb-3 text-sm">06. Formato deseado de entrega *</label>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 bg-gray-50 p-4 rounded-xl border border-gray-100">
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="format" value="Google Sheets (.gsheet)" class="rounded text-obelisco-blue"> <span>Google Sheets</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="format" value="Microsoft Excel (.xlsx)" class="rounded text-obelisco-blue"> <span>Microsoft Excel</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="format" value="Google Docs (.gdoc)" class="rounded text-obelisco-blue"> <span>Google Docs</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="format" value="Microsoft Word (.docx)" class="rounded text-obelisco-blue"> <span>Microsoft Word</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="format" value="Documento (.pdf)" class="rounded text-obelisco-blue"> <span>Documento (.pdf)</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="format" value="Google Slides (.gslides)" class="rounded text-obelisco-blue"> <span>Google Slides</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="format" value="Microsoft PowerPoint (.pptx)" class="rounded text-obelisco-blue"> <span>MS PowerPoint</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="format" value="Microsoft Power BI (.pbix)" class="rounded text-obelisco-blue"> <span>MS Power BI</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input type="checkbox" name="format" value="Apache Superset (.)" class="rounded text-obelisco-blue"> <span>Apache Superset</span></label>
-                            <label class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition col-span-full border-t border-gray-100 pt-2 mt-1">
-                                <input type="checkbox" name="format" value="Otro" class="rounded text-obelisco-blue"> 
+                        <div
+                            class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="format" value="Google Sheets (.gsheet)"
+                                    class="rounded text-obelisco-blue"> <span>Google Sheets</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="format" value="Microsoft Excel (.xlsx)"
+                                    class="rounded text-obelisco-blue"> <span>Microsoft Excel</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="format" value="Google Docs (.gdoc)"
+                                    class="rounded text-obelisco-blue"> <span>Google Docs</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="format" value="Microsoft Word (.docx)"
+                                    class="rounded text-obelisco-blue"> <span>Microsoft Word</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="format" value="Documento (.pdf)"
+                                    class="rounded text-obelisco-blue"> <span>Documento (.pdf)</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="format" value="Google Slides (.gslides)"
+                                    class="rounded text-obelisco-blue"> <span>Google Slides</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="format" value="Microsoft PowerPoint (.pptx)"
+                                    class="rounded text-obelisco-blue"> <span>MS PowerPoint</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="format" value="Microsoft Power BI (.pbix)"
+                                    class="rounded text-obelisco-blue"> <span>MS Power BI</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition"><input
+                                    type="checkbox" name="format" value="Apache Superset (.)"
+                                    class="rounded text-obelisco-blue"> <span>Apache Superset</span></label>
+                            <label
+                                class="flex items-center space-x-2 text-[11px] font-medium cursor-pointer hover:text-obelisco-blue transition col-span-full border-t border-gray-100 pt-2 mt-1">
+                                <input type="checkbox" name="format" value="Otro" class="rounded text-obelisco-blue">
                                 <span>Otro:</span>
-                                <input type="text" name="format_other" class="flex-grow border-b border-gray-300 text-[10px] outline-none focus:border-obelisco-blue ml-2 bg-transparent" placeholder="Especifique...">
+                                <input type="text" name="format_other"
+                                    class="flex-grow border-b border-gray-300 text-[10px] outline-none focus:border-obelisco-blue ml-2 bg-transparent"
+                                    placeholder="Especifique...">
                             </label>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 gap-6">
                         <div>
-                            <label class="block font-bold mb-2 text-sm">08. ¿Existe un equipo o contacto técnico asignado al proyecto en su área?*</label>
+                            <label class="block font-bold mb-2 text-sm">08. ¿Existe un equipo o contacto técnico
+                                asignado al proyecto en su área?*</label>
                             <div class="flex items-center space-x-4 h-12">
                                 <label class="flex-1 cursor-pointer group">
-                                    <input type="radio" name="hasTechContact" value="si" class="hidden peer" required onchange="document.getElementById('tech-contact-fields').classList.remove('hidden')">
-                                    <span class="block w-full text-center py-2 border rounded-lg peer-checked:bg-green-50 peer-checked:border-green-500 group-hover:bg-gray-50 transition text-sm">Sí</span>
+                                    <input type="radio" name="hasTechContact" value="si" class="hidden peer" required
+                                        onchange="document.getElementById('tech-contact-fields').classList.remove('hidden')">
+                                    <span
+                                        class="block w-full text-center py-2 border rounded-lg peer-checked:bg-green-50 peer-checked:border-green-500 group-hover:bg-gray-50 transition text-sm">Sí</span>
                                 </label>
                                 <label class="flex-1 cursor-pointer group">
-                                    <input type="radio" name="hasTechContact" value="no" class="hidden peer" onchange="document.getElementById('tech-contact-fields').classList.add('hidden')">
-                                    <span class="block w-full text-center py-2 border rounded-lg peer-checked:bg-red-50 peer-checked:border-red-500 group-hover:bg-gray-50 transition text-sm">No</span>
+                                    <input type="radio" name="hasTechContact" value="no" class="hidden peer"
+                                        onchange="document.getElementById('tech-contact-fields').classList.add('hidden')">
+                                    <span
+                                        class="block w-full text-center py-2 border rounded-lg peer-checked:bg-red-50 peer-checked:border-red-500 group-hover:bg-gray-50 transition text-sm">No</span>
                                 </label>
                             </div>
                         </div>
 
                         <!-- Campos condicionales Contacto Técnico -->
-                        <div id="tech-contact-fields" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <div id="tech-contact-fields"
+                            class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
                             <div>
-                                <label class="block font-bold mb-1 text-[10px] uppercase tracking-wider text-gray-500">08.1. Nombre y apellido</label>
-                                <input type="text" name="techContactName" class="w-full border border-gray-300 rounded px-3 py-1.5 text-xs outline-none focus:border-obelisco-blue" placeholder="Responsable">
+                                <label
+                                    class="block font-bold mb-1 text-[10px] uppercase tracking-wider text-gray-500">08.1.
+                                    Nombre y apellido</label>
+                                <input type="text" name="techContactName"
+                                    class="w-full border border-gray-300 rounded px-3 py-1.5 text-xs outline-none focus:border-obelisco-blue"
+                                    placeholder="Responsable">
                             </div>
                             <div>
-                                <label class="block font-bold mb-1 text-[10px] uppercase tracking-wider text-gray-500">08.2. Correo electrónico</label>
-                                <input type="email" name="techContactEmail" class="w-full border border-gray-300 rounded px-3 py-1.5 text-xs outline-none focus:border-obelisco-blue" placeholder="correo@ejemplo.com">
+                                <label
+                                    class="block font-bold mb-1 text-[10px] uppercase tracking-wider text-gray-500">08.2.
+                                    Correo electrónico</label>
+                                <input type="email" name="techContactEmail"
+                                    class="w-full border border-gray-300 rounded px-3 py-1.5 text-xs outline-none focus:border-obelisco-blue"
+                                    placeholder="correo@ejemplo.com">
                             </div>
                             <div>
-                                <label class="block font-bold mb-1 text-[10px] uppercase tracking-wider text-gray-500">08.3. Teléfono</label>
-                                <input type="tel" name="techContactPhone" class="w-full border border-gray-300 rounded px-3 py-1.5 text-xs outline-none focus:border-obelisco-blue" placeholder="Contacto">
+                                <label
+                                    class="block font-bold mb-1 text-[10px] uppercase tracking-wider text-gray-500">08.3.
+                                    Teléfono</label>
+                                <input type="tel" name="techContactPhone"
+                                    class="w-full border border-gray-300 rounded px-3 py-1.5 text-xs outline-none focus:border-obelisco-blue"
+                                    placeholder="Contacto">
                             </div>
                         </div>
 
                         <div>
-                            <label class="block font-bold mb-2 text-sm text-gray-400 italic">11. Información adicional que considere relevante a los efectos aclaratorios</label>
-                            <textarea name="additionalInfo" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition" placeholder="Cualquier dato extra..."></textarea>
+                            <label class="block font-bold mb-2 text-sm text-gray-400 italic">11. Información adicional
+                                que considere relevante a los efectos aclaratorios</label>
+                            <textarea name="additionalInfo" rows="3"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition"
+                                placeholder="Cualquier dato extra..."></textarea>
                         </div>
 
                         <div>
-                            <label class="block font-bold mb-2 text-sm">12. Incorpore el/los archivo/s de datos que considere aportan a esta solicitud</label>
-                            <div class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-obelisco-blue transition cursor-pointer bg-gray-50/50 group relative">
-                                <input type="file" name="attachment" multiple class="absolute inset-0 opacity-0 cursor-pointer" id="request-file-input">
+                            <label class="block font-bold mb-2 text-sm">12. Incorpore el/los archivo/s de datos que
+                                considere aportan a esta solicitud</label>
+                            <div
+                                class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-obelisco-blue transition cursor-pointer bg-gray-50/50 group relative">
+                                <input type="file" name="attachment" multiple
+                                    class="absolute inset-0 opacity-0 cursor-pointer" id="request-file-input">
                                 <div>
-                                    <svg class="w-8 h-8 mx-auto text-gray-300 mb-2 group-hover:text-obelisco-blue transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                    <svg class="w-8 h-8 mx-auto text-gray-300 mb-2 group-hover:text-obelisco-blue transition"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
                                     <p class="text-xs text-gray-500">Hacé clic o arrastrá archivos aquí</p>
                                     <p class="text-[9px] text-gray-400 mt-1">Soporte para múltiples archivos</p>
                                 </div>
@@ -902,14 +1175,17 @@
 
             <!-- Footer Modal -->
             <div class="px-8 py-6 border-t border-gray-100 bg-gray-50/50 flex justify-between rounded-b-2xl">
-                <button id="prev-step" class="hidden px-6 py-2.5 text-obelisco-gray hover:text-obelisco-dark font-bold transition flex items-center">
+                <button id="prev-step"
+                    class="hidden px-6 py-2.5 text-obelisco-gray hover:text-obelisco-dark font-bold transition flex items-center">
                     &larr; Anterior
                 </button>
                 <div class="flex-grow"></div>
-                <button id="next-step" class="px-8 py-2.5 bg-obelisco-blue hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition">
+                <button id="next-step"
+                    class="px-8 py-2.5 bg-obelisco-blue hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition">
                     Siguiente &rarr;
                 </button>
-                <button id="submit-request" class="hidden px-8 py-2.5 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg shadow-sm transition">
+                <button id="submit-request"
+                    class="hidden px-8 py-2.5 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg shadow-sm transition">
                     Enviar Solicitud
                 </button>
             </div>
