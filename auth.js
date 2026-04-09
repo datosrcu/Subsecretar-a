@@ -1,5 +1,4 @@
-import { app, auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, collection, getDocs, doc, getDoc, addDoc, updateDoc } from './firebase-config.js';
-import { setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { app, auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, collection, getDocs, doc, getDoc, addDoc, updateDoc, setDoc } from './firebase-config.js';
 
 // DOM Elements
 const loginBtn = document.getElementById('login-btn');
@@ -696,7 +695,7 @@ document.addEventListener('click', (e) => {
         if (hasAccess) {
             const url = btn.getAttribute('data-iframe');
             
-            // Record activity and wait for it (or handle errors)
+            // Record activity and wait for it
             recordUserActivity(title, true);
 
             openModal(title, url);

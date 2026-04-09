@@ -1,5 +1,4 @@
-import { app, auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, collection, getDocs, doc, getDoc } from './firebase-config.js';
-import { addDoc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { app, auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, collection, getDocs, doc, getDoc, addDoc, updateDoc, setDoc, deleteDoc, serverTimestamp } from './firebase-config.js';
 
 // --- DOM Elements ---
 const loader = document.getElementById('auth-loader');
@@ -112,7 +111,8 @@ let boardStatusFilter = "all";
 let allTrackingFetched = [];
 
 const ADMIN_EMAILS = [
-    'datos@riocuarto.gov.ar'
+    'datos@riocuarto.gov.ar',
+    'pfabbroni@riocuarto.gov.ar'
 ];
 
 // --- Initialization & Auth ---
@@ -1131,6 +1131,9 @@ async function loadUserTracking() {
         renderTrackingTable();
     } catch (error) {
         console.error("Error loading user tracking:", error);
+        if (trackingTbody) {
+            trackingTbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-red-500">Error: ${error.message}. Revisá los permisos de Firestore.</td></tr>`;
+        }
     }
 }
 
