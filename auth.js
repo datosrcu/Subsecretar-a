@@ -1,5 +1,5 @@
 import { app, auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, collection, getDocs, doc, getDoc } from './firebase-config.js';
-import { setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { setDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // DOM Elements
 const loginBtn = document.getElementById('login-btn');
@@ -37,6 +37,9 @@ const modalIframeWrap = document.getElementById('ogb-iframe-wrap');
 const modalIframe = document.getElementById('ogb-iframe');
 const modalLoader = document.getElementById('iframe-loader');
 const fullScreenBtn = document.getElementById('ogb-full');
+const ogbDirectLink = document.getElementById('ogb-direct-link');
+const iframeFallback = document.getElementById('iframe-fallback');
+const ogbFallbackBtn = document.getElementById('ogb-fallback-btn');
 const unauthOverlay = document.getElementById('unauth-overlay');
 
 // Allowed Domain
@@ -394,8 +397,8 @@ async function handleAccessRequest(e) {
     submitBtn.textContent = "Enviando...";
 
     try {
-        const { addDoc } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
-        await addDoc(collection(db, "requests"), {
+        const { addDoc: addDocLocal } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
+        await addDocLocal(collection(db, "requests"), {
             userEmail: userEmail,
             buttonId: buttonId,
             buttonName: buttonName,
@@ -523,10 +526,27 @@ function openModal(title, url) {
     // Load iframe content
     modalIframe.src = finalSrc;
 
+    // Direct links update
+    if (ogbDirectLink) ogbDirectLink.href = finalSrc;
+    if (ogbFallbackBtn) ogbFallbackBtn.href = finalSrc;
+
+    // Reset fallback visibility
+    if (iframeFallback) iframeFallback.classList.add('hidden');
+
+    // Show fallback if it takes too long (might be blocked)
+    const fallbackTimeout = setTimeout(() => {
+        if (modalLoader.style.display !== 'none' || modalIframe.style.opacity === '0') {
+            if (iframeFallback) iframeFallback.classList.remove('hidden');
+        }
+    }, 6000);
+
     // Listen for iframe load
     modalIframe.onload = () => {
+        clearTimeout(fallbackTimeout);
         modalLoader.style.display = 'none';
         modalIframe.style.opacity = '1';
+        // Even if it loads, we hide fallback just in case it was showing
+        if (iframeFallback) iframeFallback.classList.add('hidden');
     };
 
     // Show modal
@@ -544,6 +564,7 @@ function closeModal() {
 
     // Reset contents
     modalIframeWrap.classList.remove('hidden');
+    if (iframeFallback) iframeFallback.classList.add('hidden');
     const formWrap = document.getElementById('ogb-form-wrap');
     if (formWrap) {
         formWrap.classList.add('hidden');
@@ -681,12 +702,15 @@ document.addEventListener('click', (e) => {
             const url = btn.getAttribute('data-iframe');
             const openInNewTab = btn.getAttribute('data-new-tab') === 'true';
 
+            recordUserActivity(title, true);
+
             if (openInNewTab) {
                 window.open(url, '_blank');
             } else {
                 openModal(title, url);
             }
         } else {
+            recordUserActivity(title, false);
             openAccessRequestForm(title, id);
         }
         return;
@@ -787,4 +811,21 @@ if (registrationForm) {
             alert("Hubo un error al guardar tu información: " + (error.code || error.message));
         }
     });
+}
+
+// --- Tracking Activity ---
+async function recordUserActivity(buttonName, hasAccess) {
+    if (!auth.currentUser) return;
+    try {
+        await addDoc(collection(db, "user_tracking"), {
+            userEmail: auth.currentUser.email,
+            userName: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
+            buttonName: buttonName,
+            hasAccess: hasAccess,
+            timestamp: new Date().toISOString()
+        });
+        console.log("Activity recorded:", buttonName, hasAccess);
+    } catch (e) {
+        console.warn("Failed to record activity:", e);
+    }
 }

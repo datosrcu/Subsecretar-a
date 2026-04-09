@@ -42,6 +42,7 @@ const requestsBadge = document.getElementById('requests-badge');
 const filterBoardSearch = document.getElementById('filter-board-search');
 const filterBoardCategory = document.getElementById('filter-board-category');
 const filterBoardStatus = document.getElementById('filter-board-status');
+const trackingTbody = document.getElementById('tracking-tbody');
 
 const countTotal = document.getElementById('count-total');
 const countActive = document.getElementById('count-active');
@@ -71,6 +72,7 @@ const fieldBoardId = document.getElementById('board-id');
 const fieldBoardEnabled = document.getElementById('field-board-enabled');
 const fieldBoardTitle = document.getElementById('field-board-title');
 const categoriesChecklist = document.getElementById('categories-checklist');
+const categorySearchInput = document.getElementById('category-search');
 let currentlySelectedCategories = [];
 
 const fieldBoardReqLogin = document.getElementById('field-board-req-login');
@@ -107,6 +109,7 @@ let allBoardsFetched = [];
 let boardSearchQuery = "";
 let boardCategoryFilter = "all";
 let boardStatusFilter = "all";
+let allTrackingFetched = [];
 
 const ADMIN_EMAILS = [
     'datos@riocuarto.gov.ar'
@@ -136,7 +139,8 @@ onAuthStateChanged(auth, async (user) => {
             }
 
             await loadData();
-            await loadRequests(); // Load requests on init
+            await loadRequests();
+            await loadUserTracking();
         } else {
             showError("No tienes privilegios de administrador para ver o editar.");
             await signOut(auth);
@@ -216,6 +220,7 @@ navTabs.forEach(tab => {
         if (target === 'tab-categorias') loadCategories();
         if (target === 'tab-usuarios') loadUsers();
         if (target === 'tab-solicitudes') loadRequests();
+        if (target === 'tab-tracking') loadUserTracking();
     });
 });
 
@@ -226,7 +231,8 @@ async function loadData() {
         loadCategories(),
         loadBoards(),
         loadRequests(),
-        loadStatisticalRequests()
+        loadStatisticalRequests(),
+        loadUserTracking()
     ]);
 }
 // --- USERS LISTING & SELECTOR ---
@@ -477,30 +483,32 @@ function renderRequests(requests) {
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
                 ` : ''}
-
-                <button class="btn-del-req text-red-400 hover:text-red-600 p-2" data-id="${req.id}" title="Eliminar del historial">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                </button>
             </td>
         `;
 
         if (status === 'pending' || status === 'rejected' || status === 'restricted') {
-            tr.querySelector('.btn-approve').addEventListener('click', async (e) => {
-                const btn = e.currentTarget;
-                btn.disabled = true;
-                btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>';
-                await approveRequest(req.id, req.userEmail, req.buttonId);
-            });
+            const approveBtn = tr.querySelector('.btn-approve');
+            if (approveBtn) {
+                approveBtn.addEventListener('click', async (e) => {
+                    const btn = e.currentTarget;
+                    btn.disabled = true;
+                    btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>';
+                    await approveRequest(req.id, req.userEmail, req.buttonId);
+                });
+            }
         }
+
         if (status === 'pending') {
-            tr.querySelector('.btn-reject').addEventListener('click', async (e) => {
-                const btn = e.currentTarget;
-                btn.disabled = true;
-                btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>';
-                await updateRequestStatus(req.id, 'rejected');
-            });
+            const rejectBtn = tr.querySelector('.btn-reject');
+            if (rejectBtn) {
+                rejectBtn.addEventListener('click', async (e) => {
+                    const btn = e.currentTarget;
+                    btn.disabled = true;
+                    btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>';
+                    await updateRequestStatus(req.id, 'rejected');
+                });
+            }
         }
-        tr.querySelector('.btn-del-req').addEventListener('click', () => deleteDocReq("requests", req.id));
 
         requestsTbody.appendChild(tr);
     });
@@ -617,33 +625,49 @@ function renderUserChecklist(filterText = '') {
 userSearchInput.addEventListener('input', (e) => renderUserChecklist(e.target.value));
 
 // --- CATEGORIES LISTING & SELECTOR ---
-function renderCategoryChecklist() {
+categorySearchInput?.addEventListener('input', (e) => renderCategoryChecklist(e.target.value));
+
+function renderCategoryChecklist(filterText = '') {
     categoriesChecklist.innerHTML = '';
+    const lowerFilter = filterText.toLowerCase().trim();
+
     // Virtual option: assign board directly to Gestores Externos (no real category needed)
     const vIsChecked = currentlySelectedCategories.includes('_ge_direct');
-    const vDiv = document.createElement('div');
-    vDiv.className = `flex items-center space-x-2 p-2 rounded border cursor-pointer transition mb-1 ${vIsChecked ? 'border-blue-300 bg-blue-50' : 'border-dashed border-blue-200 hover:bg-blue-50'}`;
-    vDiv.innerHTML = `
-        <input type="checkbox" class="w-4 h-4 text-obelisco-blue rounded border-gray-300 pointer-events-none" ${vIsChecked ? 'checked' : ''}>
-        <span class="pointer-events-none">🌐</span>
-        <span class="text-sm font-semibold pointer-events-none text-obelisco-blue">Gestores Externos <span class="text-xs text-gray-400 font-normal">· sin categoría específica</span></span>
-    `;
-    vDiv.addEventListener('click', () => {
-        const cb = vDiv.querySelector('input');
-        cb.checked = !cb.checked;
-        vDiv.className = `flex items-center space-x-2 p-2 rounded border cursor-pointer transition mb-1 ${cb.checked ? 'border-blue-300 bg-blue-50' : 'border-dashed border-blue-200 hover:bg-blue-50'}`;
-        if (cb.checked) { if (!currentlySelectedCategories.includes('_ge_direct')) currentlySelectedCategories.push('_ge_direct'); }
-        else { currentlySelectedCategories = currentlySelectedCategories.filter(id => id !== '_ge_direct'); }
+    const vLabel = "Gestores Externos".toLowerCase();
+
+    if (!lowerFilter || vLabel.includes(lowerFilter)) {
+        const vDiv = document.createElement('div');
+        vDiv.className = `flex items-center space-x-2 p-2 rounded border cursor-pointer transition mb-1 ${vIsChecked ? 'border-blue-300 bg-blue-50' : 'border-dashed border-blue-200 hover:bg-blue-50'}`;
+        vDiv.innerHTML = `
+            <input type="checkbox" class="w-4 h-4 text-obelisco-blue rounded border-gray-300 pointer-events-none" ${vIsChecked ? 'checked' : ''}>
+            <span class="pointer-events-none">🌐</span>
+            <span class="text-sm font-semibold pointer-events-none text-obelisco-blue">Gestores Externos <span class="text-xs text-gray-400 font-normal">· sin categoría específica</span></span>
+        `;
+        vDiv.addEventListener('click', () => {
+            const cb = vDiv.querySelector('input');
+            cb.checked = !cb.checked;
+            vDiv.className = `flex items-center space-x-2 p-2 rounded border cursor-pointer transition mb-1 ${cb.checked ? 'border-blue-300 bg-blue-50' : 'border-dashed border-blue-200 hover:bg-blue-50'}`;
+            if (cb.checked) { if (!currentlySelectedCategories.includes('_ge_direct')) currentlySelectedCategories.push('_ge_direct'); }
+            else { currentlySelectedCategories = currentlySelectedCategories.filter(id => id !== '_ge_direct'); }
+        });
+        categoriesChecklist.appendChild(vDiv);
+    }
+
+    const filteredCategories = globalCategories.filter(c => {
+        const name = (c.name || '').toLowerCase();
+        const type = (c.type || '').toLowerCase();
+        return name.includes(lowerFilter) || type.includes(lowerFilter);
     });
-    categoriesChecklist.appendChild(vDiv);
-    if (globalCategories.length === 0) {
+
+    if (filteredCategories.length === 0 && (!vLabel.includes(lowerFilter) || !lowerFilter)) {
         const p = document.createElement('p');
         p.className = 'text-xs text-center text-gray-500 py-4';
-        p.textContent = 'No hay categorías creadas aún.';
+        p.textContent = lowerFilter ? 'No se encontraron categorías.' : 'No hay categorías creadas aún.';
         categoriesChecklist.appendChild(p);
         return;
     }
-    globalCategories.forEach(c => {
+
+    filteredCategories.forEach(c => {
         const isChecked = currentlySelectedCategories.includes(c.id) ? 'checked' : '';
         const div = document.createElement('div');
         div.className = "flex items-center space-x-2 p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200 cursor-pointer transition";
@@ -952,6 +976,7 @@ function filterAndRenderBoards() {
                 ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email)
             );
             userSearchInput.value = '';
+            categorySearchInput.value = '';
             renderUserChecklist();
             // Handle categories including virtual GE direct
             currentlySelectedCategories = data.categories || [];
@@ -994,6 +1019,7 @@ addBoardBtn.addEventListener('click', () => {
     fieldBoardNewTab.checked = false;
     currentlySelectedUsers = [];
     userSearchInput.value = '';
+    categorySearchInput.value = '';
     renderUserChecklist();
 
     currentlySelectedCategories = [];
@@ -1083,9 +1109,58 @@ async function deleteDocReq(collectionName, id) {
             await deleteDoc(doc(db, collectionName, id));
             if (collectionName === 'buttons') await loadBoards();
             if (collectionName === 'categories') await loadCategories();
+            // Solicitudes no se eliminan más por tracking, pero dejamos el catch por si se usa en otro lado
             if (collectionName === 'requests') await loadRequests();
         } catch (error) { console.error(error); alert("No se pudo eliminar."); }
     }
+}
+
+// --- USER TRACKING LOGIC ---
+async function loadUserTracking() {
+    console.log("Loading user tracking logs...");
+    try {
+        const snapshot = await getDocs(collection(db, "user_tracking"));
+        allTrackingFetched = [];
+        snapshot.forEach(doc => {
+            allTrackingFetched.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Ordenar por timestamp descending
+        allTrackingFetched.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        renderTrackingTable();
+    } catch (error) {
+        console.error("Error loading user tracking:", error);
+    }
+}
+
+function renderTrackingTable() {
+    if (!trackingTbody) return;
+    trackingTbody.innerHTML = '';
+
+    if (allTrackingFetched.length === 0) {
+        trackingTbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-obelisco-gray">No hay registros de actividad.</td></tr>';
+        return;
+    }
+
+    allTrackingFetched.forEach(log => {
+        const date = log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A';
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-gray-50 transition-colors";
+        
+        const statusBadge = log.hasAccess 
+            ? '<span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-bold text-[10px] uppercase">Acceso Concedido</span>'
+            : '<span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full font-bold text-[10px] uppercase">Denegado / Solicitud</span>';
+
+        tr.innerHTML = `
+            <td class="py-3 px-4 text-xs font-mono text-gray-500">${date}</td>
+            <td class="py-3 px-4 text-xs">${log.userEmail}</td>
+            <td class="py-3 px-4 font-medium text-xs">${log.userName || 'N/A'}</td>
+            <td class="py-3 px-4 text-xs font-bold">${log.buttonName}</td>
+            <td class="py-3 px-4 text-right">${statusBadge}</td>
+        `;
+        trackingTbody.appendChild(tr);
+    });
 }
 // --- SOLICITUDES ESTADÍSTICAS (PEDIDOS) ---
 

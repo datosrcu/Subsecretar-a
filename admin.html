@@ -158,6 +158,11 @@
                             <span id="requests-badge"
                                 class="ml-2 hidden bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
                         </button>
+                        <button
+                            class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                            data-target="tab-tracking">
+                            Seguimiento Usuarios
+                        </button>
                     </nav>
                 </div>
             </div>
@@ -443,6 +448,33 @@
                     </div>
                 </div>
 
+                <!-- CONTENIDO SEGUIMIENTO -->
+                <div id="tab-tracking" class="tab-pane hidden text-sm">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold mb-1">Seguimiento de Usuarios</h2>
+                        <p class="text-obelisco-gray text-sm">Registro de actividad de usuarios en los tableros (ingresos y clics en restringidos).</p>
+                    </div>
+
+                    <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
+                            <thead>
+                                <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
+                                    <th class="py-3 px-4 font-semibold">Fecha/Hora</th>
+                                    <th class="py-3 px-4 font-semibold">Usuario</th>
+                                    <th class="py-3 px-4 font-semibold">Nombre</th>
+                                    <th class="py-3 px-4 font-semibold">Tablero</th>
+                                    <th class="py-3 px-4 font-semibold text-right">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tracking-tbody" class="divide-y divide-obelisco-border">
+                                <tr>
+                                    <td colspan="5" class="text-center py-8 text-obelisco-gray">Cargando registros de actividad...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
     </main>
 
@@ -519,8 +551,13 @@
                 </div>
 
                 <div>
-                    <label class="block font-medium mb-2">Categorías a las que pertenece</label>
-                    <div class="border border-gray-300 rounded-lg overflow-hidden flex flex-col max-h-40">
+                    <label class="block font-medium mb-1 truncate">Categorías a las que pertenece</label>
+                    <div class="border border-gray-300 rounded-lg overflow-hidden flex flex-col max-h-[220px]">
+                        <div class="p-2 bg-gray-50 border-b border-gray-200">
+                            <input type="text" id="category-search"
+                                class="w-full text-xs px-2 py-1.5 border border-gray-300 rounded outline-none focus:border-obelisco-blue"
+                                placeholder="Buscar categoría...">
+                        </div>
                         <div id="categories-checklist" class="overflow-y-auto p-2 space-y-1 bg-white flex-grow">
                             <p class="text-xs text-center text-gray-400 py-4">Cargando categorías...</p>
                         </div>
