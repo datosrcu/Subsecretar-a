@@ -47,6 +47,9 @@ const countTotal = document.getElementById('count-total');
 const countActive = document.getElementById('count-active');
 const countInactive = document.getElementById('count-inactive');
 
+const filterTrackingSearch = document.getElementById('filter-tracking-search');
+const filterTrackingStatus = document.getElementById('filter-tracking-status');
+
 // Solicitudes Estadísticas
 let statisticalRequests = [];
 let reqStatusFilter = 'todos';
@@ -109,6 +112,8 @@ let boardSearchQuery = "";
 let boardCategoryFilter = "all";
 let boardStatusFilter = "all";
 let allTrackingFetched = [];
+let trackingSearchQuery = "";
+let trackingStatusFilter = "all";
 
 const ADMIN_EMAILS = [
     'datos@riocuarto.gov.ar',
@@ -123,7 +128,7 @@ onAuthStateChanged(auth, async (user) => {
         const isAdminExact = ADMIN_EMAILS.map(e => e.toLowerCase()).includes(userEmail);
         const isDomain = userEmail.endsWith('@riocuarto.gov.ar');
 
-        if (isDomain || isAdminExact) { // For MVP
+        if (isAdminExact) { 
             showAdminUI(user);
 
             // Auto-register/update admin user in the directory
@@ -223,6 +228,20 @@ navTabs.forEach(tab => {
         if (target === 'tab-tracking') loadUserTracking();
     });
 });
+
+if (filterTrackingSearch) {
+    filterTrackingSearch.addEventListener('input', (e) => {
+        trackingSearchQuery = e.target.value.toLowerCase();
+        renderTrackingTable();
+    });
+}
+
+if (filterTrackingStatus) {
+    filterTrackingStatus.addEventListener('change', (e) => {
+        trackingStatusFilter = e.target.value;
+        renderTrackingTable();
+    });
+}
 
 // --- LOAD MASTER DATA ---
 async function loadData() {
@@ -1141,12 +1160,29 @@ function renderTrackingTable() {
     if (!trackingTbody) return;
     trackingTbody.innerHTML = '';
 
-    if (allTrackingFetched.length === 0) {
-        trackingTbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-obelisco-gray">No hay registros de actividad.</td></tr>';
+    // Aplicar filtros
+    const filtered = allTrackingFetched.filter(log => {
+        const matchesSearch = 
+            (log.userEmail || "").toLowerCase().includes(trackingSearchQuery) ||
+            (log.userName || "").toLowerCase().includes(trackingSearchQuery) ||
+            (log.buttonName || "").toLowerCase().includes(trackingSearchQuery);
+        
+        let matchesStatus = true;
+        if (trackingStatusFilter === 'access') {
+            matchesStatus = log.hasAccess === true;
+        } else if (trackingStatusFilter === 'denied') {
+            matchesStatus = log.hasAccess === false;
+        }
+
+        return matchesSearch && matchesStatus;
+    });
+
+    if (filtered.length === 0) {
+        trackingTbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-obelisco-gray">No hay registros de actividad que coincidan con los filtros.</td></tr>';
         return;
     }
 
-    allTrackingFetched.forEach(log => {
+    filtered.forEach(log => {
         const date = log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A';
         const tr = document.createElement('tr');
         tr.className = "hover:bg-gray-50 transition-colors";

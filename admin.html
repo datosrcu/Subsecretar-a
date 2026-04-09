@@ -455,6 +455,33 @@
                         <p class="text-obelisco-gray text-sm">Registro de actividad de usuarios en los tableros (ingresos y clics en restringidos).</p>
                     </div>
 
+                    <!-- Buscador y Filtro de Tracking -->
+                    <div class="flex flex-wrap items-center gap-4 mb-6">
+                        <div class="relative min-w-[300px]">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </span>
+                            <input type="text" id="filter-tracking-search" placeholder="Buscar por usuario, nombre o tablero..."
+                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue outline-none transition text-sm">
+                        </div>
+                        <div class="relative min-w-[200px]">
+                            <select id="filter-tracking-status"
+                                class="pl-4 pr-10 py-2 border border-gray-300 rounded-lg w-full appearance-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue outline-none transition text-sm bg-white">
+                                <option value="all">Suscripción (Todos)</option>
+                                <option value="access">Acceso Concedido</option>
+                                <option value="denied">Denegado / Solicitud</option>
+                            </select>
+                            <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+
                     <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden">
                         <table class="w-full text-left border-collapse min-w-[700px]">
                             <thead>
