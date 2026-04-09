@@ -828,3 +828,134 @@ async function recordUserActivity(buttonName, hasAccess) {
         console.error("[Tracking] Error recording activity:", e);
     }
 }
+
+// --- NUEVOS MÓDULOS Y FUNCIONALIDADES ---
+
+// 1. Lógica del Móvil de Teléfonos Útiles
+const phonesModal = document.getElementById('phones-modal');
+const viewPhonesBtn = document.getElementById('view-phones-btn');
+const closePhonesBtn = document.getElementById('close-phones-btn');
+const closePhonesOverlay = document.getElementById('close-phones-overlay');
+
+function togglePhonesModal(show) {
+    if (!phonesModal) return;
+    if (show) {
+        phonesModal.classList.remove('hidden');
+        phonesModal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    } else {
+        phonesModal.classList.add('hidden');
+        phonesModal.classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+}
+
+viewPhonesBtn?.addEventListener('click', () => togglePhonesModal(true));
+closePhonesBtn?.addEventListener('click', () => togglePhonesModal(false));
+closePhonesOverlay?.addEventListener('click', () => togglePhonesModal(false));
+
+// 2. Lógica de Feedback ("No me sirvió")
+const feedbackModal = document.getElementById('feedback-modal');
+const feedbackNoBtn = document.getElementById('feedback-no-btn');
+const feedbackForm = document.getElementById('feedback-form');
+const feedbackSuccess = document.getElementById('feedback-success');
+const closeFeedbackOverlay = document.getElementById('close-feedback-overlay');
+
+feedbackNoBtn?.addEventListener('click', () => {
+    if (!feedbackModal) return;
+    feedbackModal.classList.remove('hidden');
+    feedbackModal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+});
+
+closeFeedbackOverlay?.addEventListener('click', () => {
+    feedbackModal?.classList.add('hidden');
+    feedbackModal?.classList.remove('flex');
+    document.body.style.overflow = '';
+});
+
+feedbackForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const comment = document.getElementById('feedback-comment').value;
+    const name = document.getElementById('feedback-name').value;
+    const email = document.getElementById('feedback-email').value;
+    const submitBtn = document.getElementById('feedback-submit-btn');
+
+    if (!comment) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Enviando...";
+
+    try {
+        await addDoc(collection(db, "feedback"), {
+            name: name || "Anónimo",
+            email: email || "No provisto",
+            comment: comment,
+            pageUrl: window.location.pathname,
+            timestamp: new Date().toISOString(),
+            createdAt: serverTimestamp()
+        });
+
+        feedbackForm.classList.add('hidden');
+        feedbackSuccess.classList.remove('hidden');
+
+        setTimeout(() => {
+            feedbackModal.classList.add('hidden');
+            feedbackModal.classList.remove('flex');
+            document.body.style.overflow = '';
+            // Reset for next time
+            setTimeout(() => {
+                feedbackForm.reset();
+                feedbackForm.classList.remove('hidden');
+                feedbackSuccess.classList.add('hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Enviar Feedback";
+            }, 500);
+        }, 2000);
+
+    } catch (error) {
+        console.error("Error sending feedback:", error);
+        alert("Ocurrió un error al enviar el feedback. Por favor, intenta de nuevo.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Enviar Feedback";
+    }
+});
+
+// 3. Lógica de Buscador de Cabecera (Client-side)
+const searchInput = document.getElementById('header-search-input');
+
+searchInput?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        const query = searchInput.value.trim().toLowerCase();
+        if (query.length < 3) return;
+
+        // Simple search logic: find the first element containing the text
+        const elements = document.querySelectorAll('h1, h2, h3, h4, p, a');
+        let found = false;
+
+        for (const el of elements) {
+            if (el.textContent.toLowerCase().includes(query)) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Visual feedback
+                const originalBg = el.style.backgroundColor;
+                el.style.backgroundColor = '#fef08a'; // Light yellow
+                setTimeout(() => {
+                    el.style.backgroundColor = originalBg;
+                }, 2000);
+                
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            // If not found in static text, alert or show toast
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 bg-obelisco-dark text-white px-6 py-3 rounded-full shadow-2xl z-50 text-sm font-bold';
+            toast.textContent = `No se encontraron resultados para "${query}"`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    }
+});

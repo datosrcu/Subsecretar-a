@@ -64,15 +64,15 @@
             </div>
             <div class="flex items-center space-x-4">
 
-                <button
-                    class="flex items-center space-x-2 bg-transparent text-obelisco-dark border border-obelisco-dark rounded-lg px-4 py-2 hover:bg-gray-100 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                <div class="flex items-center bg-gray-100 rounded-lg px-3 py-1 border border-gray-200 focus-within:ring-2 focus-within:ring-obelisco-blue/20 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    <span class="font-medium">Buscar</span>
-                </button>
+                    <input type="text" id="header-search-input" placeholder="Buscar..." 
+                        class="bg-transparent border-none outline-none px-2 py-1 text-sm w-32 md:w-48 focus:w-64 transition-all duration-300">
+                </div>
 
                 <!-- Authentication UI -->
                 <div id="auth-section" class="flex items-center space-x-3 ml-4 border-l pl-4 border-gray-300">
@@ -523,12 +523,13 @@
                         <div>
                             <h3 class="text-xl font-bold text-obelisco-dark mb-3">Seguinos en</h3>
                             <div class="flex space-x-4">
-                                <a href="#"
-                                    class="text-obelisco-blue hover:text-blue-800 transition underline">Facebook</a>
-                                <a href="#"
-                                    class="text-obelisco-blue hover:text-blue-800 transition underline">Instagram</a>
-                                <a href="#"
-                                    class="text-obelisco-blue hover:text-blue-800 transition underline">Twitter</a>
+                                <a href="https://www.instagram.com/datosrcu" target="_blank"
+                                    class="text-obelisco-blue hover:text-blue-800 transition flex items-center font-bold">
+                                    <svg class="h-5 w-5 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                    </svg>
+                                    Instagram
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -555,10 +556,10 @@
                             </iframe>
                         </div>
 
-                        <button
-                            class="w-full bg-obelisco-yellow hover:bg-obelisco-yellowHover text-white font-bold py-3 px-6 rounded-lg transition shadow-sm text-center">
+                        <a href="https://maps.google.com/maps?q=Pje.%20de%20la%20Concepci%C3%B3n%20650,%20R%C3%ADo%20Cuarto,%20Argentina" target="_blank"
+                            class="w-full bg-obelisco-yellow hover:bg-obelisco-yellowHover text-white font-bold py-3 px-6 rounded-lg transition shadow-sm text-center block">
                             Cómo llego
-                        </button>
+                        </a>
                     </div>
 
                 </div>
@@ -569,7 +570,7 @@
                 class="bg-obelisco-light border border-obelisco-border rounded-xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between mb-8">
                 <h3 class="text-xl font-bold text-obelisco-dark mb-4 md:mb-0">¿Te fue útil esta página?</h3>
                 <div class="flex space-x-4 w-full md:w-auto">
-                    <button
+                    <button id="feedback-no-btn"
                         class="flex-1 md:flex-none bg-white border border-obelisco-border hover:bg-gray-50 text-obelisco-dark font-semibold py-2 px-6 rounded-lg transition">
                         No me sirvió
                     </button>
@@ -596,14 +597,18 @@
                     <span><strong>911</strong> - Policía</span>
                     <span><strong>144</strong> - Violencia de género</span>
                     <span><strong>147</strong> - Atención ciudadana</span>
-                    <a href="#"
-                        class="text-obelisco-yellow hover:underline ml-auto block w-full mt-2 md:w-auto md:mt-0">Ver
-                        todos los teléfonos</a>
+                    <button id="view-phones-btn"
+                        class="text-obelisco-yellow hover:underline ml-auto block w-full mt-2 md:w-auto md:mt-0 text-left md:text-right">Ver
+                        todos los teléfonos</button>
                 </div>
             </div>
 
+            <div class="border-t border-gray-700 mt-8 pt-8 flex flex-col items-center">
+                <p class="text-sm font-medium text-gray-400">Desarrollado por la Subsecretaría de Estadística</p>
+            </div>
+
             <div
-                class="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-start md:items-center">
+                class="border-t border-gray-700 pt-8 mt-8 flex flex-col md:flex-row justify-between items-start md:items-center">
 
                 <div class="flex flex-col mb-6 md:mb-0 space-y-4">
                     <!-- Espacio Logos Footer -->
@@ -649,7 +654,7 @@
     </footer>
 
     <!-- BOTÓN FLOTANTE SUAV (WHATSAPP) -->
-    <a href="#"
+    <a href="https://wa.me/543584283673" target="_blank"
         class="fixed bottom-6 right-6 flex items-center bg-white border border-gray-200 rounded-full shadow-lg p-2 pr-6 hover:shadow-xl transition z-50 group cursor-pointer">
         <div class="w-12 h-12 bg-[#25D366] rounded-full flex items-center justify-center text-white mr-3 shadow-inner">
             <img src="Digital_Glyph_White.svg" alt="WhatsApp" class="w-7 h-7 object-contain">
@@ -657,6 +662,141 @@
         <span
             class="text-obelisco-dark font-bold text-lg group-hover:text-[#25D366] transition tracking-tight">SUAV</span>
     </a>
+
+    <!-- MODAL TELÉFONOS ÚTILES -->
+    <div id="phones-modal" class="fixed inset-0 hidden items-center justify-center z-[100002] p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="close-phones-overlay"></div>
+        <div class="relative bg-white w-[700px] max-w-full rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="text-2xl font-bold text-obelisco-dark">Contactos y Teléfonos Útiles</h3>
+                <button id="close-phones-btn" class="text-gray-400 hover:text-red-500 transition">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-8 overflow-y-auto space-y-8 text-obelisco-dark">
+                <!-- SUAV -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="border-l-4 border-obelisco-yellow pl-4">
+                            <h4 class="font-bold text-lg">SUAV</h4>
+                            <p class="text-xs text-gray-500 uppercase font-medium">Atención al Vecino</p>
+                            <div class="mt-2 space-y-1">
+                                <p class="text-sm"><strong>Tel:</strong> 0800 444-5454</p>
+                                <p class="text-sm flex items-center">
+                                    <svg class="w-4 h-4 mr-1 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                                    <strong>WhatsApp:</strong> 358 428-3673
+                                </p>
+                            </div>
+                        </div>
+                        <div class="border-l-4 border-gray-300 pl-4">
+                            <h4 class="font-bold text-md">Guardia Prevención</h4>
+                            <p class="text-sm">358 476-8460 / Int. 1</p>
+                        </div>
+                        <div class="border-l-4 border-[#25D366] pl-4">
+                            <h4 class="font-bold text-md">Ojos en Alerta</h4>
+                            <p class="text-sm flex items-center">
+                                <svg class="w-4 h-4 mr-1 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                                358 428-3693
+                            </p>
+                        </div>
+                    </div>
+                    <div class="space-y-4 text-sm">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <h5 class="font-bold">Registros Civiles</h5>
+                                <p>358 476-8495</p>
+                            </div>
+                            <div>
+                                <h5 class="font-bold">Zoonosis</h5>
+                                <p>358 411-1422 / 4768460</p>
+                            </div>
+                            <div>
+                                <h5 class="font-bold">Guardia EMOS</h5>
+                                <p>358 476-8401</p>
+                            </div>
+                            <div>
+                                <h5 class="font-bold">Guardia EPEC</h5>
+                                <p>358 467-2001</p>
+                            </div>
+                        </div>
+                        <div class="border-t pt-4">
+                            <p><strong>ECOGAS:</strong> 0810-555-0427</p>
+                            <p><strong>Salud:</strong> 358 476-8420</p>
+                            <p><strong>Adicciones:</strong> 358 418-5350</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Economía y Género -->
+                <div class="bg-blue-50 p-4 rounded-xl grid grid-cols-1 md:grid-cols-2 gap-4 border border-blue-100">
+                    <div>
+                        <h4 class="font-bold text-sm mb-2 text-obelisco-blue">Economía e Innovación</h4>
+                        <div class="text-xs space-y-1">
+                            <p>Consulta Deuda/Planes:</p>
+                            <p>WhatsApp: 358 412-1879</p>
+                            <p>WhatsApp: 358 514-8212</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm mb-2 text-obelisco-blue">Género y Discapacidad</h4>
+                        <p class="text-xs">WhatsApp: 358 424-8542</p>
+                    </div>
+                </div>
+
+                <!-- Otros Emergencias -->
+                <div class="bg-obelisco-dark p-6 rounded-xl text-white">
+                    <h4 class="font-bold mb-4 text-center uppercase tracking-widest text-xs opacity-70">Emergencias</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-2 text-center text-sm">
+                        <p><strong class="block text-obelisco-yellow text-lg">100</strong> Bomberos</p>
+                        <p><strong class="block text-obelisco-yellow text-lg">103</strong> Defensa Civil</p>
+                        <p><strong class="block text-obelisco-yellow text-lg">107</strong> Emergencia Médica</p>
+                        <p><strong class="block text-obelisco-yellow text-lg">911</strong> Policía</p>
+                        <p><strong class="block text-obelisco-yellow text-lg">105</strong> Emergencia Amb.</p>
+                        <p><strong class="block text-obelisco-yellow text-lg">145</strong> Trata Personas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL FEEDBACK -->
+    <div id="feedback-modal" class="fixed inset-0 hidden items-center justify-center z-[100003] p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="close-feedback-overlay"></div>
+        <div class="relative bg-white w-[550px] max-w-full rounded-2xl shadow-2xl p-8 flex flex-col">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-obelisco-dark">Sentimos que no fuera útil</h3>
+                <p class="text-obelisco-gray text-sm">Contanos qué podemos mejorar para brindarte un mejor servicio.</p>
+            </div>
+
+            <form id="feedback-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold mb-1">Tu comentario *</label>
+                    <textarea id="feedback-comment" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-obelisco-blue" placeholder="¿En qué podemos mejorar?" required></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-1">Nombre</label>
+                        <input type="text" id="feedback-name" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-obelisco-blue" placeholder="Tu nombre">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-1">Email</label>
+                        <input type="email" id="feedback-email" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-obelisco-blue" placeholder="tu@email.com">
+                    </div>
+                </div>
+                <button type="submit" id="feedback-submit-btn" class="w-full bg-obelisco-dark text-white font-bold py-3 rounded-lg hover:bg-gray-800 transition shadow-lg">Enviar Feedback</button>
+            </form>
+            <div id="feedback-success" class="hidden mt-4 p-4 bg-green-50 text-green-700 rounded-lg flex items-center justify-center font-medium">
+                ¡Gracias! Tu comentario ha sido recibido.
+            </div>
+        </div>
+    </div>
 
     <!-- Application Scripts -->
     <script type="module" src="firebase-config.js"></script>

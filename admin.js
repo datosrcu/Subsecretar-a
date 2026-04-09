@@ -42,6 +42,8 @@ const filterBoardSearch = document.getElementById('filter-board-search');
 const filterBoardCategory = document.getElementById('filter-board-category');
 const filterBoardStatus = document.getElementById('filter-board-status');
 const trackingTbody = document.getElementById('tracking-tbody');
+const feedbackTbody = document.getElementById('feedback-tbody');
+const feedbackBadge = document.getElementById('feedback-badge');
 
 const countTotal = document.getElementById('count-total');
 const countActive = document.getElementById('count-active');
@@ -146,6 +148,7 @@ onAuthStateChanged(auth, async (user) => {
             await loadData();
             await loadRequests();
             await loadUserTracking();
+            await loadFeedback();
         } else {
             showError("No tienes privilegios de administrador para ver o editar.");
             await signOut(auth);
@@ -226,6 +229,7 @@ navTabs.forEach(tab => {
         if (target === 'tab-usuarios') loadUsers();
         if (target === 'tab-solicitudes') loadRequests();
         if (target === 'tab-tracking') loadUserTracking();
+        if (target === 'tab-feedback') loadFeedback();
     });
 });
 
@@ -251,7 +255,8 @@ async function loadData() {
         loadBoards(),
         loadRequests(),
         loadStatisticalRequests(),
-        loadUserTracking()
+        loadUserTracking(),
+        loadFeedback()
     ]);
 }
 // --- USERS LISTING & SELECTOR ---
@@ -1378,3 +1383,80 @@ filterReqStatus?.addEventListener('change', (e) => {
     reqStatusFilter = e.target.value;
     renderStatisticalRequests();
 });
+// --- FEEDBACK LOGIC ---
+async function loadFeedback() {
+    console.log("Admin JS - Loading feedback...");
+    try {
+        const querySnapshot = await getDocs(collection(db, "feedback"));
+        const allFeedback = [];
+        querySnapshot.forEach((doc) => {
+            allFeedback.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Sort by date desc
+        allFeedback.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        // Hide "New" badge if we are viewing the tab
+        const activeTab = document.querySelector('.nav-tab.text-obelisco-blue');
+        if (activeTab && activeTab.getAttribute('data-target') === 'tab-feedback') {
+            feedbackBadge.classList.add('hidden');
+        } else {
+            // Logic to show badge if there's very recent feedback? 
+            // For now let's just keep it hidden unless we implement a "read" state
+        }
+
+        renderFeedbackTable(allFeedback);
+    } catch (error) {
+        console.error("Error loading feedback:", error);
+    }
+}
+
+function renderFeedbackTable(feedbackList) {
+    if (!feedbackTbody) return;
+    feedbackTbody.innerHTML = '';
+
+    if (feedbackList.length === 0) {
+        feedbackTbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-obelisco-gray">No hay feedback recibido aún.</td></tr>';
+        return;
+    }
+
+    feedbackList.forEach(fb => {
+        const date = fb.timestamp ? new Date(fb.timestamp).toLocaleString() : '-';
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-gray-50 transition-colors";
+        
+        tr.innerHTML = `
+            <td class="py-4 px-4 whitespace-nowrap text-xs text-gray-500">${date}</td>
+            <td class="py-4 px-4 font-medium">
+                <div class="flex flex-col">
+                    <span>${fb.name || 'Anónimo'}</span>
+                    <span class="text-[10px] text-gray-400 font-normal">${fb.email || 'Email no provisto'}</span>
+                </div>
+            </td>
+            <td class="py-4 px-4 text-sm text-gray-700">
+                <div class="max-w-md break-words">${fb.comment}</div>
+            </td>
+            <td class="py-4 px-4 text-xs font-semibold text-obelisco-blue truncate max-w-[150px]" title="${fb.pageUrl}">
+                ${fb.pageUrl || '/'}
+            </td>
+            <td class="py-4 px-4 text-right">
+                <button class="text-red-500 hover:text-red-700 btn-del-feedback" data-id="${fb.id}">
+                    <svg class="w-5 h-5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+            </td>
+        `;
+
+        tr.querySelector('.btn-del-feedback').addEventListener('click', async () => {
+            if (confirm("¿Eliminar este feedback?")) {
+                try {
+                    await deleteDoc(doc(db, "feedback", fb.id));
+                    loadFeedback();
+                } catch (err) {
+                    console.error("Error deleting feedback:", err);
+                }
+            }
+        });
+
+        feedbackTbody.appendChild(tr);
+    });
+}
