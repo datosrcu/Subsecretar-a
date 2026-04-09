@@ -1,4 +1,4 @@
-import { app, auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, collection, getDocs, doc, getDoc, addDoc, updateDoc, setDoc } from './firebase-config.js';
+import { app, auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, collection, getDocs, doc, getDoc, addDoc, updateDoc, setDoc, serverTimestamp } from './firebase-config.js';
 
 // DOM Elements
 const loginBtn = document.getElementById('login-btn');
@@ -949,13 +949,126 @@ searchInput?.addEventListener('keypress', (e) => {
             }
         }
 
-        if (!found) {
-            // If not found in static text, alert or show toast
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 bg-obelisco-dark text-white px-6 py-3 rounded-full shadow-2xl z-50 text-sm font-bold';
-            toast.textContent = `No se encontraron resultados para "${query}"`;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+        performEnhancedSearch(query);
+    }
+
+    function performEnhancedSearch(query) {
+        const resultsContainer = document.getElementById('search-results-container');
+        const searchModal = document.getElementById('search-modal');
+        const queryDisplay = document.getElementById('search-query-display');
+        
+        if (!resultsContainer || !searchModal) return;
+
+        resultsContainer.innerHTML = '';
+        queryDisplay.textContent = `Buscando: "${query}"`;
+        
+        const results = [];
+        // Search in meaningful sections
+        const elements = document.querySelectorAll('h1, h2, h3, h4, h5, p, .searchable');
+        
+        elements.forEach(el => {
+            const text = el.textContent || '';
+            if (text.toLowerCase().includes(query.toLowerCase()) && text.trim().length > 5) {
+                // Find parent section or category
+                const section = el.closest('section')?.querySelector('h2, h3')?.textContent || 
+                               el.closest('.bg-white')?.querySelector('h3, h4')?.textContent || 
+                               'Información General';
+                
+                results.push({
+                    text: text.trim(),
+                    section: section.trim(),
+                    element: el
+                });
+            }
+        });
+
+        if (results.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="text-center py-12">
+                    <div class="text-gray-300 mb-4">
+                        <svg class="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </div>
+                    <p class="text-obelisco-dark font-medium">No encontramos coincidencias exactas para "${query}"</p>
+                    <p class="text-gray-500 text-sm mt-1">Intentá con otras palabras clave.</p>
+                </div>
+            `;
+        } else {
+            // Group by section
+            const grouped = results.reduce((acc, curr) => {
+                if (!acc[curr.section]) acc[curr.section] = [];
+                acc[curr.section].push(curr);
+                return acc;
+            }, {});
+
+            for (const [section, items] of Object.entries(grouped)) {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'mb-6';
+                sectionDiv.innerHTML = `
+                    <h4 class="text-[10px] font-bold uppercase tracking-widest text-obelisco-blue mb-2 px-2">${section}</h4>
+                    <div class="space-y-2">
+                        ${items.map(item => `
+                            <div class="p-3 bg-white border border-gray-100 rounded-xl hover:border-obelisco-blue hover:shadow-md transition cursor-pointer group" onclick="document.getElementById('search-modal').classList.add('hidden'); window.scrollTo({ top: ${item.element.offsetTop - 100}, behavior: 'smooth' });">
+                                <p class="text-sm text-obelisco-dark line-clamp-2">${item.text.replace(new RegExp(query, 'gi'), match => `<span class="bg-yellow-100 font-bold">${match}</span>`)}</p>
+                                <div class="mt-2 flex items-center text-[10px] text-gray-400 group-hover:text-obelisco-blue">
+                                    <span>Ir a la sección</span>
+                                    <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                resultsContainer.appendChild(sectionDiv);
+            }
         }
+
+        searchModal.classList.remove('hidden');
+    }
+
+    // Modal Generic Close Logic
+    document.querySelectorAll('[data-close-modal]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const modalId = `${e.currentTarget.getAttribute('data-close-modal')}-modal`;
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.add('hidden');
+        });
+    });
+
+    // Terms & Privacy Triggers
+    const termsBtn = document.getElementById('view-terms-btn');
+    const privacyBtn = document.getElementById('view-privacy-btn');
+    const termsModal = document.getElementById('terms-modal');
+    const privacyModal = document.getElementById('privacy-modal');
+
+    if (termsBtn) termsBtn.onclick = (e) => { e.preventDefault(); termsModal.classList.remove('hidden'); };
+    if (privacyBtn) privacyBtn.onclick = (e) => { e.preventDefault(); privacyModal.classList.remove('hidden'); };
+
+    // "Sí, me fue útil" Logic
+    const feedbackYesBtn = document.getElementById('feedback-yes-btn');
+    if (feedbackYesBtn) {
+        feedbackYesBtn.onclick = async () => {
+            feedbackYesBtn.disabled = true;
+            feedbackYesBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            try {
+                await addDoc(collection(db, 'useful_votes'), {
+                    page: window.location.pathname,
+                    timestamp: serverTimestamp(),
+                    userAgent: navigator.userAgent
+                });
+                
+                // Show thanks toast
+                const thanksToast = document.createElement('div');
+                thanksToast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 bg-green-600 text-white px-8 py-4 rounded-xl shadow-2xl z-[100005] font-bold flex items-center space-x-3';
+                thanksToast.innerHTML = `
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                    <span>¡Gracias por tu devolución! Nos ayuda a mejorar.</span>
+                `;
+                document.body.appendChild(thanksToast);
+                setTimeout(() => thanksToast.remove(), 4000);
+                
+            } catch (err) {
+                console.error("Error saving useful vote:", err);
+            }
+        };
     }
 });
