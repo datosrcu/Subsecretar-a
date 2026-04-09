@@ -1327,100 +1327,146 @@
         </div>
     </div>
 
-    <!-- MODAL RESULTADOS DE BÚSQUEDA -->
-    <div id="search-modal" class="fixed inset-0 hidden items-center justify-center z-[100006] p-4">
-        <div class="absolute inset-0 bg-obelisco-dark/80 backdrop-blur-md" data-close-modal="search"></div>
-        <div class="relative bg-white w-[700px] max-w-full rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
-                <div>
-                    <h3 class="text-xl font-bold text-obelisco-dark">Resultados de búsqueda</h3>
-                    <p class="text-xs text-gray-500 mt-1" id="search-query-display"></p>
-                </div>
-                <button data-close-modal="search" class="text-gray-400 hover:text-red-500 transition">
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-            </div>
-            <div id="search-results-container" class="p-4 overflow-y-auto space-y-3 bg-gray-50/30">
-                <!-- Se llenará dinámicamente -->
-            </div>
-        </div>
-    </div>
+    <!-- FOOTER GCBA -->
+    <footer class="bg-obelisco-dark text-white pt-12 pb-6">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
 
-    <!-- MODAL FEEDBACK -->
-    <div id="feedback-modal" class="fixed inset-0 hidden items-center justify-center z-[100003] p-4">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="close-feedback-overlay"></div>
-        <div class="relative bg-white w-[550px] max-w-full rounded-2xl shadow-2xl p-8 flex flex-col">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+            <div class="mb-10">
+                <h3 class="text-lg font-bold mb-4">Teléfonos útiles</h3>
+                <div class="flex flex-wrap gap-x-6 gap-y-3 text-sm text-gray-300">
+                    <span><strong>102</strong> - Niñez y Adolescencia</span>
+                    <span><strong>103</strong> - Emergencias</span>
+                    <span><strong>107</strong> - SAME</span>
+                    <span><strong>911</strong> - Policía</span>
+                    <span><strong>144</strong> - Violencia de género</span>
+                    <span><strong>147</strong> - Atención ciudadana</span>
+                    <button id="view-phones-btn"
+                        class="text-obelisco-yellow hover:underline ml-auto block w-full mt-2 md:w-auto md:mt-0 text-left md:text-right">Ver
+                        todos los teléfonos</button>
                 </div>
-                <h3 class="text-2xl font-bold text-obelisco-dark">Sentimos que no fuera útil</h3>
-                <p class="text-obelisco-gray text-sm">Contanos qué podemos mejorar para brindarte un mejor servicio.</p>
             </div>
 
-            <form id="feedback-form" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-bold mb-1">Tu comentario *</label>
-                    <textarea id="feedback-comment" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-obelisco-blue" placeholder="¿En qué podemos mejorar?" required></textarea>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-bold mb-1">Nombre</label>
-                        <input type="text" id="feedback-name" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-obelisco-blue" placeholder="Tu nombre">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold mb-1">Email</label>
-                        <input type="email" id="feedback-email" class="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:border-obelisco-blue" placeholder="tu@email.com">
+            <div class="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center text-[10px] text-gray-400 gap-4">
+                <div class="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+                    <p class="font-bold text-gray-300 uppercase tracking-widest">Subsecretaría de Estadística</p>
+                    <div class="flex flex-wrap justify-center gap-x-6 gap-y-2">
+                        <a href="#" id="view-terms-btn" class="hover:text-white transition decoration-obelisco-blue underline-offset-4 decoration-2">Términos y condiciones</a>
+                        <a href="#" id="view-privacy-btn" class="hover:text-white transition decoration-obelisco-blue underline-offset-4 decoration-2">Política de privacidad</a>
+                        <a href="https://boletinoficial.riocuarto.gov.ar/" target="_blank" class="hover:text-white transition decoration-obelisco-blue underline-offset-4 decoration-2">Boletín oficial</a>
                     </div>
                 </div>
-                <button type="submit" id="feedback-submit-btn" class="w-full bg-obelisco-dark text-white font-bold py-3 rounded-lg hover:bg-gray-800 transition shadow-lg">Enviar Feedback</button>
-            </form>
-            <div id="feedback-success" class="hidden mt-4 p-4 bg-green-50 text-green-700 rounded-lg flex items-center justify-center font-medium">
-                ¡Gracias! Tu comentario ha sido recibido.
+                <p class="opacity-60">© 2025 Municipalidad de Río Cuarto</p>
+            </div>
+
+            <div
+                class="border-t border-gray-700 pt-8 mt-8 flex flex-col md:flex-row justify-between items-start md:items-center">
+
+                <div class="flex flex-col mb-6 md:mb-0 space-y-4">
+                    <!-- Espacio Logos Footer -->
+                    <div class="flex items-center space-x-4">
+                        <img src="https://placehold.co/120x40/212529/FFFFFF?text=Vamos+BA" alt="Vamos Buenos Aires"
+                            class="h-10">
+                        <img src="https://placehold.co/120x40/212529/FFFFFF?text=BA+Ciudad" alt="Buenos Aires Ciudad"
+                            class="h-10">
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-start md:items-end">
+                    <div class="mb-4">
+                        <h4 class="text-sm font-bold mb-2">Seguinos en</h4>
+                        <div class="flex space-x-3 text-sm text-gray-300">
+                             <a href="https://www.instagram.com/datosrcu" target="_blank" class="flex items-center hover:text-white transition">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.791-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.209-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                                Instagram
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="border-t border-gray-700 mt-8 pt-6 text-xs text-gray-500 text-center md:text-left">
+                Los contenidos de buenosaires.gob.ar están licenciados bajo Creative Commons Reconocimiento 2.5
+                Argentina License.
             </div>
         </div>
-    </div>
+    </footer>
 
     <!-- MODAL TÉRMINOS Y CONDICIONES -->
     <div id="terms-modal" class="fixed inset-0 hidden items-center justify-center z-[100004] p-4">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-close-modal="terms"></div>
-        <div class="relative bg-white w-[800px] max-w-full rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center shrink-0">
-                <h3 class="text-xl font-bold text-obelisco-dark">Términos y Condiciones</h3>
+        <div class="absolute inset-0 bg-obelisco-dark/90 backdrop-blur-sm" data-close-modal="terms"></div>
+        <div class="relative bg-white w-[800px] max-w-full rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+                <div>
+                    <h3 class="text-xl font-bold text-obelisco-dark">Términos y Condiciones de Uso</h3>
+                    <p class="text-[10px] text-obelisco-blue font-bold tracking-widest uppercase mt-1">Ordenanza N° 162/2025</p>
+                </div>
                 <button data-close-modal="terms" class="text-gray-400 hover:text-red-500 transition">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
-            <div class="p-8 overflow-y-auto prose prose-sm max-w-none text-obelisco-dark text-sm space-y-4">
-                <h4 class="font-bold">1. Marco Normativo</h4>
-                <p>El portal del Observatorio de Gestión Municipal se rige bajo la Ordenanza N° 162/2025 de Modelo de Gobernanza de Datos Públicos, garantizando el acceso a la información y la transparencia gubernamental.</p>
-                <h4 class="font-bold">2. Uso de la Información</h4>
-                <p>Los datos y tableros presentados tienen carácter informativo. Aunque se trabaja para asegurar la veracidad de los datos, el municipio no se responsabiliza por interpretaciones erróneas de terceros sobre la información cruda.</p>
-                <h4 class="font-bold">3. Accesibilidad</h4>
-                <p>Ciertos tableros pueden requerir credenciales específicas según el rol del usuario, en cumplimiento con las normativas locales de seguridad de la información.</p>
+            <div class="p-8 overflow-y-auto prose prose-sm max-w-none text-obelisco-dark text-sm space-y-6">
+                <section>
+                    <h4 class="font-bold text-obelisco-blue border-b pb-1 mb-2">1. Marco Normativo y Propósito</h4>
+                    <p>El portal del Observatorio de Gestión Municipal se enmarca en la **Ordenanza N° 162/2025: Modelo de Gobernanza de Datos Públicos**. Su propósito es garantizar la transparencia, el acceso a la información pública y fomentar la participación ciudadana mediante la visualización de datos gubernamentales.</p>
+                </section>
+                <section>
+                    <h4 class="font-bold text-obelisco-blue border-b pb-1 mb-2">2. Propiedad y Licenciamiento</h4>
+                    <p>Los datos, tableros y análisis presentados son propiedad de la **Municipalidad de Río Cuarto**. Salvo indicación contraria, la información está sujeta a una **Licencia Creative Commons Atribución-CompartirIgual 4.0 Internacional (CC BY-SA 4.0)**, permitiendo su redistribución y uso citando la fuente original.</p>
+                </section>
+                <section>
+                    <h4 class="font-bold text-obelisco-blue border-b pb-1 mb-2">3. Exención de Responsabilidad</h4>
+                    <p>Si bien la Municipalidad trabaja para asegurar la veracidad y actualización de los datos, estos tienen carácter informativo. La Municipalidad no se responsabiliza por errores u omisiones, ni por las interpretaciones, conclusiones o decisiones que terceros puedan tomar a partir de la información cruda o visualizada en este portal.</p>
+                </section>
+                <section>
+                    <h4 class="font-bold text-obelisco-blue border-b pb-1 mb-2">4. Uso del Portal</h4>
+                    <p>Se prohíbe cualquier uso que atente contra la integridad del servicio, incluyendo ataques informáticos, extracción masiva automatizada de datos (scraping) que degrade el rendimiento, o el uso de la información para fines ilícitos o difamatorios.</p>
+                </section>
+            </div>
+            <div class="p-4 bg-gray-50 border-t flex justify-end shrink-0">
+                <button data-close-modal="terms" class="bg-obelisco-dark text-white px-6 py-2 rounded-lg font-bold text-xs hover:bg-gray-800 transition">Entendido</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL PRIVACIDAD -->
     <div id="privacy-modal" class="fixed inset-0 hidden items-center justify-center z-[100004] p-4">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-close-modal="privacy"></div>
-        <div class="relative bg-white w-[800px] max-w-full rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center shrink-0">
-                <h3 class="text-xl font-bold text-obelisco-dark">Política de Privacidad</h3>
+        <div class="absolute inset-0 bg-obelisco-dark/90 backdrop-blur-sm" data-close-modal="privacy"></div>
+        <div class="relative bg-white w-[700px] max-w-full rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+                <div>
+                    <h3 class="text-xl font-bold text-obelisco-dark">Política de Privacidad</h3>
+                    <p class="text-[10px] text-obelisco-blue font-bold tracking-widest uppercase mt-1">Protección de Datos</p>
+                </div>
                 <button data-close-modal="privacy" class="text-gray-400 hover:text-red-500 transition">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
-            <div class="p-8 overflow-y-auto prose prose-sm max-w-none text-obelisco-dark text-sm space-y-4">
-                <h4 class="font-bold">1. Recolección de Datos</h4>
-                <p>Recopilamos información básica al iniciar sesión (Nombre y Email) para gestionar permisos de acceso a tableros específicos.</p>
-                <h4 class="font-bold">2. Seguimiento de Uso</h4>
-                <p>Utilizamos herramientas de analítica para registrar los ingresos a los tableros con fines estadísticos y de mejora continua del servicio.</p>
-                <h4 class="font-bold">3. Feedback</h4>
-                <p>Los comentarios enviados a través del sistema de feedback son anónimos a menos que el usuario decida proveer su nombre. Estos se utilizan exclusivamente para mejoras técnicas.</p>
+            <div class="p-8 overflow-y-auto prose prose-sm max-w-none text-obelisco-dark text-sm space-y-6">
+                <section>
+                    <h4 class="font-bold text-obelisco-blue border-b pb-1 mb-2">1. Recolección de Información</h4>
+                    <p>Para la gestión de accesos diferenciados, recolectamos el nombre y correo electrónico de los usuarios que inician sesión mediante Google Auth. No recolectamos datos sensibles fuera de los estrictamente necesarios para el funcionamiento de los tableros internos.</p>
+                </section>
+                <section>
+                    <h4 class="font-bold text-obelisco-blue border-b pb-1 mb-2">2. Finalidad del Tratamiento</h4>
+                    <p>Los datos personales son utilizados exclusivamente para:</p>
+                    <ul class="list-disc ml-5 space-y-1">
+                        <li>Determinar permisos de acceso a tableros específicos.</li>
+                        <li>Análisis estadístico interno de uso del portal.</li>
+                        <li>Auditoría y mejora continua de la experiencia del usuario.</li>
+                    </ul>
+                </section>
+                <section>
+                    <h4 class="font-bold text-obelisco-blue border-b pb-1 mb-2">3. Sistema de Feedback</h4>
+                    <p>La información enviada a través de los formularios de feedback (comentarios) es utilizada para la resolución de errores técnicos y mejoras de diseño. Estos registros están protegidos y solo son accesibles por el personal técnico del Observatorio.</p>
+                </section>
+                <section>
+                    <h4 class="font-bold text-obelisco-blue border-b pb-1 mb-2">4. Derechos del Titular</h4>
+                    <p>Los usuarios mantienen en todo momento el derecho de acceso, rectificación y supresión de sus datos personales, en el marco de la normativa vigente de Protección de Datos Personales.</p>
+                </section>
+            </div>
+            <div class="p-4 bg-gray-50 border-t flex justify-end shrink-0">
+                <button data-close-modal="privacy" class="bg-obelisco-dark text-white px-6 py-2 rounded-lg font-bold text-xs hover:bg-gray-800 transition">Entendido</button>
             </div>
         </div>
     </div>
