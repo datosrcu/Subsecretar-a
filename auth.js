@@ -747,25 +747,29 @@ document.getElementById('ogb-form-terms')?.addEventListener('change', (e) => {
     if (submitBtn) submitBtn.disabled = !e.target.checked;
 });
 
-// Terms Modal Logic
+// 4. Lógica de Modales Legales (Términos y Privacidad)
 const termsModal = document.getElementById('terms-modal');
-const openTermsBtn = document.getElementById('open-terms-modal');
-const closeTermsBtn = document.getElementById('close-terms-btn');
-const closeTermsOverlay = document.getElementById('close-terms-overlay');
+const privacyModal = document.getElementById('privacy-modal');
 
-function openTermsModal() {
-    termsModal?.classList.remove('hidden');
-    termsModal?.classList.add('flex');
-}
+// Selectores para botones de apertura (soportando múltiples IDs usados en el proyecto)
+const termsTriggers = ['view-terms-btn', 'open-terms-modal'];
+const privacyTriggers = ['view-privacy-btn', 'open-privacy-modal'];
 
-function closeTermsModal() {
-    termsModal?.classList.add('hidden');
-    termsModal?.classList.remove('flex');
-}
+termsTriggers.forEach(id => {
+    document.getElementById(id)?.addEventListener('click', (e) => {
+        e.preventDefault();
+        termsModal?.classList.remove('hidden');
+        termsModal?.classList.add('flex');
+    });
+});
 
-openTermsBtn?.addEventListener('click', openTermsModal);
-closeTermsBtn?.addEventListener('click', closeTermsModal);
-closeTermsOverlay?.addEventListener('click', closeTermsModal);
+privacyTriggers.forEach(id => {
+    document.getElementById(id)?.addEventListener('click', (e) => {
+        e.preventDefault();
+        privacyModal?.classList.remove('hidden');
+        privacyModal?.classList.add('flex');
+    });
+});
 // --- Registration Form Submission ---
 if (registrationForm) {
     registrationForm.addEventListener('submit', async (e) => {
@@ -926,255 +930,155 @@ const searchInput = document.getElementById('header-search-input');
 
 searchInput?.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-        const query = searchInput.value.trim().toLowerCase();
+        const query = searchInput.value.trim();
         if (query.length < 3) return;
-
-        // Simple search logic: find the first element containing the text
-        const elements = document.querySelectorAll('h1, h2, h3, h4, p, a');
-        let found = false;
-
-        for (const el of elements) {
-            if (el.textContent.toLowerCase().includes(query)) {
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                // Visual feedback
-                const originalBg = el.style.backgroundColor;
-                el.style.backgroundColor = '#fef08a'; // Light yellow
-                setTimeout(() => {
-                    el.style.backgroundColor = originalBg;
-                }, 2000);
-                
-                found = true;
-                break;
-            }
-        }
 
         performEnhancedSearch(query);
     }
+});
 
-    function performEnhancedSearch(query) {
-        const resultsContainer = document.getElementById('search-results-container');
-        const searchModal = document.getElementById('search-modal');
-        const queryDisplay = document.getElementById('search-query-display');
+// Helper: Normalize string (remove accents and lower case)
+function normalizeStr(str) {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function performEnhancedSearch(query) {
+    const resultsContainer = document.getElementById('search-results-container');
+    const searchModal = document.getElementById('search-modal');
+    const queryDisplay = document.getElementById('search-query-display');
+    
+    if (!resultsContainer || !searchModal) return;
+
+    resultsContainer.innerHTML = '';
+    queryDisplay.textContent = `Buscando: "${query}"`;
+    
+    const normalizedQuery = normalizeStr(query);
+    const results = [];
+    
+    // Search in meaningful sections, including buttons and links (important for dashboard boards)
+    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, p, .searchable, button, a');
+    
+    elements.forEach(el => {
+        const text = el.textContent || '';
+        const normalizedText = normalizeStr(text);
         
-        if (!resultsContainer || !searchModal) return;
+        // Skip elements inside modals to avoid recursive search results if needed
+        if (el.closest('#search-modal') || el.closest('#login-modal')) return;
 
-        resultsContainer.innerHTML = '';
-        queryDisplay.textContent = `Buscando: "${query}"`;
-        
-        const results = [];
-        // Search in meaningful sections
-        const elements = document.querySelectorAll('h1, h2, h3, h4, h5, p, .searchable');
-        
-        elements.forEach(el => {
-            const text = el.textContent || '';
-            if (text.toLowerCase().includes(query.toLowerCase()) && text.trim().length > 5) {
-                // Find parent section or category
-                const section = el.closest('section')?.querySelector('h2, h3')?.textContent || 
-                               el.closest('.bg-white')?.querySelector('h3, h4')?.textContent || 
-                               'Información General';
-                
-                results.push({
-                    text: text.trim(),
-                    section: section.trim(),
-                    element: el
-                });
-            }
-        });
-
-        if (results.length === 0) {
-            resultsContainer.innerHTML = `
-                <div class="text-center py-12">
-                    <div class="text-gray-300 mb-4">
-                        <svg class="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                    </div>
-                    <p class="text-obelisco-dark font-medium">No encontramos coincidencias exactas para "${query}"</p>
-                    <p class="text-gray-500 text-sm mt-1">Intentá con otras palabras clave.</p>
-                </div>
-            `;
-        } else {
-            // Group by section
-            const grouped = results.reduce((acc, curr) => {
-                if (!acc[curr.section]) acc[curr.section] = [];
-                acc[curr.section].push(curr);
-                return acc;
-            }, {});
-
-            for (const [section, items] of Object.entries(grouped)) {
-                const sectionDiv = document.createElement('div');
-                sectionDiv.className = 'mb-6';
-                sectionDiv.innerHTML = `
-                    <h4 class="text-[10px] font-bold uppercase tracking-widest text-obelisco-blue mb-2 px-2">${section}</h4>
-                    <div class="space-y-2">
-                        ${items.map(item => `
-                            <div class="p-3 bg-white border border-gray-100 rounded-xl hover:border-obelisco-blue hover:shadow-md transition cursor-pointer group" onclick="document.getElementById('search-modal').classList.add('hidden'); window.scrollTo({ top: ${item.element.offsetTop - 100}, behavior: 'smooth' });">
-                                <p class="text-sm text-obelisco-dark line-clamp-2">${item.text.replace(new RegExp(query, 'gi'), match => `<span class="bg-yellow-100 font-bold">${match}</span>`)}</p>
-                                <div class="mt-2 flex items-center text-[10px] text-gray-400 group-hover:text-obelisco-blue">
-                                    <span>Ir a la sección</span>
-                                    <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                resultsContainer.appendChild(sectionDiv);
-            }
-        }
-
-        searchModal.classList.remove('hidden');
-    }
-
-    // Helper: Normalize string (remove accents and lower case)
-    function normalizeStr(str) {
-        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    }
-
-    function performEnhancedSearch(query) {
-        const resultsContainer = document.getElementById('search-results-container');
-        const searchModal = document.getElementById('search-modal');
-        const queryDisplay = document.getElementById('search-query-display');
-        
-        if (!resultsContainer || !searchModal) return;
-
-        resultsContainer.innerHTML = '';
-        queryDisplay.textContent = `Buscando: "${query}"`;
-        
-        const normalizedQuery = normalizeStr(query);
-        const results = [];
-        
-        // Search in meaningful sections, including buttons and links (important for dashboard boards)
-        const elements = document.querySelectorAll('h1, h2, h3, h4, h5, p, .searchable, button, a');
-        
-        elements.forEach(el => {
-            const text = el.textContent || '';
-            const normalizedText = normalizeStr(text);
+        if (normalizedText.includes(normalizedQuery) && text.trim().length > 3) {
+            // Find parent section or category
+            const section = el.closest('section')?.querySelector('h2, h3')?.textContent || 
+                           el.closest('.bg-white')?.querySelector('h3, h4')?.textContent || 
+                           el.closest('[id]')?.id ||
+                           'Información General';
             
-            // Skip elements inside modals to avoid recursive search results if needed
-            if (el.closest('#search-modal') || el.closest('#login-modal')) return;
-
-            if (normalizedText.includes(normalizedQuery) && text.trim().length > 3) {
-                // Find parent section or category
-                const section = el.closest('section')?.querySelector('h2, h3')?.textContent || 
-                               el.closest('.bg-white')?.querySelector('h3, h4')?.textContent || 
-                               el.closest('[id]')?.id ||
-                               'Información General';
-                
-                results.push({
-                    text: text.trim(),
-                    section: section.trim(),
-                    element: el
-                });
-            }
-        });
-
-        if (results.length === 0) {
-            resultsContainer.innerHTML = `
-                <div class="text-center py-12">
-                    <div class="text-gray-300 mb-4">
-                        <svg class="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                    </div>
-                    <p class="text-obelisco-dark font-medium">No encontramos coincidencias para "${query}"</p>
-                    <p class="text-gray-500 text-sm mt-1">Intentá con otras palabras clave (ignora acentos si preferís).</p>
-                </div>
-            `;
-        } else {
-            // Group by section and filter duplicates
-            const uniqueResults = [];
-            const seenTexts = new Set();
-            
-            results.forEach(r => {
-                if (!seenTexts.has(r.text)) {
-                    uniqueResults.push(r);
-                    seenTexts.add(r.text);
-                }
+            results.push({
+                text: text.trim(),
+                section: section.trim(),
+                element: el
             });
-
-            const grouped = uniqueResults.reduce((acc, curr) => {
-                const sectionName = curr.section.length > 30 ? 'General' : curr.section;
-                if (!acc[sectionName]) acc[sectionName] = [];
-                acc[sectionName].push(curr);
-                return acc;
-            }, {});
-
-            for (const [section, items] of Object.entries(grouped)) {
-                const sectionDiv = document.createElement('div');
-                sectionDiv.className = 'mb-6';
-                sectionDiv.innerHTML = `
-                    <h4 class="text-[10px] font-bold uppercase tracking-widest text-obelisco-blue mb-2 px-2 border-l-2 border-obelisco-blue ml-1">${section}</h4>
-                    <div class="space-y-2">
-                        ${items.map(item => `
-                            <div class="p-3 bg-white border border-gray-100 rounded-xl hover:border-obelisco-blue hover:shadow-md transition cursor-pointer group" onclick="document.getElementById('search-modal').classList.add('hidden'); window.scrollTo({ top: ${item.element.getBoundingClientRect().top + window.scrollY - 100}, behavior: 'smooth' });">
-                                <p class="text-sm text-obelisco-dark line-clamp-2">${item.text.replace(new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), match => `<span class="bg-yellow-100 font-bold">${match}</span>`)}</p>
-                                <div class="mt-2 flex items-center text-[10px] text-gray-400 group-hover:text-obelisco-blue font-bold">
-                                    <span>Ver ubicación</span>
-                                    <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                resultsContainer.appendChild(sectionDiv);
-            }
         }
-
-        searchModal.classList.remove('hidden');
-    }
-
-    // Modal Generic Close Logic
-    document.querySelectorAll('[data-close-modal]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const modalId = `${e.currentTarget.getAttribute('data-close-modal')}-modal`;
-            const modal = document.getElementById(modalId);
-            if (modal) modal.classList.add('hidden');
-        });
     });
 
-    // Terms & Privacy Triggers
-    const termsBtn = document.getElementById('view-terms-btn');
-    const privacyBtn = document.getElementById('view-privacy-btn');
-    const termsModal = document.getElementById('terms-modal');
-    const privacyModal = document.getElementById('privacy-modal');
-
-    if (termsBtn) termsBtn.onclick = (e) => { e.preventDefault(); termsModal.classList.remove('hidden'); };
-    if (privacyBtn) privacyBtn.onclick = (e) => { e.preventDefault(); privacyModal.classList.remove('hidden'); };
-
-    // "Sí, me fue útil" Logic
-    const feedbackYesBtn = document.getElementById('feedback-yes-btn');
-    if (feedbackYesBtn) {
-        feedbackYesBtn.onclick = async () => {
-            feedbackYesBtn.disabled = true;
-            feedbackYesBtn.innerHTML = '<span class="animate-pulse">Procesando...</span>';
-            
-            try {
-                await addDoc(collection(db, 'useful_votes'), {
-                    page: window.location.pathname,
-                    timestamp: serverTimestamp(),
-                    userAgent: navigator.userAgent
-                });
-                
-                // Show thanks toast
-                const thanksToast = document.createElement('div');
-                thanksToast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 bg-green-600 text-white px-8 py-4 rounded-xl shadow-2xl z-[100005] font-bold flex items-center space-x-3 transition-all transform animate-bounce';
-                thanksToast.innerHTML = `
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                    <span>¡Gracias por tu devolución! Nos ayuda a mejorar.</span>
-                `;
-                document.body.appendChild(thanksToast);
-
-                // Ocultar sección de feedback
-                const feedbackSection = feedbackYesBtn.closest('section');
-                if (feedbackSection) {
-                    feedbackSection.classList.add('opacity-0', 'pointer-events-none', 'transition-all', 'duration-1000');
-                    setTimeout(() => feedbackSection.style.display = 'none', 1000);
-                }
-
-                setTimeout(() => thanksToast.remove(), 4000);
-                
-            } catch (err) {
-                console.error("Error saving useful vote:", err);
-                feedbackYesBtn.disabled = false;
-                feedbackYesBtn.innerText = 'Error - Reintentar';
+    if (results.length === 0) {
+        resultsContainer.innerHTML = `
+            <div class="text-center py-12">
+                <div class="text-gray-300 mb-4">
+                    <svg class="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </div>
+                <p class="text-obelisco-dark font-medium">No encontramos coincidencias para "${query}"</p>
+                <p class="text-gray-500 text-sm mt-1">Intentá con otras palabras clave (ignora acentos si preferís).</p>
+            </div>
+        `;
+    } else {
+        // Group by section and filter duplicates
+        const uniqueResults = [];
+        const seenTexts = new Set();
+        
+        results.forEach(r => {
+            if (!seenTexts.has(r.text)) {
+                uniqueResults.push(r);
+                seenTexts.add(r.text);
             }
-        };
+        });
+
+        const grouped = uniqueResults.reduce((acc, curr) => {
+            const sectionName = curr.section.length > 30 ? 'General' : curr.section;
+            if (!acc[sectionName]) acc[sectionName] = [];
+            acc[sectionName].push(curr);
+            return acc;
+        }, {});
+
+        for (const [section, items] of Object.entries(grouped)) {
+            const sectionDiv = document.createElement('div');
+            sectionDiv.className = 'mb-6';
+            sectionDiv.innerHTML = `
+                <h4 class="text-[10px] font-bold uppercase tracking-widest text-obelisco-blue mb-2 px-2 border-l-2 border-obelisco-blue ml-1">${section}</h4>
+                <div class="space-y-2">
+                    ${items.map(item => `
+                        <div class="p-3 bg-white border border-gray-100 rounded-xl hover:border-obelisco-blue hover:shadow-md transition cursor-pointer group" onclick="document.getElementById('search-modal').classList.add('hidden'); window.scrollTo({ top: ${item.element.getBoundingClientRect().top + window.scrollY - 100}, behavior: 'smooth' });">
+                            <p class="text-sm text-obelisco-dark line-clamp-2">${item.text.replace(new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), match => `<span class="bg-yellow-100 font-bold">${match}</span>`)}</p>
+                            <div class="mt-2 flex items-center text-[10px] text-gray-400 group-hover:text-obelisco-blue font-bold">
+                                <span>Ver ubicación</span>
+                                <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            resultsContainer.appendChild(sectionDiv);
+        }
     }
+
+    searchModal.classList.remove('hidden');
+}
+
+// Modal Generic Close Logic
+document.querySelectorAll('[data-close-modal]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const modalId = `${e.currentTarget.getAttribute('data-close-modal')}-modal`;
+        const modal = document.getElementById(modalId);
+        if (modal) modal.classList.add('hidden');
+    });
 });
+
+// "Sí, me fue útil" Logic
+const feedbackYesBtn = document.getElementById('feedback-yes-btn');
+if (feedbackYesBtn) {
+    feedbackYesBtn.onclick = async () => {
+        feedbackYesBtn.disabled = true;
+        feedbackYesBtn.innerHTML = '<span class="animate-pulse">Procesando...</span>';
+        
+        try {
+            await addDoc(collection(db, 'useful_votes'), {
+                page: window.location.pathname,
+                timestamp: serverTimestamp(),
+                userAgent: navigator.userAgent
+            });
+            
+            // Show thanks toast
+            const thanksToast = document.createElement('div');
+            thanksToast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 bg-green-600 text-white px-8 py-4 rounded-xl shadow-2xl z-[100005] font-bold flex items-center space-x-3 transition-all transform animate-bounce';
+            thanksToast.innerHTML = `
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <span>¡Gracias por tu devolución! Nos ayuda a mejorar.</span>
+            `;
+            document.body.appendChild(thanksToast);
+
+            // Ocultar sección de feedback
+            const feedbackSection = feedbackYesBtn.closest('section');
+            if (feedbackSection) {
+                feedbackSection.classList.add('opacity-0', 'pointer-events-none', 'transition-all', 'duration-1000');
+                setTimeout(() => feedbackSection.style.display = 'none', 1000);
+            }
+
+            setTimeout(() => thanksToast.remove(), 4000);
+            
+        } catch (err) {
+            console.error("Error saving useful vote:", err);
+            feedbackYesBtn.disabled = false;
+            feedbackYesBtn.innerText = 'Error - Reintentar';
+        }
+    };
+}
+
