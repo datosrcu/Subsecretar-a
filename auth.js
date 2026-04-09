@@ -1,5 +1,5 @@
-import { app, auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, collection, getDocs, doc, getDoc } from './firebase-config.js';
-import { setDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { app, auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, collection, getDocs, doc, getDoc, addDoc, updateDoc } from './firebase-config.js';
+import { setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // DOM Elements
 const loginBtn = document.getElementById('login-btn');
@@ -37,9 +37,9 @@ const modalIframeWrap = document.getElementById('ogb-iframe-wrap');
 const modalIframe = document.getElementById('ogb-iframe');
 const modalLoader = document.getElementById('iframe-loader');
 const fullScreenBtn = document.getElementById('ogb-full');
-const ogbDirectLink = document.getElementById('ogb-direct-link');
+const ogbDirectLink = null;
 const iframeFallback = document.getElementById('iframe-fallback');
-const ogbFallbackBtn = document.getElementById('ogb-fallback-btn');
+const ogbFallbackBtn = null;
 const unauthOverlay = document.getElementById('unauth-overlay');
 
 // Allowed Domain
@@ -397,8 +397,7 @@ async function handleAccessRequest(e) {
     submitBtn.textContent = "Enviando...";
 
     try {
-        const { addDoc: addDocLocal } = await import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js");
-        await addDocLocal(collection(db, "requests"), {
+        await addDoc(collection(db, "requests"), {
             userEmail: userEmail,
             buttonId: buttonId,
             buttonName: buttonName,
@@ -525,10 +524,6 @@ function openModal(title, url) {
 
     // Load iframe content
     modalIframe.src = finalSrc;
-
-    // Direct links update
-    if (ogbDirectLink) ogbDirectLink.href = finalSrc;
-    if (ogbFallbackBtn) ogbFallbackBtn.href = finalSrc;
 
     // Reset fallback visibility
     if (iframeFallback) iframeFallback.classList.add('hidden');
@@ -700,15 +695,11 @@ document.addEventListener('click', (e) => {
 
         if (hasAccess) {
             const url = btn.getAttribute('data-iframe');
-            const openInNewTab = btn.getAttribute('data-new-tab') === 'true';
-
+            
+            // Record activity and wait for it (or handle errors)
             recordUserActivity(title, true);
 
-            if (openInNewTab) {
-                window.open(url, '_blank');
-            } else {
-                openModal(title, url);
-            }
+            openModal(title, url);
         } else {
             recordUserActivity(title, false);
             openAccessRequestForm(title, id);
@@ -815,17 +806,26 @@ if (registrationForm) {
 
 // --- Tracking Activity ---
 async function recordUserActivity(buttonName, hasAccess) {
-    if (!auth.currentUser) return;
+    const user = auth.currentUser;
+    if (!user) {
+        console.warn("Tracking skipped: No user logged in.");
+        return;
+    }
+    
+    console.log(`[Tracking] Recording activity for: ${buttonName} (Access: ${hasAccess})`);
+    
     try {
-        await addDoc(collection(db, "user_tracking"), {
-            userEmail: auth.currentUser.email,
-            userName: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
-            buttonName: buttonName,
+        const logData = {
+            userEmail: user.email.toLowerCase(),
+            userName: user.displayName || user.email.split('@')[0],
+            buttonName: buttonName || "Desconocido",
             hasAccess: hasAccess,
             timestamp: new Date().toISOString()
-        });
-        console.log("Activity recorded:", buttonName, hasAccess);
+        };
+        
+        await addDoc(collection(db, "user_tracking"), logData);
+        console.log("[Tracking] Activity recorded successfully.");
     } catch (e) {
-        console.warn("Failed to record activity:", e);
+        console.error("[Tracking] Error recording activity:", e);
     }
 }
