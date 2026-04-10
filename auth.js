@@ -838,6 +838,7 @@ async function recordUserActivity(buttonName, hasAccess) {
 // 1. Lógica del Móvil de Teléfonos Útiles
 const phonesModal = document.getElementById('phones-modal');
 const viewPhonesBtn = document.getElementById('view-phones-btn');
+const viewPhonesBtnFooter = document.getElementById('view-phones-btn-footer');
 const closePhonesBtn = document.getElementById('close-phones-btn');
 const closePhonesOverlay = document.getElementById('close-phones-overlay');
 
@@ -855,8 +856,12 @@ function togglePhonesModal(show) {
 }
 
 viewPhonesBtn?.addEventListener('click', () => togglePhonesModal(true));
+viewPhonesBtnFooter?.addEventListener('click', () => togglePhonesModal(true));
 closePhonesBtn?.addEventListener('click', () => togglePhonesModal(false));
 closePhonesOverlay?.addEventListener('click', () => togglePhonesModal(false));
+
+// Modales legales: los listeners ya están registrados en el bloque de arriba (termsTriggers / privacyTriggers).
+
 
 // 2. Lógica de Feedback ("No me sirvió")
 const feedbackModal = document.getElementById('feedback-modal');
@@ -932,7 +937,6 @@ searchInput?.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         const query = searchInput.value.trim();
         if (query.length < 3) return;
-
         performEnhancedSearch(query);
     }
 });
@@ -956,21 +960,20 @@ function performEnhancedSearch(query) {
     const results = [];
     
     // Search in meaningful sections, including buttons and links (important for dashboard boards)
-    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, p, .searchable, button, a');
+    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, p, .searchable, button, a, [title]');
     
     elements.forEach(el => {
-        const text = el.textContent || '';
+        let text = el.textContent || el.getAttribute('title') || '';
         const normalizedText = normalizeStr(text);
         
-        // Skip elements inside modals to avoid recursive search results if needed
-        if (el.closest('#search-modal') || el.closest('#login-modal')) return;
+        // Skip elements inside modals to avoid recursive search results
+        if (el.closest('#search-modal') || el.closest('#login-modal') || el.closest('footer')) return;
 
-        if (normalizedText.includes(normalizedQuery) && text.trim().length > 3) {
+        if (normalizedText.includes(normalizedQuery) && text.trim().length > 2) {
             // Find parent section or category
-            const section = el.closest('section')?.querySelector('h2, h3')?.textContent || 
-                           el.closest('.bg-white')?.querySelector('h3, h4')?.textContent || 
-                           el.closest('[id]')?.id ||
-                           'Información General';
+            const section = el.closest('section')?.querySelector('h1, h2, h3')?.textContent || 
+                           el.closest('.obelisco-card')?.querySelector('h3, h4')?.textContent || 
+                           'Sección General';
             
             results.push({
                 text: text.trim(),
@@ -983,51 +986,57 @@ function performEnhancedSearch(query) {
     if (results.length === 0) {
         resultsContainer.innerHTML = `
             <div class="text-center py-12">
-                <div class="text-gray-300 mb-4">
+                <div class="text-gray-300 mb-4 opacity-30">
                     <svg class="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </div>
-                <p class="text-obelisco-dark font-medium">No encontramos coincidencias para "${query}"</p>
-                <p class="text-gray-500 text-sm mt-1">Intentá con otras palabras clave (ignora acentos si preferís).</p>
+                <p class="text-obelisco-dark font-bold text-lg">No encontramos coincidencias</p>
+                <p class="text-gray-500 text-sm mt-1">Probá con términos más generales como "seguridad", "ambiente" o "dalcar".</p>
             </div>
         `;
     } else {
-        // Group by section and filter duplicates
         const uniqueResults = [];
         const seenTexts = new Set();
         
         results.forEach(r => {
-            if (!seenTexts.has(r.text)) {
+            const cleanText = normalizeStr(r.text);
+            if (!seenTexts.has(cleanText)) {
                 uniqueResults.push(r);
-                seenTexts.add(r.text);
+                seenTexts.add(cleanText);
             }
         });
 
-        const grouped = uniqueResults.reduce((acc, curr) => {
-            const sectionName = curr.section.length > 30 ? 'General' : curr.section;
-            if (!acc[sectionName]) acc[sectionName] = [];
-            acc[sectionName].push(curr);
-            return acc;
-        }, {});
+        // Limit to 15 results for performance
+        const limitedResults = uniqueResults.slice(0, 15);
 
-        for (const [section, items] of Object.entries(grouped)) {
-            const sectionDiv = document.createElement('div');
-            sectionDiv.className = 'mb-6';
-            sectionDiv.innerHTML = `
-                <h4 class="text-[10px] font-bold uppercase tracking-widest text-obelisco-blue mb-2 px-2 border-l-2 border-obelisco-blue ml-1">${section}</h4>
-                <div class="space-y-2">
-                    ${items.map(item => `
-                        <div class="p-3 bg-white border border-gray-100 rounded-xl hover:border-obelisco-blue hover:shadow-md transition cursor-pointer group" onclick="document.getElementById('search-modal').classList.add('hidden'); window.scrollTo({ top: ${item.element.getBoundingClientRect().top + window.scrollY - 100}, behavior: 'smooth' });">
-                            <p class="text-sm text-obelisco-dark line-clamp-2">${item.text.replace(new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), match => `<span class="bg-yellow-100 font-bold">${match}</span>`)}</p>
-                            <div class="mt-2 flex items-center text-[10px] text-gray-400 group-hover:text-obelisco-blue font-bold">
-                                <span>Ver ubicación</span>
-                                <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                            </div>
-                        </div>
-                    `).join('')}
+        limitedResults.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'p-4 bg-white border border-gray-100 rounded-xl hover:border-obelisco-blue hover:shadow-lg transition cursor-pointer group mb-3';
+            
+            // Highlight match
+            const escapedQuery = normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const displayHTML = item.text.replace(new RegExp(escapedQuery, 'gi'), match => `<span class="bg-yellow-200 font-bold p-0.5 rounded">${match}</span>`);
+
+            itemDiv.innerHTML = `
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-[9px] font-bold uppercase tracking-widest text-obelisco-blue opacity-70">${item.section}</span>
+                </div>
+                <p class="text-sm text-obelisco-dark font-medium leading-relaxed">${displayHTML}</p>
+                <div class="mt-2 flex items-center text-[10px] text-obelisco-blue font-bold opacity-0 group-hover:opacity-100 transition">
+                    <span>Ir a la sección</span>
+                    <svg class="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                 </div>
             `;
-            resultsContainer.appendChild(sectionDiv);
-        }
+
+            itemDiv.onclick = () => {
+                searchModal.classList.add('hidden');
+                item.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Flash animation for the target element
+                item.element.classList.add('ring-4', 'ring-obelisco-yellow', 'ring-opacity-50', 'rounded-lg', 'transition-all');
+                setTimeout(() => item.element.classList.remove('ring-4', 'ring-obelisco-yellow', 'ring-opacity-50'), 2000);
+            };
+
+            resultsContainer.appendChild(itemDiv);
+        });
     }
 
     searchModal.classList.remove('hidden');
@@ -1037,8 +1046,12 @@ function performEnhancedSearch(query) {
 document.querySelectorAll('[data-close-modal]').forEach(btn => {
     btn.addEventListener('click', (e) => {
         const modalId = `${e.currentTarget.getAttribute('data-close-modal')}-modal`;
-        const modal = document.getElementById(modalId);
-        if (modal) modal.classList.add('hidden');
+        const m = document.getElementById(modalId);
+        if (m) {
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
     });
 });
 
@@ -1047,7 +1060,7 @@ const feedbackYesBtn = document.getElementById('feedback-yes-btn');
 if (feedbackYesBtn) {
     feedbackYesBtn.onclick = async () => {
         feedbackYesBtn.disabled = true;
-        feedbackYesBtn.innerHTML = '<span class="animate-pulse">Procesando...</span>';
+        feedbackYesBtn.innerHTML = '<span class="animate-pulse">Registrando...</span>';
         
         try {
             await addDoc(collection(db, 'useful_votes'), {
@@ -1058,27 +1071,37 @@ if (feedbackYesBtn) {
             
             // Show thanks toast
             const thanksToast = document.createElement('div');
-            thanksToast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 bg-green-600 text-white px-8 py-4 rounded-xl shadow-2xl z-[100005] font-bold flex items-center space-x-3 transition-all transform animate-bounce';
+            thanksToast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-900 border border-gray-700 text-white px-8 py-4 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[100005] font-bold flex items-center space-x-4 transition-all transform scale-100 animate-in fade-in zoom-in duration-300';
             thanksToast.innerHTML = `
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                <span>¡Gracias por tu devolución! Nos ayuda a mejorar.</span>
+                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                </div>
+                <div>
+                    <p class="text-sm">¡Gracias por tu devolución!</p>
+                    <p class="text-[10px] text-gray-400 font-normal">Tu opinión nos ayuda a mejorar el portal.</p>
+                </div>
             `;
             document.body.appendChild(thanksToast);
 
-            // Ocultar sección de feedback
+            // Hide feedback section with style
             const feedbackSection = feedbackYesBtn.closest('section');
             if (feedbackSection) {
-                feedbackSection.classList.add('opacity-0', 'pointer-events-none', 'transition-all', 'duration-1000');
-                setTimeout(() => feedbackSection.style.display = 'none', 1000);
+                feedbackSection.classList.add('opacity-30', 'pointer-events-none', 'transition-all', 'duration-500', 'grayscale');
             }
 
-            setTimeout(() => thanksToast.remove(), 4000);
+            setTimeout(() => {
+                thanksToast.classList.add('opacity-0', 'translate-y-4');
+                setTimeout(() => thanksToast.remove(), 500);
+            }, 4000);
             
         } catch (err) {
             console.error("Error saving useful vote:", err);
             feedbackYesBtn.disabled = false;
-            feedbackYesBtn.innerText = 'Error - Reintentar';
+            feedbackYesBtn.innerText = 'Intentar de nuevo';
         }
     };
 }
+
+// Phone Modal Footer Link listeners already handled above via unified togglePhonesModal logic.
+
 

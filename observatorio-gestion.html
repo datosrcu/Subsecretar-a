@@ -420,15 +420,14 @@
             </section>
 
             <!-- Sección: Feedback (Útil) -->
-            <section
-                class="bg-obelisco-light border border-obelisco-border rounded-xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between mb-8">
+            <section class="bg-obelisco-light border border-obelisco-border rounded-xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between mb-8">
                 <h3 class="text-xl font-bold text-obelisco-dark mb-4 md:mb-0">¿Te fue útil esta página?</h3>
                 <div class="flex space-x-4 w-full md:w-auto">
                     <button id="feedback-no-btn"
                         class="flex-1 md:flex-none bg-white border border-obelisco-border hover:bg-gray-50 text-obelisco-dark font-semibold py-2 px-6 rounded-lg transition">
                         No me sirvió
                     </button>
-                    <button
+                    <button id="feedback-yes-btn"
                         class="flex-1 md:flex-none bg-obelisco-dark hover:bg-gray-800 text-white font-semibold py-2 px-6 rounded-lg transition">
                         Sí, me fue útil
                     </button>
@@ -438,45 +437,43 @@
         </div>
     </main>
 
-    <!-- FOOTER GCBA -->
-    <footer class="bg-obelisco-dark text-white pt-12 pb-6">
+    <!-- FOOTER RIO CUARTO (Original Adaptado) -->
+    <footer class="bg-obelisco-dark text-white pt-8 pb-8 border-t border-gray-700">
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
 
-            <div class="mb-10">
-                <h3 class="text-lg font-bold mb-4">Teléfonos útiles</h3>
-                <div class="flex flex-wrap gap-x-6 gap-y-3 text-sm text-gray-300">
-                    <span><strong>102</strong> - Niñez y Adolescencia</span>
-                    <span><strong>103</strong> - Emergencias</span>
-                    <span><strong>107</strong> - SAME</span>
-                    <span><strong>911</strong> - Policía</span>
-                    <span><strong>144</strong> - Violencia de género</span>
-                    <span><strong>147</strong> - Atención ciudadana</span>
-                    <button id="view-phones-btn"
-                        class="text-obelisco-yellow hover:underline ml-auto block w-full mt-2 md:w-auto md:mt-0 text-left md:text-right">Ver
-                        todos los teléfonos</button>
+            <!-- Teléfonos útiles (Resumen superior) -->
+            <div class="mb-8 pb-8 border-b border-gray-700/50">
+                <h4 class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-4 text-center md:text-left">Teléfonos útiles</h4>
+                <div class="flex flex-wrap justify-center md:justify-start gap-x-8 gap-y-3 text-[11px] text-gray-400">
+                    <span><strong class="text-white">102</strong> Niñez y Adolescencia</span>
+                    <span><strong class="text-white">103</strong> Emergencias</span>
+                    <span><strong class="text-white">107</strong> SAME</span>
+                    <span><strong class="text-white">911</strong> Policía</span>
+                    <span><strong class="text-white">144</strong> Violencia de género</span>
+                    <span><strong class="text-white">147</strong> Atención ciudadana</span>
+                    <button id="view-phones-btn-footer" class="text-obelisco-yellow hover:underline font-bold uppercase tracking-tighter ml-2">Ver todos</button>
                 </div>
             </div>
 
-            <div class="border-t border-gray-700 mt-8 pt-8 flex flex-col items-center">
-                <p class="text-sm font-medium text-gray-400">Desarrollado por la Subsecretaría de Estadística</p>
-            </div>
-
-            <div
-                class="border-t border-gray-700 pt-8 mt-8 flex flex-col md:flex-row justify-between items-start md:items-center">
-
-                <div class="flex flex-col mb-6 md:mb-0 space-y-4">
-                    <div class="flex items-center space-x-4">
-                        <!-- Logos Placeholder -->
-                    </div>
+            <!-- Estructura de UNA SOLA FILA (Legales, Créditos y Copyright) -->
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <!-- Izquierda: Legales -->
+                <div class="flex flex-wrap items-center gap-6 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                    <button id="view-terms-btn" class="hover:text-white transition">Términos y condiciones</button>
+                    <button id="view-privacy-btn" class="hover:text-white transition">Política de privacidad</button>
+                    <a href="https://economiariocuarto.gob.ar/transparencia/boletin-oficial" target="_blank" class="hover:text-white transition">Boletín Oficial</a>
                 </div>
 
-                <div class="flex flex-col items-start md:items-end">
-                    <div class="flex flex-wrap gap-x-4 gap-y-2 text-xs text-gray-400">
-                        <a href="#" class="hover:text-white transition">Términos y condiciones</a>
-                        <a href="#" class="hover:text-white transition">Política de privacidad</a>
-                    </div>
+                <!-- Centro: Créditos -->
+                <div class="text-[11px] font-medium text-gray-400 tracking-wide text-center">
+                    Desarrollado por la <span class="text-white font-bold opacity-80">Subsecretaría de Estadística</span>
                 </div>
 
+                <!-- Derecha: Copyright y Branding -->
+                <div class="flex flex-col items-center md:items-end text-[11px] font-bold text-gray-300">
+                    <p>© 2026 Municipalidad de Río Cuarto</p>
+                    <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-0.5">Gobierno Abierto y Transparencia</p>
+                </div>
             </div>
         </div>
     </footer>
@@ -1296,17 +1293,6 @@
                     </div>
                 </div>
 
-                <!-- Otros Emergencias -->
-                <div class="bg-obelisco-dark p-6 rounded-xl text-white">
-                    <h4 class="font-bold mb-4 text-center uppercase tracking-widest text-xs opacity-70">Emergencias</h4>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-2 text-center text-sm">
-                        <p><strong class="block text-obelisco-yellow text-lg">100</strong> Bomberos</p>
-                        <p><strong class="block text-obelisco-yellow text-lg">103</strong> Defensa Civil</p>
-                        <p><strong class="block text-obelisco-yellow text-lg">107</strong> Emergencia Médica</p>
-                        <p><strong class="block text-obelisco-yellow text-lg">911</strong> Policía</p>
-                        <p><strong class="block text-obelisco-yellow text-lg">105</strong> Emergencia Amb.</p>
-                        <p><strong class="block text-obelisco-yellow text-lg">145</strong> Trata Personas</p>
-                    </div>
                 </div>
             </div>
 
@@ -1325,42 +1311,24 @@
         </div>
     </div>
 
-    <!-- FOOTER RIO CUARTO -->
-    <footer class="bg-obelisco-dark text-white py-12">
-        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <div class="flex flex-col md:flex-row justify-between items-center gap-8 border-b border-gray-700 pb-10">
-                <div class="flex flex-col items-center md:items-start space-y-4">
-                    <p class="font-bold text-gray-300 uppercase tracking-[0.2em] text-xs">Subsecretaría de Estadística</p>
-                    <img src="Escudo.png" alt="Municipalidad de Río Cuarto" class="h-14 brightness-0 invert opacity-80">
+    <!-- SEARCH MODAL -->
+    <div id="search-modal" class="fixed inset-0 hidden items-center justify-center z-[200000] p-4">
+        <div class="absolute inset-0 bg-obelisco-dark/60 backdrop-blur-sm" data-close-modal="search"></div>
+        <div class="relative bg-white w-[800px] max-w-full rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+                <div>
+                    <h3 class="text-xl font-bold text-obelisco-dark">Resultados de búsqueda</h3>
+                    <p id="search-query-display" class="text-xs text-obelisco-blue font-bold tracking-widest uppercase mt-1">Buscando...</p>
                 </div>
-
-                <div class="flex flex-col items-center md:items-end space-y-4 text-center md:text-right">
-                    <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400">Seguinos en</h4>
-                    <a href="https://www.instagram.com/datosrcu" target="_blank" class="flex items-center hover:text-obelisco-yellow transition group">
-                        <span class="mr-3 text-sm font-medium">@datosrcu</span>
-                        <div class="bg-white/10 p-2 rounded-full group-hover:bg-obelisco-yellow group-hover:text-obelisco-dark transition">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.791-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.209-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                        </div>
-                    </a>
-                </div>
+                <button data-close-modal="search" class="text-gray-400 hover:text-red-500 transition">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
             </div>
-
-            <div class="pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] text-gray-400">
-                <div class="flex flex-wrap justify-center md:justify-start gap-x-8 gap-y-3">
-                    <button id="view-terms-btn" class="hover:text-obelisco-yellow transition font-bold uppercase tracking-widest border-b border-transparent hover:border-obelisco-yellow pb-0.5">Términos y condiciones</button>
-                    <button id="view-privacy-btn" class="hover:text-obelisco-yellow transition font-bold uppercase tracking-widest border-b border-transparent hover:border-obelisco-yellow pb-0.5">Política de privacidad</button>
-                    <a href="https://boletinoficial.riocuarto.gov.ar/" target="_blank" class="hover:text-obelisco-yellow transition font-bold uppercase tracking-widest border-b border-transparent hover:border-obelisco-yellow pb-0.5">Boletín oficial</a>
-                </div>
-                <div class="text-center md:text-right space-y-1">
-                    <p class="font-bold text-gray-300">© 2026 Municipalidad de Río Cuarto</p>
-                    <p class="opacity-50">Gobierno Abierto y Transparencia</p>
-                </div>
+            <div id="search-results-container" class="p-6 overflow-y-auto flex-grow bg-gray-50/30">
+                <!-- Results dynamic -->
             </div>
-
         </div>
-    </footer>
-
+    </div>
 
     <!-- MODAL TÉRMINOS Y CONDICIONES -->
     <div id="terms-modal" class="fixed inset-0 hidden items-center justify-center z-[100004] p-4">
@@ -1377,20 +1345,20 @@
             </div>
             <div class="p-8 overflow-y-auto prose prose-sm max-w-none text-obelisco-dark text-sm space-y-6">
                 <section>
-                    <h4 class="font-bold text-obelisco-blue border-b pb-1 mb-2">1. Marco Normativo y Propósito</h4>
-                    <p>El portal del Observatorio de Gestión Municipal se enmarca en la **Ordenanza N° 162/2025: Modelo de Gobernanza de Datos Públicos**. Su propósito es garantizar la transparencia, el acceso a la información pública y fomentar la participación ciudadana mediante la visualización de datos gubernamentales.</p>
+                    <h4 class="font-bold text-obelisco-blue border-b pb-1 mb-2">1. Uso del Portal Municipal</h4>
+                    <p>El acceso y uso de este portal propiedad de la **Municipalidad de Río Cuarto** implica la aceptación de estos términos. La información publicada tiene como fin promover la transparencia y brindar servicios digitales eficientes a la comunidad.</p>
                 </section>
                 <section>
-                    <h4 class="font-bold text-obelisco-blue border-b pb-1 mb-2">2. Propiedad y Licenciamiento</h4>
-                    <p>Los datos, tableros y análisis presentados son propiedad de la **Municipalidad de Río Cuarto**. Salvo indicación contraria, la información está sujeta a una **Licencia Creative Commons Atribución-CompartirIgual 4.0 Internacional (CC BY-SA 4.0)**, permitiendo su redistribución y uso citando la fuente original.</p>
+                    <h4 class="font-bold text-obelisco-blue border-b pb-1 mb-2">2. Propiedad de la Información</h4>
+                    <p>Todo el contenido, incluyendo datos del Observatorio, gráficos y textos, se rige por las políticas de **Datos Abiertos** de la Municipalidad (Ordenanza 162/2025). Se autoriza su uso citando siempre la fuente oficial.</p>
                 </section>
                 <section>
-                    <h4 class="font-bold text-obelisco-blue border-b pb-1 mb-2">3. Exención de Responsabilidad</h4>
-                    <p>Si bien la Municipalidad trabaja para asegurar la veracidad y actualización de los datos, estos tienen carácter informativo. La Municipalidad no se responsabiliza por errores u omisiones, ni por las interpretaciones, conclusiones o decisiones que terceros puedan tomar a partir de la información cruda o visualizada en este portal.</p>
+                    <h4 class="font-bold text-obelisco-blue border-b pb-1 mb-2">3. Responsabilidad del Usuario</h4>
+                    <p>El usuario se compromete a utilizar el portal de manera lícita, sin afectar la disponibilidad del servicio ni utilizar los datos para fines fraudulentos o que atenten contra la privacidad de terceros.</p>
                 </section>
                 <section>
-                    <h4 class="font-bold text-obelisco-blue border-b pb-1 mb-2">4. Uso del Portal</h4>
-                    <p>Se prohíbe cualquier uso que atente contra la integridad del servicio, incluyendo ataques informáticos, extracción masiva automatizada de datos (scraping) que degrade el rendimiento, o el uso de la información para fines ilícitos o difamatorios.</p>
+                    <h4 class="font-bold text-obelisco-blue border-b pb-1 mb-2">4. Actualización de Contenidos</h4>
+                    <p>La Municipalidad trabaja para que la información sea precisa y esté actualizada, no obstante, se reserva el derecho de modificar el contenido o las funcionalidades del portal sin previo aviso para mejorar la experiencia del ciudadano.</p>
                 </section>
             </div>
             <div class="p-4 bg-gray-50 border-t flex justify-end shrink-0">
@@ -1437,6 +1405,51 @@
             </div>
             <div class="p-4 bg-gray-50 border-t flex justify-end shrink-0">
                 <button data-close-modal="privacy" class="bg-obelisco-dark text-white px-6 py-2 rounded-lg font-bold text-xs hover:bg-gray-800 transition">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL FEEDBACK (NO ME SIRVIÓ) -->
+    <div id="feedback-modal" class="fixed inset-0 hidden items-center justify-center z-[100004] p-4">
+        <div class="absolute inset-0 bg-obelisco-dark/60 backdrop-blur-sm" id="close-feedback-overlay"></div>
+        <div class="relative bg-white w-[500px] max-w-full rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="text-xl font-bold text-obelisco-dark">Envianos tu comentario</h3>
+                <button data-close-modal="feedback" class="text-gray-400 hover:text-red-500 transition">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <form id="feedback-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Tu comentario *</label>
+                        <textarea id="feedback-comment" required rows="4" placeholder="¿Cómo podemos mejorar esta página?"
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-obelisco-blue/20 outline-none transition resize-none text-sm"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nombre (Opcional)</label>
+                            <input type="text" id="feedback-name" placeholder="Tu nombre" 
+                                class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-obelisco-blue/20 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email (Opcional)</label>
+                            <input type="email" id="feedback-email" placeholder="email@ejemplo.com"
+                                class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-obelisco-blue/20 outline-none text-sm">
+                        </div>
+                    </div>
+                    <button type="submit" id="feedback-submit-btn"
+                        class="w-full bg-obelisco-dark text-white font-bold py-3 rounded-xl hover:bg-gray-800 transition shadow-lg mt-2">
+                        Enviar Feedback
+                    </button>
+                </form>
+                <div id="feedback-success" class="hidden py-8 text-center space-y-4">
+                    <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
+                        <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                    </div>
+                    <h4 class="text-xl font-bold text-obelisco-dark">¡Recibido!</h4>
+                    <p class="text-gray-500 text-sm">Gracias por ayudarnos a mejorar el portal.</p>
+                </div>
             </div>
         </div>
     </div>
