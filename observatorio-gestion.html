@@ -384,6 +384,13 @@
                                     </svg>
                                     Instagram
                                 </a>
+                                <a href="https://www.linkedin.com/company/subsecretar%C3%ADa-de-estad%C3%ADstica" target="_blank"
+                                    class="text-obelisco-blue hover:text-blue-800 transition flex items-center font-bold">
+                                    <svg class="h-5 w-5 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                    </svg>
+                                    LinkedIn
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -456,10 +463,10 @@
             </div>
 
             <!-- Estructura de UNA SOLA FILA (Legales, Créditos y Copyright) -->
-            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="grid grid-cols-3 items-center gap-6">
                 <!-- Izquierda: Legales -->
                 <div class="flex flex-wrap items-center gap-6 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                    <button id="view-terms-btn" class="hover:text-white transition">Términos y condiciones</button>
+                    <span class="opacity-40 cursor-not-allowed" title="Términos en revisión">Términos y condiciones</span>
                     <button id="view-privacy-btn" class="hover:text-white transition">Política de privacidad</button>
                     <a href="https://economiariocuarto.gob.ar/transparencia/boletin-oficial" target="_blank" class="hover:text-white transition">Boletín Oficial</a>
                 </div>
@@ -470,7 +477,7 @@
                 </div>
 
                 <!-- Derecha: Copyright y Branding -->
-                <div class="flex flex-col items-center md:items-end text-[11px] font-bold text-gray-300">
+                <div class="flex flex-col items-end text-[11px] font-bold text-gray-300">
                     <p>© 2026 Municipalidad de Río Cuarto</p>
                     <p class="text-[9px] text-gray-500 uppercase tracking-widest mt-0.5">Gobierno Abierto y Transparencia</p>
                 </div>
@@ -716,6 +723,19 @@
                         <option value="Miembro de ONG / Sociedad civil">Miembro de ONG / Sociedad civil</option>
                         <option value="Ciudadano/a interesado/a">Ciudadano/a interesado/a</option>
                     </select>
+                </div>
+
+                <!-- Campo dinámico: archivo respaldatorio para Representante Legal -->
+                <div id="reg-legal-file-wrap" class="hidden">
+                    <label class="block text-sm font-bold text-obelisco-dark mb-2">
+                        Documento respaldatorio <span class="text-red-500">*</span>
+                        <span class="text-xs font-normal text-gray-500 ml-1">(Poder notarial, acta de designación, etc.)</span>
+                    </label>
+                    <div class="border-2 border-dashed border-obelisco-blue/40 rounded-xl p-4 bg-blue-50/30 text-center cursor-pointer hover:bg-blue-50 transition" onclick="document.getElementById('reg-legal-file').click()">
+                        <svg class="w-8 h-8 mx-auto text-obelisco-blue opacity-50 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                        <p id="reg-legal-file-label" class="text-sm text-gray-500">Hacer clic para seleccionar archivo <br><span class="text-xs">(PDF, JPG o PNG — máx. 5 MB)</span></p>
+                        <input type="file" id="reg-legal-file" class="hidden" accept=".pdf,.jpg,.jpeg,.png" onchange="document.getElementById('reg-legal-file-label').textContent = this.files[0]?.name || 'Sin archivo'">
+                    </div>
                 </div>
 
                 <button type="submit"

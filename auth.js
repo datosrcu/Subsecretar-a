@@ -1,4 +1,4 @@
-import { app, auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, collection, getDocs, doc, getDoc, addDoc, updateDoc, setDoc, serverTimestamp } from './firebase-config.js';
+import { app, auth, db, storage, provider, signInWithPopup, signOut, onAuthStateChanged, collection, getDocs, doc, getDoc, addDoc, updateDoc, setDoc, serverTimestamp, ref, uploadBytes, getDownloadURL } from './firebase-config.js';
 
 // DOM Elements
 const loginBtn = document.getElementById('login-btn');
@@ -770,6 +770,19 @@ privacyTriggers.forEach(id => {
         privacyModal?.classList.add('flex');
     });
 });
+// --- Dynamic File Upload for Representante Legal ---
+const regOrgRoleSelect = document.getElementById('reg-org-role');
+const regLegalFileWrap = document.getElementById('reg-legal-file-wrap');
+if (regOrgRoleSelect && regLegalFileWrap) {
+    regOrgRoleSelect.addEventListener('change', () => {
+        if (regOrgRoleSelect.value === 'Representante legal / Apoderado/a') {
+            regLegalFileWrap.classList.remove('hidden');
+        } else {
+            regLegalFileWrap.classList.add('hidden');
+        }
+    });
+}
+
 // --- Registration Form Submission ---
 if (registrationForm) {
     registrationForm.addEventListener('submit', async (e) => {
@@ -780,12 +793,40 @@ if (registrationForm) {
         const orgType = document.getElementById('reg-org-type').value;
         const orgName = document.getElementById('reg-org-name').value;
         const orgRole = document.getElementById('reg-org-role').value;
+        const submitBtn = registrationForm.querySelector('button[type="submit"]');
+
+        // Validate file if Representante Legal
+        const legalFileInput = document.getElementById('reg-legal-file');
+        const isLegalRep = orgRole === 'Representante legal / Apoderado/a';
+        if (isLegalRep && (!legalFileInput || !legalFileInput.files[0])) {
+            alert('Por favor adjuntá el documento respaldatorio requerido para tu rol.');
+            return;
+        }
 
         try {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Guardando...';
+
             const userEmail = user.email.toLowerCase();
             const userRef = doc(db, "users", userEmail);
-            console.log("Saving profile for:", userEmail);
 
+            let legalDocURL = null;
+            // Upload legal document to Firebase Storage if present
+            if (isLegalRep && legalFileInput?.files[0]) {
+                const file = legalFileInput.files[0];
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('El archivo supera el límite de 5 MB. Por favor seleccioná un archivo más pequeño.');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Guardar y Continuar';
+                    return;
+                }
+                const storageRef = ref(storage, `legal_docs/${userEmail}_${Date.now()}_${file.name}`);
+                submitBtn.textContent = 'Subiendo documento...';
+                const snapshot = await uploadBytes(storageRef, file);
+                legalDocURL = await getDownloadURL(snapshot.ref);
+            }
+
+            submitBtn.textContent = 'Guardando perfil...';
             await setDoc(userRef, {
                 email: user.email.toLowerCase(),
                 name: user.displayName || user.email.split('@')[0],
@@ -794,15 +835,18 @@ if (registrationForm) {
                 orgName,
                 orgRole,
                 profileCompleted: true,
-                updatedAt: new Date().toISOString()
+                updatedAt: new Date().toISOString(),
+                ...(legalDocURL ? { legalDocURL } : {})
             }, { merge: true });
 
             registrationModal.classList.add('hidden');
             registrationModal.classList.remove('flex');
-            alert("¡Perfil completado con éxito!");
+            alert('¡Perfil completado con éxito!');
         } catch (error) {
-            console.error("Error updating profile:", error);
-            alert("Hubo un error al guardar tu información: " + (error.code || error.message));
+            console.error('Error updating profile:', error);
+            alert('Hubo un error al guardar tu información: ' + (error.code || error.message));
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Guardar y Continuar';
         }
     });
 }

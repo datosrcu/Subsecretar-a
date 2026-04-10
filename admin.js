@@ -215,21 +215,36 @@ navTabs.forEach(tab => {
             t.classList.remove('border-obelisco-blue', 'text-obelisco-blue');
             t.classList.add('border-transparent', 'text-gray-500');
         });
-        tabPanes.forEach(pane => pane.classList.add('hidden'));
+        tabPanes.forEach(pane => {
+            pane.classList.add('hidden');
+            pane.classList.remove('block');
+        });
 
         tab.classList.remove('border-transparent', 'text-gray-500');
         tab.classList.add('border-obelisco-blue', 'text-obelisco-blue');
 
         const targetPane = document.getElementById(target);
-        if (targetPane) targetPane.classList.remove('hidden');
+        if (targetPane) {
+            targetPane.classList.remove('hidden');
+            targetPane.classList.add('block');
+        }
 
         // Reload data for specific tabs
         if (target === 'tab-tableros') loadBoards();
         if (target === 'tab-categorias') loadCategories();
-        if (target === 'tab-usuarios') loadUsers();
+        if (target === 'tab-usuarios') {
+            loadUsers();
+            // Clear users badge on view
+            const usersBadge = document.getElementById('users-badge');
+            if (usersBadge) usersBadge.classList.add('hidden');
+        }
         if (target === 'tab-solicitudes') loadRequests();
         if (target === 'tab-tracking') loadUserTracking();
-        if (target === 'tab-feedback') loadFeedback();
+        if (target === 'tab-feedback') {
+            loadFeedback();
+            // Clear feedback badge on view
+            if (feedbackBadge) feedbackBadge.classList.add('hidden');
+        }
     });
 });
 
@@ -289,6 +304,18 @@ async function loadUsers() {
         });
         filterAndRenderUsers();
         renderUserChecklist();
+
+        // Show users badge if any user registered in the last 48 hours
+        const usersBadge = document.getElementById('users-badge');
+        if (usersBadge) {
+            const cutoff = Date.now() - (48 * 60 * 60 * 1000);
+            const hasNew = allUsersFetched.some(u => u.createdAt && new Date(u.createdAt).getTime() > cutoff);
+            if (hasNew) {
+                usersBadge.classList.remove('hidden');
+            } else {
+                usersBadge.classList.add('hidden');
+            }
+        }
     } catch (error) {
         console.error(error);
         usersTbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-red-500">Error cargando usuarios.</td></tr>`;
@@ -1385,7 +1412,6 @@ filterReqStatus?.addEventListener('change', (e) => {
 });
 // --- FEEDBACK LOGIC ---
 async function loadFeedback() {
-    console.log("Admin JS - Loading feedback...");
     try {
         const querySnapshot = await getDocs(collection(db, "feedback"));
         const allFeedback = [];
@@ -1396,13 +1422,18 @@ async function loadFeedback() {
         // Sort by date desc
         allFeedback.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-        // Hide "New" badge if we are viewing the tab
+        // Show badge if there's feedback from the last 7 days and the tab is not active
         const activeTab = document.querySelector('.nav-tab.text-obelisco-blue');
-        if (activeTab && activeTab.getAttribute('data-target') === 'tab-feedback') {
-            feedbackBadge.classList.add('hidden');
-        } else {
-            // Logic to show badge if there's very recent feedback? 
-            // For now let's just keep it hidden unless we implement a "read" state
+        const isViewingFeedback = activeTab && activeTab.getAttribute('data-target') === 'tab-feedback';
+        if (feedbackBadge) {
+            const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000);
+            const hasRecent = allFeedback.some(f => f.timestamp && new Date(f.timestamp).getTime() > cutoff);
+            if (hasRecent && !isViewingFeedback) {
+                feedbackBadge.textContent = allFeedback.filter(f => f.timestamp && new Date(f.timestamp).getTime() > cutoff).length;
+                feedbackBadge.classList.remove('hidden');
+            } else {
+                feedbackBadge.classList.add('hidden');
+            }
         }
 
         renderFeedbackTable(allFeedback);
