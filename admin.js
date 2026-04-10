@@ -149,6 +149,7 @@ onAuthStateChanged(auth, async (user) => {
             await loadRequests();
             await loadUserTracking();
             await loadFeedback();
+            checkBackgroundNotifications();
         } else {
             showError("No tienes privilegios de administrador para ver o editar.");
             await signOut(auth);
@@ -304,18 +305,6 @@ async function loadUsers() {
         });
         filterAndRenderUsers();
         renderUserChecklist();
-
-        // Show users badge if any user registered in the last 48 hours
-        const usersBadge = document.getElementById('users-badge');
-        if (usersBadge) {
-            const cutoff = Date.now() - (48 * 60 * 60 * 1000);
-            const hasNew = allUsersFetched.some(u => u.createdAt && new Date(u.createdAt).getTime() > cutoff);
-            if (hasNew) {
-                usersBadge.classList.remove('hidden');
-            } else {
-                usersBadge.classList.add('hidden');
-            }
-        }
     } catch (error) {
         console.error(error);
         usersTbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-red-500">Error cargando usuarios.</td></tr>`;
@@ -1425,20 +1414,6 @@ async function loadFeedback() {
         // Sort by date desc
         allFeedback.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-        // Show badge if there's feedback from the last 7 days and the tab is not active
-        const activeTab = document.querySelector('.nav-tab.text-obelisco-blue');
-        const isViewingFeedback = activeTab && activeTab.getAttribute('data-target') === 'tab-feedback';
-        if (feedbackBadge) {
-            const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000);
-            const hasRecent = allFeedback.some(f => f.timestamp && new Date(f.timestamp).getTime() > cutoff);
-            if (hasRecent && !isViewingFeedback) {
-                feedbackBadge.textContent = allFeedback.filter(f => f.timestamp && new Date(f.timestamp).getTime() > cutoff).length;
-                feedbackBadge.classList.remove('hidden');
-            } else {
-                feedbackBadge.classList.add('hidden');
-            }
-        }
-
         renderFeedbackTable(allFeedback);
     } catch (error) {
         console.error("Error loading feedback:", error);
@@ -1493,4 +1468,49 @@ function renderFeedbackTable(feedbackList) {
 
         feedbackTbody.appendChild(tr);
     });
+}
+// Background notifications
+async function checkBackgroundNotifications() {
+    console.log("Checking background notifications for badges...");
+    try {
+        const usersBadge = document.getElementById('users-badge');
+        if (usersBadge) {
+            const usersSnap = await getDocs(collection(db, "users"));
+            const cutoff = Date.now() - (48 * 60 * 60 * 1000);
+            let hasNewUser = false;
+            usersSnap.forEach(doc => {
+                const data = doc.data();
+                const timeStr = data.updatedAt || data.createdAt;
+                if (timeStr && new Date(timeStr).getTime() > cutoff) {
+                    hasNewUser = true;
+                }
+            });
+            const activeTab = document.querySelector('.nav-tab.text-obelisco-blue');
+            const isViewingUsers = activeTab && activeTab.getAttribute('data-target') === 'tab-usuarios';
+            if (hasNewUser && !isViewingUsers) {
+                usersBadge.classList.remove('hidden');
+            }
+        }
+
+        const feedbackBadge = document.getElementById('feedback-badge');
+        if (feedbackBadge) {
+            const feedbackSnap = await getDocs(collection(db, "feedback"));
+            const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000);
+            let newCount = 0;
+            feedbackSnap.forEach(doc => {
+                const data = doc.data();
+                if (data.timestamp && new Date(data.timestamp).getTime() > cutoff) {
+                    newCount++;
+                }
+            });
+            const activeTab = document.querySelector('.nav-tab.text-obelisco-blue');
+            const isViewingFeedback = activeTab && activeTab.getAttribute('data-target') === 'tab-feedback';
+            if (newCount > 0 && !isViewingFeedback) {
+                feedbackBadge.textContent = newCount;
+                feedbackBadge.classList.remove('hidden');
+            }
+        }
+    } catch (e) {
+        console.error("Error checking background notifications:", e);
+    }
 }
