@@ -822,8 +822,20 @@ if (registrationForm) {
                 }
                 const storageRef = ref(storage, `legal_docs/${userEmail}_${Date.now()}_${file.name}`);
                 submitBtn.textContent = 'Subiendo documento...';
-                const snapshot = await uploadBytes(storageRef, file);
-                legalDocURL = await getDownloadURL(snapshot.ref);
+                
+                try {
+                    // Timeout to prevent eternal hanging if Firebase Storage is not configured
+                    const uploadPromise = uploadBytes(storageRef, file);
+                    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 15000));
+                    const snapshot = await Promise.race([uploadPromise, timeoutPromise]);
+                    legalDocURL = await getDownloadURL(snapshot.ref);
+                } catch (err) {
+                    console.error("Upload error:", err);
+                    alert("Error subiendo el archivo. Asegúrate que tu conexión esté estable o intenta con un archivo más liviano.");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Guardar y Continuar';
+                    return;
+                }
             }
 
             submitBtn.textContent = 'Guardando perfil...';
@@ -951,6 +963,10 @@ feedbackForm?.addEventListener('submit', async (e) => {
 
         feedbackForm.classList.add('hidden');
         feedbackSuccess.classList.remove('hidden');
+
+        // Hide the original feedback card
+        const section = document.getElementById('feedback-no-btn')?.closest('section');
+        if (section) section.classList.add('hidden');
 
         setTimeout(() => {
             feedbackModal.classList.add('hidden');
@@ -1127,10 +1143,10 @@ if (feedbackYesBtn) {
             `;
             document.body.appendChild(thanksToast);
 
-            // Hide feedback section with style
+            // Hide feedback section completely
             const feedbackSection = feedbackYesBtn.closest('section');
             if (feedbackSection) {
-                feedbackSection.classList.add('opacity-30', 'pointer-events-none', 'transition-all', 'duration-500', 'grayscale');
+                feedbackSection.classList.add('hidden');
             }
 
             setTimeout(() => {

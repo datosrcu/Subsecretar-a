@@ -350,7 +350,10 @@ function renderUsersTable(users) {
                 <div class="flex flex-col">
                     <span class="text-xs font-bold text-obelisco-blue uppercase">${u.orgType || 'N/A'}</span>
                     <span class="text-sm font-medium">${u.orgName || '-'}</span>
-                    <span class="text-[10px] text-obelisco-gray uppercase">${u.orgRole || '-'}</span>
+                    <span class="text-[10px] text-obelisco-gray uppercase flex flex-col gap-1 items-start">
+                        ${u.orgRole || '-'}
+                         ${u.legalDocURL ? `<a href="${u.legalDocURL}" target="_blank" class="text-blue-500 hover:text-blue-700 underline normal-case flex items-center mt-1"><svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg> Ver Respaldo</a>` : ''}
+                    </span>
                 </div>
             </td>
             <td class="py-3 px-4">
