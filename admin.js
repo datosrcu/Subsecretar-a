@@ -44,6 +44,8 @@ const filterBoardStatus = document.getElementById('filter-board-status');
 const trackingTbody = document.getElementById('tracking-tbody');
 const feedbackTbody = document.getElementById('feedback-tbody');
 const feedbackBadge = document.getElementById('feedback-badge');
+const contactoTbody = document.getElementById('contacto-tbody');
+const contactoBadge = document.getElementById('contacto-badge');
 
 const countTotal = document.getElementById('count-total');
 const countActive = document.getElementById('count-active');
@@ -102,6 +104,17 @@ const fieldCatType = document.getElementById('field-cat-type');
 const fieldCatColorPicker = document.getElementById('field-cat-color-picker');
 const fieldCatColorText = document.getElementById('field-cat-color');
 
+// Duration Modal for Solicitudes
+const durationModal = document.getElementById('duration-modal');
+const optOneYear = document.getElementById('opt-1-year');
+const optRoleExpiry = document.getElementById('opt-role-expiry');
+const userRoleDateLabel = document.getElementById('user-role-date');
+const roleExpiryWarning = document.getElementById('role-expiry-warning');
+
+const cancelDurationBtn = document.getElementById('cancel-duration-btn');
+const closeDurationOverlay = document.getElementById('close-duration-overlay');
+let pendingApproval = null; // { requestId, email, buttonId, userExpiryDate }
+
 // Search & Filter Listeners for Requests
 
 // --- State ---
@@ -116,15 +129,17 @@ let boardStatusFilter = "all";
 let allTrackingFetched = [];
 let trackingSearchQuery = "";
 let trackingStatusFilter = "all";
+let allContactsFetched = [];
+let allRCEFetched = [];
+let globalTermsVersion = "1.2.0";
 
 const ADMIN_EMAILS = [
-    'datos@riocuarto.gov.ar',
-    'pfabbroni@riocuarto.gov.ar'
+    'datos@riocuarto.gov.ar'
 ];
 
 // --- Initialization & Auth ---
 onAuthStateChanged(auth, async (user) => {
-    loader.classList.add('hidden');
+    if (loader) loader.classList.add('hidden');
     if (user) {
         const userEmail = user.email.toLowerCase();
         const isAdminExact = ADMIN_EMAILS.map(e => e.toLowerCase()).includes(userEmail);
@@ -139,7 +154,12 @@ onAuthStateChanged(auth, async (user) => {
                     email: userEmail,
                     name: user.displayName || user.email.split('@')[0],
                     photoURL: user.photoURL || '',
-                    lastLogin: new Date().toISOString()
+                    lastLogin: new Date().toISOString(),
+                    role: 'admin',
+                    profileCompleted: true,
+                    orgType: 'Administración',
+                    orgName: 'Municipalidad',
+                    orgRole: 'Administrador'
                 }, { merge: true });
             } catch (e) {
                 console.warn("Could not auto-register admin user", e);
@@ -149,6 +169,7 @@ onAuthStateChanged(auth, async (user) => {
             await loadRequests();
             await loadUserTracking();
             await loadFeedback();
+            await loadTCConfig();
             checkBackgroundNotifications();
         } else {
             showError("No tienes privilegios de administrador para ver o editar.");
@@ -159,8 +180,8 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-errorLoginBtn.addEventListener('click', () => signInWithPopup(auth, provider));
-logoutBtn.addEventListener('click', () => signOut(auth));
+errorLoginBtn?.addEventListener('click', () => signInWithPopup(auth, provider));
+logoutBtn?.addEventListener('click', () => signOut(auth));
 
 function showAdminUI(user) {
     adminContent.classList.remove('hidden');
@@ -196,9 +217,9 @@ function showPedidosSection() {
 }
 
 // Navigation dashboard listeners
-btnGotoOG.addEventListener('click', showOGSection);
-btnGotoPedidos.addEventListener('click', showPedidosSection);
-btnsBackDashboard.forEach(btn => btn.addEventListener('click', showDashboard));
+btnGotoOG?.addEventListener('click', showOGSection);
+btnGotoPedidos?.addEventListener('click', showPedidosSection);
+btnsBackDashboard?.forEach(btn => btn?.addEventListener('click', showDashboard));
 
 function showError(msg) {
     adminContent.classList.add('hidden');
@@ -209,8 +230,8 @@ function showError(msg) {
 }
 
 // --- Tabs Logic ---
-navTabs.forEach(tab => {
-    tab.addEventListener('click', (e) => {
+navTabs?.forEach(tab => {
+    tab?.addEventListener('click', (e) => {
         const target = tab.getAttribute('data-target');
         navTabs.forEach(t => {
             t.classList.remove('border-obelisco-blue', 'text-obelisco-blue');
@@ -230,12 +251,12 @@ navTabs.forEach(tab => {
             targetPane.classList.add('block');
         }
 
-        // Reload data for specific tabs
+        // Reload data for specific tabs and clear badges
         if (target === 'tab-tableros') loadBoards();
         if (target === 'tab-categorias') loadCategories();
         if (target === 'tab-usuarios') {
             loadUsers();
-            // Clear users badge on view
+            localStorage.setItem('ogb_last_seen_users', new Date().toISOString());
             const usersBadge = document.getElementById('users-badge');
             if (usersBadge) usersBadge.classList.add('hidden');
         }
@@ -243,25 +264,75 @@ navTabs.forEach(tab => {
         if (target === 'tab-tracking') loadUserTracking();
         if (target === 'tab-feedback') {
             loadFeedback();
-            // Clear feedback badge on view
+            localStorage.setItem('ogb_last_seen_feedback', new Date().toISOString());
             if (feedbackBadge) feedbackBadge.classList.add('hidden');
+        }
+        if (target === 'tab-contacto') {
+            loadContacts();
+            localStorage.setItem('ogb_last_seen_contacto', new Date().toISOString());
+            if (contactoBadge) contactoBadge.classList.add('hidden');
         }
     });
 });
 
-if (filterTrackingSearch) {
-    filterTrackingSearch.addEventListener('input', (e) => {
+// --- Sub-Tabs Logic (Usuarios) ---
+const subNavTabs = document.querySelectorAll('.sub-nav-tab');
+const subPanes = document.querySelectorAll('.sub-pane');
+
+subNavTabs?.forEach(tab => {
+    subNavTabs.forEach(t => {
+        t.addEventListener('click', () => {
+            const target = t.getAttribute('data-sub');
+            
+            subNavTabs.forEach(btn => {
+                btn.classList.remove('active-sub-tab', 'border-obelisco-blue', 'bg-blue-50', 'text-obelisco-blue');
+                btn.classList.add('border-transparent', 'text-gray-600');
+            });
+            
+            subPanes.forEach(p => p.classList.add('hidden'));
+            
+            t.classList.add('active-sub-tab', 'border-obelisco-blue', 'bg-blue-50', 'text-obelisco-blue');
+            t.classList.remove('border-transparent', 'text-gray-600');
+            
+            const targetPane = document.getElementById(target);
+            if (targetPane) targetPane.classList.remove('hidden');
+
+            // Trigger specific loads
+            if (target === 'sub-rce') loadRCE();
+            if (target === 'sub-solicitudes') loadRequests();
+            if (target === 'sub-tracking') loadUserTracking();
+            if (target === 'sub-directorio') loadUsers();
+        });
+    });
+});
+
+const filterTrackingSearchInner = document.getElementById('filter-tracking-search-inner');
+const filterTrackingStatusInner = document.getElementById('filter-tracking-status-inner');
+
+if (filterTrackingSearchInner) {
+    filterTrackingSearchInner.addEventListener('input', (e) => {
         trackingSearchQuery = e.target.value.toLowerCase();
-        renderTrackingTable();
+        renderUserTracking();
+    });
+}
+if (filterTrackingStatusInner) {
+    filterTrackingStatusInner.addEventListener('change', (e) => {
+        trackingStatusFilter = e.target.value;
+        renderUserTracking();
     });
 }
 
-if (filterTrackingStatus) {
-    filterTrackingStatus.addEventListener('change', (e) => {
-        trackingStatusFilter = e.target.value;
-        renderTrackingTable();
+const filterContactType = document.getElementById('filter-contact-type');
+if (filterContactType) {
+    filterContactType.addEventListener('change', () => {
+        renderContactsTable();
     });
 }
+
+// Listeners for restored Requests sub-tab filters
+document.getElementById('filter-request-user')?.addEventListener('input', filterAndRenderRequests);
+document.getElementById('filter-request-status')?.addEventListener('change', filterAndRenderRequests);
+document.getElementById('sort-request-expiry')?.addEventListener('change', filterAndRenderRequests);
 
 // --- LOAD MASTER DATA ---
 async function loadData() {
@@ -272,7 +343,8 @@ async function loadData() {
         loadRequests(),
         loadStatisticalRequests(),
         loadUserTracking(),
-        loadFeedback()
+        loadFeedback(),
+        loadContacts()
     ]);
 }
 // --- USERS LISTING & SELECTOR ---
@@ -328,11 +400,14 @@ function renderUsersTable(users) {
         const role = u.role || 'usuario';
 
         tr.innerHTML = `
-            <td class="py-3 px-4 flex items-center space-x-3">
-                <img src="${u.photoURL || `https://ui-avatars.com/api/?name=${u.name}&background=random`}" class="w-8 h-8 rounded-full border border-gray-200">
-                <div class="flex flex-col">
-                    <span class="font-medium">${u.name}</span>
-                    <span class="text-xs text-obelisco-gray">${u.email}</span>
+            <td class="px-4 py-3">
+                <div class="flex items-center space-x-3">
+                    <img src="${u.photoURL || 'https://ui-avatars.com/api/?name='+u.name}" class="w-8 h-8 rounded-full border">
+                    <div>
+                        <div class="font-bold text-obelisco-dark">${u.name}</div>
+                        <div class="text-[10px] text-gray-500">${u.email}</div>
+                        <div class="text-[9px] font-mono bg-gray-100 w-fit px-1 rounded mt-1">DNI: ${u.dni || 'No reg.'}</div>
+                    </div>
                 </div>
             </td>
             <td class="py-3 px-4">
@@ -445,19 +520,59 @@ async function loadRequests() {
     try {
         const querySnapshot = await getDocs(collection(db, "requests"));
         allRequestsFetched = [];
-        querySnapshot.forEach((doc) => {
-            allRequestsFetched.push({ id: doc.id, ...doc.data() });
+        const now = new Date();
+        const updatePromises = [];
+
+        querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            // Passive auto-expire check
+            if (data.status === 'approved' && data.expiryDate) {
+                const expiry = new Date(data.expiryDate);
+                if (now > expiry) {
+                    console.log(`Auto-expiring request ${docSnap.id}`);
+                    data.status = 'expired';
+                    updatePromises.push(updateDoc(doc(db, "requests", docSnap.id), { status: 'expired' }));
+                    
+                    // Also remove from button's allowedUsers
+                    if (data.buttonId && data.userEmail) {
+                        const bRef = doc(db, "buttons", data.buttonId);
+                        getDoc(bRef).then(bSnap => {
+                            if (bSnap.exists()) {
+                                const bData = bSnap.data();
+                                const allowed = bData.allowedUsers || [];
+                                const newAllowed = allowed.filter(u => u.toLowerCase() !== data.userEmail.toLowerCase());
+                                if (allowed.length !== newAllowed.length) {
+                                    updateDoc(bRef, { allowedUsers: newAllowed });
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+            allRequestsFetched.push({ id: docSnap.id, ...data });
         });
+
+        if (updatePromises.length > 0) {
+            await Promise.all(updatePromises);
+        }
 
         // Sort by date desc
         allRequestsFetched.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         const pendingCount = allRequestsFetched.filter(r => r.status === 'pending').length;
-        if (pendingCount > 0) {
-            requestsBadge.textContent = pendingCount;
-            requestsBadge.classList.remove('hidden');
-        } else {
-            requestsBadge.classList.add('hidden');
+        const badge = document.getElementById('requests-badge');
+        const innerBadge = document.getElementById('requests-badge-inner');
+        
+        if (badge) {
+            badge.textContent = pendingCount;
+            badge.classList.toggle('hidden', pendingCount === 0);
+        }
+        if (innerBadge) {
+            innerBadge.textContent = pendingCount;
+            innerBadge.classList.toggle('bg-red-100', pendingCount > 0);
+            innerBadge.classList.toggle('text-red-600', pendingCount > 0);
+            innerBadge.classList.toggle('bg-gray-100', pendingCount === 0);
+            innerBadge.classList.toggle('text-gray-400', pendingCount === 0);
         }
 
         filterAndRenderRequests();
@@ -467,14 +582,33 @@ async function loadRequests() {
 }
 
 function filterAndRenderRequests() {
-    const userSearch = document.getElementById('filter-request-user').value.toLowerCase();
-    const statusFilter = document.getElementById('filter-request-status').value;
+    const userSearch = document.getElementById('filter-request-user')?.value.toLowerCase() || "";
+    const statusFilter = document.getElementById('filter-request-status')?.value || "all";
+    const sortFilter = document.getElementById('sort-request-expiry')?.value || 'created-desc';
 
-    const filtered = allRequestsFetched.filter(req => {
+    let filtered = allRequestsFetched.filter(req => {
         const matchesUser = req.userEmail.toLowerCase().includes(userSearch);
         const matchesStatus = statusFilter === 'all' || req.status === statusFilter;
         return matchesUser && matchesStatus;
     });
+
+    // Handle Sorting
+    if (sortFilter === 'expiry-soon') {
+        filtered.sort((a, b) => {
+            if (!a.expiryDate) return 1;
+            if (!b.expiryDate) return -1;
+            return new Date(a.expiryDate) - new Date(b.expiryDate);
+        });
+    } else if (sortFilter === 'expiry-far') {
+        filtered.sort((a, b) => {
+            if (!a.expiryDate) return 1;
+            if (!b.expiryDate) return -1;
+            return new Date(b.expiryDate) - new Date(a.expiryDate);
+        });
+    } else {
+        // Default: created-desc
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
 
     renderRequests(filtered);
 }
@@ -482,78 +616,90 @@ function filterAndRenderRequests() {
 // Filter listeners
 document.getElementById('filter-request-user')?.addEventListener('input', filterAndRenderRequests);
 document.getElementById('filter-request-status')?.addEventListener('change', filterAndRenderRequests);
+document.getElementById('sort-request-expiry')?.addEventListener('change', filterAndRenderRequests);
 
 
 function renderRequests(requests) {
-    if (!requestsTbody) return;
+    const container = document.getElementById('requests-container');
+    if (!container) return;
+
     if (requests.length === 0) {
-        requestsTbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-obelisco-gray">No se encontraron solicitudes con esos filtros.</td></tr>';
+        container.innerHTML = `
+            <div class="bg-white border rounded-xl p-12 text-center text-gray-400 border-dashed">
+                <svg class="w-12 h-12 mx-auto mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                No se encontraron solicitudes con esos filtros.
+            </div>
+        `;
         return;
     }
 
-    requestsTbody.innerHTML = '';
+    container.innerHTML = '';
     requests.forEach(req => {
         const date = req.createdAt ? new Date(req.createdAt).toLocaleDateString() : '-';
+        const expiryDate = req.expiryDate ? new Date(req.expiryDate).toLocaleDateString() : 'N/A';
         const status = req.status || 'pending';
 
         let statusBadge = '';
         switch (status) {
-            case 'approved': statusBadge = '<span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-bold text-[10px] uppercase">Aprobada</span>'; break;
-            case 'rejected': statusBadge = '<span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full font-bold text-[10px] uppercase">Rechazada</span>'; break;
-            case 'restricted': statusBadge = '<span class="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full font-bold text-[10px] uppercase">Restringida</span>'; break;
-            default: statusBadge = '<span class="px-2 py-0.5 bg-obelisco-light text-obelisco-blue rounded-full font-bold text-[10px] uppercase">Pendiente</span>';
+            case 'approved': statusBadge = '<span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-bold text-[9px] uppercase">Aprobada</span>'; break;
+            case 'rejected': statusBadge = '<span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full font-bold text-[9px] uppercase">Rechazada</span>'; break;
+            case 'restricted': statusBadge = '<span class="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full font-bold text-[9px] uppercase">Restringida</span>'; break;
+            case 'expired': statusBadge = '<span class="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full font-bold text-[9px] uppercase">Vencido</span>'; break;
+            default: statusBadge = '<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-bold text-[9px] uppercase">Pendiente</span>';
         }
 
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-gray-50 transition-colors";
-        tr.innerHTML = `
-            <td class="py-4 px-4 whitespace-nowrap text-xs text-gray-500">${date}</td>
-            <td class="py-4 px-4 font-medium flex flex-col">
-                <span>${req.userEmail}</span>
-                ${statusBadge}
-            </td>
-            <td class="py-4 px-4 text-xs font-semibold">${req.buttonName || 'ID: ' + req.buttonId}</td>
-            <td class="py-4 px-4 italic text-obelisco-gray text-xs">"${req.reason}"</td>
-            <td class="py-4 px-4 text-right space-x-2 whitespace-nowrap">
-                ${(status === 'pending' || status === 'rejected' || status === 'restricted') ? `
-                <button class="btn-approve text-green-600 hover:bg-green-100 p-2 rounded" data-id="${req.id}" data-email="${req.userEmail}" data-button="${req.buttonId}" title="Aprobar Acceso">
+        const card = document.createElement('div');
+        card.className = "bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition flex flex-col md:flex-row items-center gap-4";
+        card.innerHTML = `
+            <div class="flex-shrink-0 w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-gray-400">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            </div>
+            
+            <div class="flex-grow text-center md:text-left">
+                <div class="flex items-center justify-center md:justify-start gap-2 mb-1">
+                    <span class="font-bold text-obelisco-dark">${req.userEmail}</span>
+                    ${statusBadge}
+                </div>
+                <div class="text-xs text-gray-500">
+                    Solicita: <span class="font-bold text-obelisco-blue">${req.buttonName || 'Tablero restringido'}</span>
+                </div>
+                <div class="text-[10px] text-gray-400 mt-1">
+                    Fecha: ${date} • Vencimiento: <span class="font-mono">${expiryDate}</span>
+                </div>
+                <div class="mt-3 text-[11px] text-gray-600 italic bg-gray-50 p-2 rounded-lg border-l-2 border-gray-200 line-clamp-1 truncate hover:line-clamp-none cursor-help" title="${req.reason}">
+                    "${req.reason || 'Sin motivo declarado'}"
+                </div>
+            </div>
+
+            <div class="flex flex-row md:flex-col gap-2 shrink-0">
+                ${(status === 'pending' || status === 'rejected' || status === 'restricted' || status === 'expired') ? `
+                <button class="btn-approve bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg transition shadow-sm" data-id="${req.id}" data-email="${req.userEmail}" data-button="${req.buttonId}" title="Aprobar Acceso">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 </button>
                 ` : ''}
                 
                 ${status === 'pending' ? `
-                <button class="btn-reject text-orange-500 hover:bg-orange-50 p-2 rounded" data-id="${req.id}" title="Rechazar">
+                <button class="btn-reject bg-white border border-orange-200 text-orange-500 hover:bg-orange-50 p-2 rounded-lg transition" data-id="${req.id}" title="Rechazar">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
                 ` : ''}
-            </td>
+            </div>
         `;
 
-        if (status === 'pending' || status === 'rejected' || status === 'restricted') {
-            const approveBtn = tr.querySelector('.btn-approve');
-            if (approveBtn) {
-                approveBtn.addEventListener('click', async (e) => {
-                    const btn = e.currentTarget;
-                    btn.disabled = true;
-                    btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>';
-                    await approveRequest(req.id, req.userEmail, req.buttonId);
-                });
-            }
+        const approveBtn = card.querySelector('.btn-approve');
+        if (approveBtn) {
+            approveBtn.addEventListener('click', () => approveRequest(req.id, req.userEmail, req.buttonId));
         }
 
-        if (status === 'pending') {
-            const rejectBtn = tr.querySelector('.btn-reject');
-            if (rejectBtn) {
-                rejectBtn.addEventListener('click', async (e) => {
-                    const btn = e.currentTarget;
-                    btn.disabled = true;
-                    btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>';
-                    await updateRequestStatus(req.id, 'rejected');
-                });
-            }
+        const rejectBtn = card.querySelector('.btn-reject');
+        if (rejectBtn) {
+            rejectBtn.addEventListener('click', async () => {
+                if(!confirm("¿Estás seguro que querés rechazar esta solicitud?")) return;
+                await updateRequestStatus(req.id, 'rejected');
+            });
         }
 
-        requestsTbody.appendChild(tr);
+        container.appendChild(card);
     });
 }
 
@@ -565,6 +711,71 @@ async function updateRequestStatus(requestId, newStatus) {
 }
 
 async function approveRequest(requestId, email, buttonId) {
+    pendingApproval = { requestId, email, buttonId };
+
+    // Reset UI
+    userRoleDateLabel.classList.add('hidden');
+    roleExpiryWarning.classList.add('hidden');
+    optRoleExpiry.classList.remove('hidden');
+
+    // Fetch user info to check expiry date
+    try {
+        console.log("Fetching user profile for approval:", email);
+        const userSnap = await getDoc(doc(db, "users", email.toLowerCase()));
+        if (userSnap.exists()) {
+            const userData = userSnap.data();
+            const expiry = userData.expiryDate; // Can be ISO string or "No aplica"
+
+            if (expiry && expiry !== 'No aplica' && expiry !== '') {
+                const expiryDate = new Date(expiry);
+                const now = new Date();
+
+                if (now > expiryDate) {
+                    // Already expired - Hide option
+                    optRoleExpiry.classList.add('hidden');
+                } else {
+                    const daysRemaining = Math.max(0, Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24)));
+                    userRoleDateLabel.textContent = `${expiryDate.toLocaleDateString()} (vence en ${daysRemaining} días)`;
+                    userRoleDateLabel.classList.remove('hidden');
+                    pendingApproval.userExpiryDate = expiry;
+                }
+            } else {
+                // No expiry date or "No aplica" - Hide option
+                optRoleExpiry.classList.add('hidden');
+            }
+        }
+    } catch (error) {
+        console.error("Error fetching user data for modal:", error);
+    }
+    
+    durationModal?.classList.remove('hidden');
+    durationModal?.classList.add('flex');
+}
+
+// Handle Expiration Selections
+async function processApproval(type) {
+    console.log("Iniciando proceso de aprobación:", type);
+    if (!pendingApproval) {
+        console.warn("Error: No hay solicitud pendiente de aprobación en memoria.");
+        return;
+    }
+    const { requestId, email, buttonId, userExpiryDate } = pendingApproval;
+    console.log("Contexto de aprobación:", { requestId, email, buttonId, userExpiryDate });
+    const now = new Date();
+    let expiryISO = "";
+
+    // Disable buttons
+    optOneYear.disabled = true;
+    optRoleExpiry.disabled = true;
+
+    if (type === '1year') {
+        const expiryDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+        expiryISO = expiryDate.toISOString();
+    } else if (type === 'role') {
+        if (!userExpiryDate) return;
+        expiryISO = userExpiryDate;
+    }
+
     try {
         // 1. Get the button doc
         const buttonRef = doc(db, "buttons", buttonId);
@@ -573,25 +784,51 @@ async function approveRequest(requestId, email, buttonId) {
         if (buttonSnap.exists()) {
             const data = buttonSnap.data();
             const allowedUsers = data.allowedUsers || [];
+            const accessExpirations = data.accessExpirations || {};
 
-            // Add email if not already there
-            if (!allowedUsers.map(e => e.toLowerCase()).includes(email.toLowerCase())) {
+            // Add/Update email
+            if (!allowedUsers.map(u => u.toLowerCase()).includes(email.toLowerCase())) {
                 allowedUsers.push(email);
-                await updateDoc(buttonRef, { allowedUsers });
             }
+            
+            // Set expiration
+            accessExpirations[email.toLowerCase()] = expiryISO;
 
-            // 2. Mark request as approved
-            await updateDoc(doc(db, "requests", requestId), { status: 'approved' });
-            await loadRequests();
-        } else {
-            // Board no longer exists — just delete the request
-            await deleteDoc(doc(db, "requests", requestId));
-            await loadRequests();
+            await updateDoc(buttonRef, { allowedUsers, accessExpirations });
         }
+
+        // 2. Update request status
+        await updateDoc(doc(db, "requests", requestId), { 
+            status: 'approved',
+            expiryDate: expiryISO,
+            approvedAt: now.toISOString()
+        });
+
+        closeDurationModal();
+        await loadRequests();
     } catch (error) {
         console.error("Error approving request:", error);
+        alert("Error al procesar la aprobación: " + (error.message || "Error desconocido"));
+    } finally {
+        optOneYear.disabled = false;
+        optRoleExpiry.disabled = false;
     }
 }
+
+optOneYear?.addEventListener('click', () => processApproval('1year'));
+optRoleExpiry?.addEventListener('click', () => processApproval('role'));
+
+function closeDurationModal() {
+    durationModal?.classList.add('hidden');
+    durationModal?.classList.remove('flex');
+    pendingApproval = null;
+}
+
+cancelDurationBtn?.addEventListener('click', () => {
+    closeDurationModal();
+    loadRequests(); 
+});
+closeDurationOverlay?.addEventListener('click', closeDurationModal);
 
 function renderUserChecklist(filterText = '') {
     usersChecklist.innerHTML = '';
@@ -665,7 +902,7 @@ function renderUserChecklist(filterText = '') {
         usersChecklist.appendChild(divManual);
     }
 }
-userSearchInput.addEventListener('input', (e) => renderUserChecklist(e.target.value));
+userSearchInput?.addEventListener('input', (e) => renderUserChecklist(e.target.value));
 
 // --- CATEGORIES LISTING & SELECTOR ---
 categorySearchInput?.addEventListener('input', (e) => renderCategoryChecklist(e.target.value));
@@ -871,7 +1108,7 @@ document.querySelectorAll('.cat-filter-btn').forEach(btn => {
     });
 });
 
-addCatBtn.addEventListener('click', () => {
+addCatBtn?.addEventListener('click', () => {
     catForm.reset();
     fieldCatId.value = '';
     fieldCatVisible.checked = true;
@@ -883,7 +1120,7 @@ addCatBtn.addEventListener('click', () => {
     catModal.classList.add('flex');
 });
 
-catForm.addEventListener('submit', async (e) => {
+catForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
     isSubmitting = true;
@@ -1055,7 +1292,7 @@ filterBoardStatus?.addEventListener('change', (e) => {
     filterAndRenderBoards();
 });
 
-addBoardBtn.addEventListener('click', () => {
+addBoardBtn?.addEventListener('click', () => {
     boardForm.reset();
     fieldBoardId.value = '';
     fieldBoardReqLogin.value = 'true';
@@ -1073,7 +1310,7 @@ addBoardBtn.addEventListener('click', () => {
     boardModal.classList.add('flex');
 });
 
-boardForm.addEventListener('submit', async (e) => {
+boardForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
     isSubmitting = true;
@@ -1144,7 +1381,7 @@ function closeAllModals() {
     catModal.classList.add('hidden');
     catModal.classList.remove('flex');
 }
-document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', closeAllModals));
+document.querySelectorAll('[data-close]')?.forEach(btn => btn?.addEventListener('click', closeAllModals));
 
 async function deleteDocReq(collectionName, id) {
     if (confirm("¿Estás seguro que querés eliminar esto permanentemente?")) {
@@ -1473,44 +1710,266 @@ function renderFeedbackTable(feedbackList) {
 async function checkBackgroundNotifications() {
     console.log("Checking background notifications for badges...");
     try {
+        const lastSeenUsers = localStorage.getItem('ogb_last_seen_users');
+        const lastSeenFeedback = localStorage.getItem('ogb_last_seen_feedback');
+        const lastSeenContacto = localStorage.getItem('ogb_last_seen_contacto');
+
+        const activeTab = document.querySelector('.nav-tab.text-obelisco-blue');
+        const currentTarget = activeTab ? activeTab.getAttribute('data-target') : '';
+
+        const getSafeDate = (val) => {
+            if (!val) return null;
+            if (val.seconds) return val.toDate(); // Firestore Timestamp
+            return new Date(val); // ISO String or other
+        };
+
+        // 1. Users Badge
         const usersBadge = document.getElementById('users-badge');
-        if (usersBadge) {
+        if (usersBadge && currentTarget !== 'tab-usuarios') {
             const usersSnap = await getDocs(collection(db, "users"));
-            const cutoff = Date.now() - (48 * 60 * 60 * 1000);
             let hasNewUser = false;
             usersSnap.forEach(doc => {
                 const data = doc.data();
-                const timeStr = data.updatedAt || data.createdAt;
-                if (timeStr && new Date(timeStr).getTime() > cutoff) {
+                const userDate = getSafeDate(data.updatedAt || data.createdAt);
+                if (userDate && (!lastSeenUsers || userDate.getTime() > new Date(lastSeenUsers).getTime())) {
                     hasNewUser = true;
                 }
             });
-            const activeTab = document.querySelector('.nav-tab.text-obelisco-blue');
-            const isViewingUsers = activeTab && activeTab.getAttribute('data-target') === 'tab-usuarios';
-            if (hasNewUser && !isViewingUsers) {
-                usersBadge.classList.remove('hidden');
-            }
+            if (hasNewUser) usersBadge.classList.remove('hidden');
         }
 
+        // 2. Feedback Badge
         const feedbackBadge = document.getElementById('feedback-badge');
-        if (feedbackBadge) {
+        if (feedbackBadge && currentTarget !== 'tab-feedback') {
             const feedbackSnap = await getDocs(collection(db, "feedback"));
-            const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000);
             let newCount = 0;
             feedbackSnap.forEach(doc => {
                 const data = doc.data();
-                if (data.timestamp && new Date(data.timestamp).getTime() > cutoff) {
+                const feedbackDate = getSafeDate(data.timestamp);
+                if (feedbackDate && (!lastSeenFeedback || feedbackDate.getTime() > new Date(lastSeenFeedback).getTime())) {
                     newCount++;
                 }
             });
-            const activeTab = document.querySelector('.nav-tab.text-obelisco-blue');
-            const isViewingFeedback = activeTab && activeTab.getAttribute('data-target') === 'tab-feedback';
-            if (newCount > 0 && !isViewingFeedback) {
+            if (newCount > 0) {
                 feedbackBadge.textContent = newCount;
                 feedbackBadge.classList.remove('hidden');
+            }
+        }
+
+        // 3. Contact/Incident Badge
+        const contactBadge = document.getElementById('contacto-badge');
+        if (contactBadge && currentTarget !== 'tab-contacto') {
+            const contactsSnap = await getDocs(collection(db, "contacts"));
+            let newCount = 0;
+            contactsSnap.forEach(doc => {
+                const data = doc.data();
+                const contactDate = getSafeDate(data.createdAt);
+                if (contactDate && (!lastSeenContacto || contactDate.getTime() > new Date(lastSeenContacto).getTime())) {
+                    newCount++;
+                }
+            });
+            if (newCount > 0) {
+                contactBadge.textContent = newCount;
+                contactBadge.classList.remove('hidden');
             }
         }
     } catch (e) {
         console.error("Error checking background notifications:", e);
     }
+}
+
+// --- CONTACTS LOGIC ---
+async function loadContacts() {
+    console.log("Loading contacts from Firestore...");
+    try {
+        const snapshot = await getDocs(collection(db, "contacts"));
+        allContactsFetched = [];
+        snapshot.forEach(doc => {
+            allContactsFetched.push({ id: doc.id, ...doc.data() });
+        });
+        
+        console.log(`Fetched ${allContactsFetched.length} contacts.`);
+        
+        // Sort by date desc (handle both ISO strings and Firestore Timestamps)
+        allContactsFetched.sort((a, b) => {
+            const dateA = a.createdAt?.seconds ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+            const dateB = b.createdAt?.seconds ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+            return dateB - dateA;
+        });
+        
+        renderContactsTable();
+    } catch (error) {
+        console.error("Error loading contacts:", error);
+        if (contactoTbody) contactoTbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-red-500">Error cargando reportes: ${error.message}</td></tr>`;
+    }
+}
+
+function renderContactsTable() {
+    if (!contactoTbody) return;
+    contactoTbody.innerHTML = '';
+
+    // Filter the contacts
+    const filterType = document.getElementById('filter-contact-type')?.value || 'all';
+    const filtered = allContactsFetched.filter(c => {
+        // New explicit type field OR fallback keyword detection
+        const isIncident = c.type === 'incident' || (c.reason && (
+            c.reason.toLowerCase().includes('seguridad') || 
+            c.reason.toLowerCase().includes('autorizado') ||
+            c.reason.toLowerCase().includes('incidente') ||
+            c.reason.toLowerCase().includes('indebido')
+        ));
+
+        if (filterType === 'incident') return isIncident;
+        if (filterType === 'general') return !isIncident;
+        return true;
+    });
+
+    if (filtered.length === 0) {
+        contactoTbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center text-obelisco-gray">No hay mensajes que coincidan con el filtro.</td></tr>`;
+        return;
+    }
+
+    filtered.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-gray-50 transition border-b border-gray-100";
+        
+        // Format date safely
+        let dateStr = 'N/A';
+        if (c.createdAt) {
+            try {
+                const dt = c.createdAt.seconds ? c.createdAt.toDate() : new Date(c.createdAt);
+                dateStr = dt.toLocaleString();
+            } catch (e) {
+                console.warn("Date formatting error for contact:", c.id, e);
+            }
+        }
+
+        const isUrgent = c.type === 'incident' || (c.reason && (
+            c.reason.toLowerCase().includes('seguridad') || 
+            c.reason.toLowerCase().includes('autorizado') || 
+            c.reason.toLowerCase().includes('incidente') ||
+            c.reason.toLowerCase().includes('indebido')
+        ));
+
+        tr.innerHTML = `
+            <td class="py-4 px-4 text-xs font-mono text-gray-500">${dateStr}</td>
+            <td class="py-4 px-4 font-medium">
+                <div class="flex flex-col">
+                    <span class="text-obelisco-dark">${c.name || 'Anónimo'}</span>
+                    <span class="text-[11px] text-obelisco-gray">${c.email || 'Sin email'}</span>
+                </div>
+            </td>
+            <td class="py-4 px-4">
+                <span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${isUrgent ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-blue-50 text-blue-600 border border-blue-100'}">
+                    ${isUrgent ? '🚨 ' : '💬 '}${c.reason || 'Consulta'}
+                </span>
+            </td>
+            <td class="py-4 px-4 italic text-obelisco-gray text-xs leading-relaxed max-w-xs truncate" title="${c.message}">"${c.message}"</td>
+            <td class="py-4 px-4 text-right">
+                <button class="text-gray-400 hover:text-red-500 transition-colors btn-del-contact" data-id="${c.id}" title="Eliminar reporte">
+                    <svg class="w-5 h-5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+            </td>
+        `;
+
+        tr.querySelector('.btn-del-contact').addEventListener('click', async () => {
+            if (confirm("¿Eliminar este reporte permanentemente?")) {
+                try {
+                    await deleteDoc(doc(db, "contacts", c.id));
+                    loadContacts();
+                } catch (err) {
+                    console.error("Error deleting contact:", err);
+                }
+            }
+        });
+
+        contactoTbody.appendChild(tr);
+    });
+}
+// --- T&C Version Management ---
+async function loadTCConfig() {
+    try {
+        const snap = await getDoc(doc(db, "config", "terms"));
+        if (snap.exists()) {
+            globalTermsVersion = snap.data().currentVersion;
+            const input = document.getElementById('config-tc-version');
+            if (input) input.value = globalTermsVersion;
+        }
+    } catch (e) {
+        console.error("Error loading TC config:", e);
+    }
+}
+
+document.getElementById('save-tc-version')?.addEventListener('click', async () => {
+    const newVersion = document.getElementById('config-tc-version').value;
+    if (!newVersion) return;
+    
+    if (!confirm(`¿Estás seguro de actualizar a la versión ${newVersion}? \nEsto obligará a TODOS los usuarios a aceptar los términos de nuevo.`)) return;
+
+    try {
+        const btn = document.getElementById('save-tc-version');
+        btn.disabled = true;
+        btn.textContent = "...";
+        
+        await setDoc(doc(db, "config", "terms"), { currentVersion: newVersion }, { merge: true });
+        globalTermsVersion = newVersion;
+        alert("Versión de T&C actualizada correctamente.");
+        
+        btn.disabled = false;
+        btn.textContent = "Activar";
+    } catch (e) {
+        console.error("Critical error saving TC Version:", e);
+        alert(`Error al guardar versión: ${e.code || e.message}`);
+    }
+});
+
+// --- RCE Loading ---
+async function loadRCE() {
+    const rceTbody = document.getElementById('rce-tbody');
+    if (!rceTbody) return;
+
+    rceTbody.innerHTML = '<tr><td colspan="5" class="py-12 text-center text-gray-400">Cargando registros...</td></tr>';
+
+    try {
+        const snap = await getDocs(collection(db, "consent_logs"));
+        allRCEFetched = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        
+        // Sort by timestamp desc
+        allRCEFetched.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        renderRCE();
+    } catch (e) {
+        console.error(e);
+        rceTbody.innerHTML = '<tr><td colspan="5" class="py-12 text-center text-red-400">Error al cargar RCE</td></tr>';
+    }
+}
+
+function renderRCE() {
+    const rceTbody = document.getElementById('rce-tbody');
+    if (!rceTbody) return;
+
+    if (allRCEFetched.length === 0) {
+        rceTbody.innerHTML = '<tr><td colspan="5" class="py-12 text-center text-gray-400">No hay registros de consentimiento aún.</td></tr>';
+        return;
+    }
+
+    rceTbody.innerHTML = allRCEFetched.map(log => `
+        <tr class="hover:bg-gray-50 transition">
+            <td class="px-4 py-3">
+                <div class="font-bold text-obelisco-dark">${log.userName || 'Usuario'}</div>
+                <div class="text-[9px] text-gray-400">DNI: ${log.dni || 'S/D'}</div>
+            </td>
+            <td class="px-4 py-3 text-gray-500">${log.userEmail}</td>
+            <td class="px-4 py-3">
+                <div class="font-medium">${new Date(log.timestamp).toLocaleDateString()}</div>
+                <div class="text-[9px] text-gray-400">${new Date(log.timestamp).toLocaleTimeString()}</div>
+            </td>
+            <td class="px-4 py-3">
+                <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-mono">${log.ip || '0.0.0.0'}</span>
+            </td>
+            <td class="px-4 py-3">
+                <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">${log.version}</span>
+            </td>
+        </tr>
+    `).join('');
 }

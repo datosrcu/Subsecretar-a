@@ -8,6 +8,8 @@
       "php-buttons.code-snippets (1).php",
       "Index.txt"
     ],
+    "cleanUrls": true,
+    "trailingSlash": false,
     "rewrites": [
       {
         "source": "**",

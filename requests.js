@@ -224,16 +224,16 @@ async function handleSubmit(e) {
 }
 
 // Event Listeners
-openRequestBtn.addEventListener('click', openModal);
-closeRequestBtn.addEventListener('click', closeModal);
-closeRequestBg.addEventListener('click', closeModal);
+openRequestBtn?.addEventListener('click', openModal);
+closeRequestBtn?.addEventListener('click', closeModal);
+closeRequestBg?.addEventListener('click', closeModal);
 
-btnNext.addEventListener('click', nextStep);
-btnPrev.addEventListener('click', prevStep);
-requestForm.addEventListener('submit', handleSubmit);
-btnSubmit.addEventListener('click', (e) => {
+btnNext?.addEventListener('click', nextStep);
+btnPrev?.addEventListener('click', prevStep);
+requestForm?.addEventListener('submit', handleSubmit);
+btnSubmit?.addEventListener('click', (e) => {
     // Manually trigger form submit if it's the last step
     if (currentStep === totalSteps) {
-        requestForm.requestSubmit();
+        requestForm?.requestSubmit();
     }
 });

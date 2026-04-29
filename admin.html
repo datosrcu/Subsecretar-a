@@ -150,22 +150,8 @@
                             data-target="tab-categorias">Categorías</button>
                         <button
                             class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-                            data-target="tab-usuarios">
+                            data-target="tab-usuarios-main">
                             Usuarios
-                            <span id="users-badge"
-                                class="ml-2 hidden bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">New</span>
-                        </button>
-                        <button
-                            class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-                            data-target="tab-solicitudes">
-                            Solicitudes de Acceso
-                            <span id="requests-badge"
-                                class="ml-2 hidden bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-xs font-bold">0</span>
-                        </button>
-                        <button
-                            class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-                            data-target="tab-tracking">
-                            Seguimiento Usuarios
                         </button>
                         <button
                             class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
@@ -173,6 +159,13 @@
                             Feedback
                             <span id="feedback-badge"
                                 class="ml-2 hidden bg-obelisco-blue text-white px-2 py-0.5 rounded-full text-[10px] font-bold">New</span>
+                        </button>
+                        <button
+                            class="nav-tab border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                            data-target="tab-contacto">
+                            Contacto
+                            <span id="contacto-badge"
+                                class="ml-2 hidden bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px] font-bold">New</span>
                         </button>
                     </nav>
                 </div>
@@ -364,152 +357,153 @@
                     </div>
                 </div>
 
-                <!-- CONTENIDO USUARIOS -->
-                <div id="tab-usuarios" class="tab-pane hidden text-sm">
-                    <div class="mb-6">
-                        <h2 class="text-2xl font-bold mb-1">Directorio de Usuarios</h2>
-                        <p class="text-obelisco-gray text-sm">Listado de todos los usuarios que han iniciado sesión al
-                            menos una vez en el portal.</p>
-                    </div>
+                <!-- CONTENIDO USUARIOS PRINCIPAL -->
+                <div id="tab-usuarios-main" class="tab-pane hidden">
+                    <div class="flex flex-col lg:flex-row gap-6">
+                        <!-- Sidebar de Sub-pestañas -->
+                        <div class="lg:w-64 flex-shrink-0">
+                            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                                <nav class="flex flex-col">
+                                    <button class="sub-nav-tab active-sub-tab p-4 text-left font-bold text-sm border-l-4 border-obelisco-blue bg-blue-50 text-obelisco-blue transition" data-sub="sub-directorio">
+                                        Explorar Directorio
+                                    </button>
+                                    <button class="sub-nav-tab p-4 text-left font-bold text-sm border-l-4 border-transparent text-gray-600 hover:bg-gray-50 transition flex items-center justify-between" data-sub="sub-solicitudes">
+                                        Solicitudes de Acceso
+                                        <span id="requests-badge-inner" class="bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-[10px]">0</span>
+                                    </button>
+                                    <button class="sub-nav-tab p-4 text-left font-bold text-sm border-l-4 border-transparent text-gray-600 hover:bg-gray-50 transition" data-sub="sub-tracking">
+                                        Seguimiento Usuarios
+                                    </button>
+                                    <button class="sub-nav-tab p-4 text-left font-bold text-sm border-l-4 border-transparent text-gray-600 hover:bg-gray-50 transition" data-sub="sub-rce">
+                                        Registro (RCE)
+                                    </button>
+                                </nav>
+                            </div>
 
-                    <!-- Filtros de Usuarios -->
-                    <div
-                        class="mb-6 bg-gray-50 p-4 rounded-xl border border-obelisco-border flex flex-wrap gap-4 items-end">
-                        <div class="flex-grow min-w-[300px]">
-                            <label class="block text-[10px] uppercase font-bold text-obelisco-gray mb-1">Buscar por
-                                Nombre, Email u Organización</label>
-                            <input type="text" id="filter-user-search"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-obelisco-blue"
-                                placeholder="Buscar usuario...">
+                            <!-- Panel Versión T&C -->
+                            <div class="mt-6 bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Versión de T&C</h4>
+                                <div class="space-y-3">
+                                    <div class="flex flex-col gap-2">
+                                        <input type="text" id="config-tc-version" class="w-full border border-gray-300 rounded px-3 py-2 text-xs outline-none focus:border-obelisco-blue" placeholder="Ej: 1.2.0">
+                                        <button id="save-tc-version" class="w-full bg-obelisco-blue text-white px-3 py-2 rounded text-xs font-bold hover:bg-blue-700 transition">Activar Nueva Versión</button>
+                                    </div>
+                                    <p class="text-[10px] text-gray-500 italic">Al cambiar la versión, todos los usuarios deberán aceptar el nuevo documento al ingresar.</p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div
-                        class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden max-w-[1600px]">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
-                                    <th class="py-3 px-4 font-semibold">Usuario</th>
-                                    <th class="py-3 px-4 font-semibold">Organización / Cargo</th>
-                                    <th class="py-3 px-4 font-semibold">Registro / Acceso</th>
-                                    <th class="py-3 px-4 font-semibold">Rol App</th>
-                                    <th class="py-3 px-4 font-semibold text-right">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="users-tbody" class="divide-y divide-obelisco-border">
-                                <!-- v1.2 - Advanced User Directory -->
-                                <tr>
-                                    <td colspan="5" class="text-center py-8 text-obelisco-gray">Cargando usuarios...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                        <!-- Panel de Contenido Dinámico Usuarios -->
+                        <div class="flex-grow space-y-6">
+                            <!-- SUB-TAB: Directorio -->
+                            <div id="sub-directorio" class="sub-pane">
+                                <div class="flex justify-between items-end mb-4">
+                                    <h4 class="text-lg font-bold">Directorio de Usuarios</h4>
+                                    <input type="text" id="filter-user-search" class="text-xs border rounded-lg px-3 py-1.5 w-64 outline-none focus:border-obelisco-blue" placeholder="Buscar por nombre o email...">
+                                </div>
+                                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                                    <table class="w-full text-left table-fixed">
+                                        <thead class="bg-gray-50 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200">
+                                            <tr>
+                                                <th class="px-4 py-3 w-1/3">Usuario / Perfil</th>
+                                                <th class="px-4 py-3">Rol / Sector</th>
+                                                <th class="px-4 py-3">Organización</th>
+                                                <th class="px-4 py-3 text-right">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="users-tbody" class="divide-y divide-gray-100 text-xs">
+                                            <!-- Usuarios aquí -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
 
-                <!-- CONTENIDO SOLICITUDES -->
-                <div id="tab-solicitudes" class="tab-pane hidden text-sm">
-                    <div class="mb-6">
-                        <h2 class="text-2xl font-bold mb-1">Solicitudes de Acceso</h2>
-                        <p class="text-obelisco-gray text-sm">Gestioná las peticiones de los usuarios para visualizar
-                            tableros restringidos.</p>
-                    </div>
+                            <!-- SUB-TAB: Solicitudes -->
+                            <div id="sub-solicitudes" class="sub-pane hidden">
+                                <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
+                                    <div>
+                                        <h4 class="text-lg font-bold">Solicitudes de Acceso</h4>
+                                        <p class="text-[10px] text-gray-500">Gestioná los permisos temporales para los tableros.</p>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2">
+                                        <input type="text" id="filter-request-user" class="text-xs border border-gray-300 rounded-lg px-3 py-1.5 w-48 outline-none focus:border-obelisco-blue" placeholder="Filtrar por email...">
+                                        <select id="filter-request-status" class="text-xs border border-gray-300 rounded-lg px-2 py-1.5 outline-none focus:border-obelisco-blue bg-white">
+                                            <option value="all">Todos los estados</option>
+                                            <option value="pending" selected>Pendientes</option>
+                                            <option value="approved">Aprobadas</option>
+                                            <option value="rejected">Rechazadas</option>
+                                            <option value="expired">Vencidas</option>
+                                        </select>
+                                        <select id="sort-request-expiry" class="text-xs border border-gray-300 rounded-lg px-2 py-1.5 outline-none focus:border-obelisco-blue bg-white">
+                                            <option value="created-desc">Más recientes</option>
+                                            <option value="expiry-soon">Vencimiento próximo</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="requests-container" class="space-y-3">
+                                    <div class="bg-white border rounded-xl p-8 text-center text-gray-400 border-dashed">
+                                        Cargando solicitudes...
+                                    </div>
+                                </div>
+                                <div class="hidden">
+                                     <table><tbody id="requests-tbody"></tbody></table>
+                                </div>
+                            </div>
 
-                    <!-- Filtros de Solicitudes -->
-                    <div
-                        class="mb-6 flex flex-wrap gap-4 items-end bg-gray-50 p-4 rounded-xl border border-obelisco-border">
-                        <div class="flex-grow">
-                            <label class="block text-[10px] uppercase font-bold text-obelisco-gray mb-1">Filtrar por
-                                Usuario / Email</label>
-                            <input type="text" id="filter-request-user"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-obelisco-blue"
-                                placeholder="Buscar email...">
+                            <!-- SUB-TAB: Tracking -->
+                            <div id="sub-tracking" class="sub-pane hidden">
+                                <div class="flex justify-between items-end mb-4">
+                                    <h4 class="text-lg font-bold">Seguimiento de Actividad</h4>
+                                    <div class="flex space-x-2">
+                                         <input type="text" id="filter-tracking-search-inner" class="text-xs border rounded-lg px-3 py-1.5 w-48 outline-none focus:border-obelisco-blue" placeholder="Filtrar por email...">
+                                         <select id="filter-tracking-status-inner" class="text-xs border rounded-lg px-2 py-1.5 outline-none focus:border-obelisco-blue bg-white">
+                                            <option value="all">Todos</option>
+                                            <option value="access">Con acceso</option>
+                                            <option value="denied">Denegado</option>
+                                         </select>
+                                    </div>
+                                </div>
+                                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                                    <table class="w-full text-left">
+                                        <thead class="bg-gray-50 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200">
+                                            <tr>
+                                                <th class="px-4 py-3">Fecha / Hora</th>
+                                                <th class="px-4 py-3">Usuario</th>
+                                                <th class="px-4 py-3">Tablero / Indicador</th>
+                                                <th class="px-4 py-3">Acceso</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tracking-tbody" class="divide-y divide-gray-100 text-xs">
+                                            <!-- Tracking aquí -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- SUB-TAB: RCE -->
+                            <div id="sub-rce" class="sub-pane hidden">
+                                <h4 class="text-lg font-bold mb-4">Registro de Consentimiento Electrónico (RCE)</h4>
+                                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-left">
+                                            <thead class="bg-gray-50 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200">
+                                                <tr>
+                                                    <th class="px-4 py-3 whitespace-nowrap">Usuario (Nombre/Doc)</th>
+                                                    <th class="px-4 py-3">Email</th>
+                                                    <th class="px-4 py-3">Aceptación (Local)</th>
+                                                    <th class="px-4 py-3">IP Origen</th>
+                                                    <th class="px-4 py-3">Versión</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="rce-tbody" class="divide-y divide-gray-100 text-[11px]">
+                                                <!-- Auditoría RCE aquí -->
+                                                <tr><td colspan="5" class="py-12 text-center text-gray-400">Cargando registros de consentimiento...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="w-48">
-                            <label class="block text-[10px] uppercase font-bold text-obelisco-gray mb-1">Estado</label>
-                            <select id="filter-request-status"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-obelisco-blue bg-white">
-                                <option value="all" selected>Todos los estados</option>
-                                <option value="pending">Pendientes</option>
-                                <option value="approved">Aprobadas</option>
-                                <option value="rejected">Rechazadas</option>
-                                <option value="restricted">Restringidas</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden">
-                        <table class="w-full text-left border-collapse min-w-[700px]">
-                            <thead>
-                                <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
-                                    <th class="py-3 px-4 font-semibold">Fecha</th>
-                                    <th class="py-3 px-4 font-semibold">Usuario</th>
-                                    <th class="py-3 px-4 font-semibold">Tablero</th>
-                                    <th class="py-3 px-4 font-semibold">Motivo</th>
-                                    <th class="py-3 px-4 font-semibold text-right">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="requests-tbody" class="divide-y divide-obelisco-border">
-                                <tr>
-                                    <td colspan="5" class="text-center py-8 text-obelisco-gray">No hay solicitudes
-                                        pendientes.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- CONTENIDO SEGUIMIENTO -->
-                <div id="tab-tracking" class="tab-pane hidden text-sm">
-                    <div class="mb-6">
-                        <h2 class="text-2xl font-bold mb-1">Seguimiento de Usuarios</h2>
-                        <p class="text-obelisco-gray text-sm">Registro de actividad de usuarios en los tableros (ingresos y clics en restringidos).</p>
-                    </div>
-
-                    <!-- Buscador y Filtro de Tracking -->
-                    <div class="flex flex-wrap items-center gap-4 mb-6">
-                        <div class="relative min-w-[300px]">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </span>
-                            <input type="text" id="filter-tracking-search" placeholder="Buscar por usuario, nombre o tablero..."
-                                class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue outline-none transition text-sm">
-                        </div>
-                        <div class="relative min-w-[200px]">
-                            <select id="filter-tracking-status"
-                                class="pl-4 pr-10 py-2 border border-gray-300 rounded-lg w-full appearance-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue outline-none transition text-sm bg-white">
-                                <option value="all">Suscripción (Todos)</option>
-                                <option value="access">Acceso Concedido</option>
-                                <option value="denied">Denegado / Solicitud</option>
-                            </select>
-                            <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden">
-                        <table class="w-full text-left border-collapse min-w-[700px]">
-                            <thead>
-                                <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
-                                    <th class="py-3 px-4 font-semibold">Fecha/Hora</th>
-                                    <th class="py-3 px-4 font-semibold">Usuario</th>
-                                    <th class="py-3 px-4 font-semibold">Nombre</th>
-                                    <th class="py-3 px-4 font-semibold">Tablero</th>
-                                    <th class="py-3 px-4 font-semibold text-right">Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tracking-tbody" class="divide-y divide-obelisco-border">
-                                <tr>
-                                    <td colspan="5" class="text-center py-8 text-obelisco-gray">Cargando registros de actividad...</td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
 
@@ -534,6 +528,44 @@
                             <tbody id="feedback-tbody" class="divide-y divide-obelisco-border">
                                 <tr>
                                     <td colspan="5" class="text-center py-8 text-obelisco-gray">Cargando feedback...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CONTENIDO CONTACTO -->
+                <div id="tab-contacto" class="tab-pane hidden text-sm">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold mb-1">Contacto y Reportes de Seguridad</h2>
+                            <p class="text-obelisco-gray text-sm">Mensajes recibidos desde el formulario de contacto y reportes de incidentes.</p>
+                        </div>
+                        <div class="w-full sm:w-64">
+                            <label class="block text-[10px] uppercase font-bold text-gray-400 mb-1 tracking-widest">Filtrar por Tipo</label>
+                            <select id="filter-contact-type" 
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-obelisco-blue/20 focus:border-obelisco-blue transition bg-white text-sm">
+                                <option value="all">Ver Todos</option>
+                                <option value="incident">🚨 Reportes de Incidente</option>
+                                <option value="general">💬 Contacto General</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border text-sm border-obelisco-border rounded-xl shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse min-w-[900px]">
+                            <thead>
+                                <tr class="bg-obelisco-light border-b border-obelisco-border text-obelisco-gray">
+                                    <th class="py-3 px-4 font-semibold w-40">Fecha</th>
+                                    <th class="py-3 px-4 font-semibold w-64">De / Email</th>
+                                    <th class="py-3 px-4 font-semibold w-48">Categoría</th>
+                                    <th class="py-3 px-4 font-semibold">Mensaje</th>
+                                    <th class="py-3 px-4 font-semibold text-right w-24">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contacto-tbody" class="divide-y divide-obelisco-border">
+                                <tr>
+                                    <td colspan="5" class="text-center py-8 text-obelisco-gray">Cargando reportes de contacto...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -884,7 +916,38 @@
 
     <!-- Application Scripts -->
     <script type="module" src="firebase-config.js"></script>
-    <script type="module" src="admin.js"></script>
+    <script type="module" src="admin.js?v=1.2.2"></script>
+    <!-- Modal Selección de Duración Acceso -->
+    <div id="duration-modal" class="fixed inset-0 hidden items-center justify-center z-[1000] p-4">
+        <div class="absolute inset-0 bg-obelisco-dark/60 backdrop-blur-sm" id="close-duration-overlay"></div>
+        <div class="relative bg-white w-[450px] max-w-full rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+                <div>
+                    <h3 class="text-xl font-bold text-obelisco-dark">Configurar Vigencia</h3>
+                    <p class="text-xs text-obelisco-gray mt-1">Definí por cuánto tiempo será válido el acceso.</p>
+                </div>
+            </div>
+            <div class="p-8 space-y-6">
+                <div class="grid grid-cols-1 gap-3" id="duration-options">
+                    <button id="opt-1-year" class="duration-opt p-4 border-2 border-gray-100 rounded-xl hover:border-obelisco-blue hover:bg-blue-50 transition text-left group">
+                        <div class="font-bold text-obelisco-dark text-base">1 Año</div>
+                        <div class="text-[10px] text-obelisco-gray group-hover:text-obelisco-blue uppercase font-bold tracking-tighter">Vigencia estándar</div>
+                    </button>
+                    <button id="opt-role-expiry" class="duration-opt p-4 border-2 border-gray-100 rounded-xl hover:border-obelisco-blue hover:bg-blue-50 transition text-left group">
+                        <div class="flex justify-between items-center mb-1">
+                            <div class="font-bold text-obelisco-dark text-base">Hasta finalizar cargo</div>
+                            <span id="user-role-date" class="text-xs font-mono bg-amber-50 text-amber-700 px-2 py-0.5 rounded border border-amber-100 hidden">Cargando...</span>
+                        </div>
+                        <div class="text-[10px] text-obelisco-gray group-hover:text-obelisco-blue uppercase font-bold tracking-tighter">Vigencia según fin de cargo declarado</div>
+                        <p id="role-expiry-warning" class="text-[9px] text-red-500 mt-2 hidden">⚠️ El cargo declarado ya se encuentra vencido o no aplica.</p>
+                    </button>
+                </div>
+                <div class="flex space-x-3 pt-4">
+                    <button id="cancel-duration-btn" class="flex-1 py-3 px-4 rounded-xl border border-gray-200 text-obelisco-gray font-bold hover:bg-gray-50 transition text-sm">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
