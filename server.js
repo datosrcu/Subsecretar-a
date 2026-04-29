@@ -206,9 +206,137 @@ app.get('/api/protected-test', verifyToken, (req, res) => {
     });
 });
 
+// --- ENDPOINTS DE LA API ---
 
-// Servir archivos estáticos del frontend
-app.use(express.static(path.join(__dirname, '/')));
+// 1. Guardar o actualizar perfil de usuario
+app.post('/api/perfil', verifyToken, async (req, res) => {
+    const { uid } = req.user;
+    const { 
+        full_name, dni, sector_group, organization_type, 
+        organization_name, role_position, role_detail, 
+        cuit, expiry_date, legal_file_url, 
+        terms_accepted_version, terms_accepted_date 
+    } = req.body;
+
+    try {
+        const connection = await getDbConnection();
+        const sql = `
+            INSERT INTO usuarios_perfiles 
+            (uid, email, full_name, dni, sector_group, organization_type, organization_name, role_position, role_detail, cuit, expiry_date, legal_file_url, terms_accepted_version, terms_accepted_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE 
+            full_name=VALUES(full_name), dni=VALUES(dni), sector_group=VALUES(sector_group), 
+            organization_type=VALUES(organization_type), organization_name=VALUES(organization_name), 
+            role_position=VALUES(role_position), role_detail=VALUES(role_detail), 
+            cuit=VALUES(cuit), expiry_date=VALUES(expiry_date), legal_file_url=VALUES(legal_file_url),
+            terms_accepted_version=VALUES(terms_accepted_version), terms_accepted_date=VALUES(terms_accepted_date)
+        `;
+        
+        await connection.execute(sql, [
+            uid, req.user.email, full_name, dni, sector_group, organization_type, 
+            organization_name, role_position, role_detail, 
+            cuit, expiry_date, legal_file_url, 
+            terms_accepted_version, terms_accepted_date
+        ]);
+        
+        await connection.end();
+        res.json({ message: 'Perfil actualizado correctamente en MySQL.' });
+    } catch (error) {
+        console.error('Error al guardar perfil:', error);
+        res.status(500).json({ error: 'Error al guardar en la base de datos.' });
+    }
+});
+
+// 2. Registrar solicitud de acceso a tablero
+app.post('/api/solicitud-acceso', verifyToken, async (req, res) => {
+    const { uid } = req.user;
+    const { dashboard_name, reason, reason_detail, terms_version } = req.body;
+
+    try {
+        const connection = await getDbConnection();
+        const sql = `
+            INSERT INTO solicitudes_acceso (user_uid, dashboard_name, reason, reason_detail, terms_version)
+            VALUES (?, ?, ?, ?, ?)
+        `;
+        await connection.execute(sql, [uid, dashboard_name, reason, reason_detail, terms_version]);
+        await connection.end();
+        res.json({ message: 'Solicitud de acceso registrada.' });
+    } catch (error) {
+        console.error('Error al registrar solicitud:', error);
+        res.status(500).json({ error: 'Error al registrar solicitud.' });
+    }
+});
+
+// 3. Registrar pedido de producto estadístico
+app.post('/api/pedido-estadistico', verifyToken, async (req, res) => {
+    const { uid } = req.user;
+    const { 
+        client_name, client_email, client_phone, client_position,
+        jurisdictions, area, product_types, title, periodicity,
+        due_date, description, formats, has_tech_contact,
+        tech_contact_name, tech_contact_email, tech_contact_phone,
+        additional_info, attachment_urls
+    } = req.body;
+
+    try {
+        const connection = await getDbConnection();
+        const sql = `
+            INSERT INTO productos_estadisticos 
+            (user_uid, client_name, client_email, client_phone, client_position, jurisdictions, area, product_types, title, periodicity, due_date, description, formats, has_tech_contact, tech_contact_name, tech_contact_email, tech_contact_phone, additional_info, attachment_urls)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        await connection.execute(sql, [
+            uid, client_name, client_email, client_phone, client_position,
+            JSON.stringify(jurisdictions), area, JSON.stringify(product_types), 
+            title, periodicity, due_date, description, JSON.stringify(formats),
+            has_tech_contact, tech_contact_name, tech_contact_email, tech_contact_phone,
+            additional_info, JSON.stringify(attachment_urls)
+        ]);
+        await connection.end();
+        res.json({ message: 'Pedido estadístico registrado exitosamente.' });
+    } catch (error) {
+        console.error('Error al registrar pedido estadístico:', error);
+        res.status(500).json({ error: 'Error al registrar pedido.' });
+    }
+});
+
+// 4. Registrar logs de actividad
+app.post('/api/log-actividad', verifyToken, async (req, res) => {
+    const { uid } = req.user;
+    const { action, details } = req.body;
+    const ip_address = req.ip || req.headers['x-forwarded-for'];
+
+    try {
+        const connection = await getDbConnection();
+        await connection.execute(
+            'INSERT INTO logs_actividad (user_uid, action, details, ip_address) VALUES (?, ?, ?, ?)',
+            [uid, action, JSON.stringify(details), ip_address]
+        );
+        await connection.end();
+        res.json({ status: 'ok' });
+    } catch (error) {
+        console.error('Error al guardar log:', error);
+        res.status(500).json({ error: 'Error al guardar log.' });
+    }
+});
+
+// 5. Registrar feedback
+app.post('/api/feedback', async (req, res) => {
+    const { user_uid, is_useful, comment, name_provided, email_provided } = req.body;
+
+    try {
+        const connection = await getDbConnection();
+        await connection.execute(
+            'INSERT INTO feedback_web (user_uid, is_useful, comment, name_provided, email_provided) VALUES (?, ?, ?, ?, ?)',
+            [user_uid || null, is_useful, comment, name_provided, email_provided]
+        );
+        await connection.end();
+        res.json({ message: 'Feedback recibido.' });
+    } catch (error) {
+        console.error('Error al guardar feedback:', error);
+        res.status(500).json({ error: 'Error al guardar feedback.' });
+    }
+});
 
 // Manejar todas las rutas para SPA (opcional, por si usas rutas de JS)
 app.get('*', (req, res) => {
