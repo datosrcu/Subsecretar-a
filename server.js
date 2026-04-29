@@ -3,10 +3,40 @@ const mysql = require('mysql2/promise');
 const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
+const admin = require('firebase-admin');
 require('dotenv').config();
+
+// Inicializar Firebase Admin
+try {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+    });
+    console.log('Firebase Admin inicializado correctamente.');
+} catch (error) {
+    console.error('Error al inicializar Firebase Admin:', error.message);
+}
 
 const app = express();
 const PORT = process.env.PORT || 80;
+
+// Middleware para verificar el Token de Firebase
+const verifyToken = async (req, res, next) => {
+    const idToken = req.headers.authorization?.split('Bearer ')[1];
+    
+    if (!idToken) {
+        return res.status(401).json({ error: 'No se proporcionó un token de autenticación.' });
+    }
+
+    try {
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        req.user = decodedToken;
+        next();
+    } catch (error) {
+        console.error('Error al verificar token:', error);
+        res.status(403).json({ error: 'Token inválido o expirado.' });
+    }
+};
 
 // Middleware de seguridad
 app.use(helmet({
@@ -48,7 +78,8 @@ app.get('/api/status', async (req, res) => {
         res.json({ 
             status: 'online', 
             database: 'connected',
-            message: '¡Conexión establecida exitosamente usando la URL de Dokploy!' 
+            auth: 'ready',
+            message: '¡Conexión establecida y sistema de seguridad inicializado!' 
         });
     } catch (error) {
         console.error('Error de DB:', error);
@@ -58,6 +89,17 @@ app.get('/api/status', async (req, res) => {
             message: error.message 
         });
     }
+});
+
+// Ruta protegida de prueba (Solo accesible con Login)
+app.get('/api/protected-test', verifyToken, (req, res) => {
+    res.json({
+        message: '¡Felicidades! Has accedido a una ruta protegida.',
+        user: {
+            email: req.user.email,
+            uid: req.user.uid
+        }
+    });
 });
 
 
