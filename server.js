@@ -17,15 +17,25 @@ app.use(express.json());
 
 // Configuración de la base de datos MySQL usando variables de entorno
 const dbConfig = {
-    host: process.env.DB_HOST,
+    host: process.env.DB_HOST || 'host.docker.internal',
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
     port: 3306
 };
 
+console.log('Intentando conectar a DB Host:', dbConfig.host);
+console.log('DB User definido:', !!dbConfig.user);
+
 // Endpoint de prueba de conexión
 app.get('/api/status', async (req, res) => {
+    if (!process.env.DB_HOST) {
+        return res.status(500).json({
+            status: 'error',
+            message: 'Las variables de entorno no están configuradas en Dokploy (Falta DB_HOST).'
+        });
+    }
+
     try {
         const connection = await mysql.createConnection(dbConfig);
         await connection.ping();
