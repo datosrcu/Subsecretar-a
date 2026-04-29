@@ -50,7 +50,29 @@ const REG_FORM_CONFIG = {
         requiresCUIT: ["Representante legal / Apoderado"]
     }
 };
-console.log("Auth JS v1.2 - Loaded");
+// --- Helper para llamar a la API del Backend ---
+async function callApi(endpoint, method = 'POST', body = null) {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Usuario no autenticado");
+
+    const token = await user.getIdToken();
+    const response = await fetch(endpoint, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: body ? JSON.stringify(body) : null
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Error en la API: ${response.status}`);
+    }
+    return await response.json();
+}
+
+console.log("Auth JS v1.3 - Backend Connected");
 
 // Navigation State
 let currentViewLevel = 'categories'; // 'categories' or 'boards'
@@ -581,6 +603,7 @@ async function handleAccessRequest(e) {
     submitBtn.textContent = "Enviando...";
 
     try {
+        // 1. Guardar en Firestore (Legacy)
         await addDoc(collection(db, "requests"), {
             userEmail: userEmail,
             buttonId: buttonId,
@@ -588,6 +611,14 @@ async function handleAccessRequest(e) {
             reason: motivoFinal,
             status: 'pending',
             createdAt: new Date().toISOString()
+        });
+
+        // 2. Guardar en MySQL (Nuevo Backend)
+        await callApi('/api/solicitud-acceso', 'POST', {
+            dashboard_name: buttonName,
+            reason: selectMotivo,
+            reason_detail: detalleMotivo,
+            terms_version: currentUserAcceptedTCVersion || '1.2.0'
         });
 
         document.getElementById('ogb-form-ok').classList.remove('hidden');
@@ -1692,6 +1723,22 @@ if (registrationForm) {
 
             await setDoc(userRef, registrationData, { merge: true });
 
+            // 2. Guardar en MySQL (Nuevo Backend)
+            await callApi('/api/perfil', 'POST', {
+                full_name: registrationData.name,
+                dni: registrationData.dni,
+                sector_group: registrationData.orgGroup,
+                organization_type: registrationData.orgType,
+                organization_name: registrationData.orgName,
+                role_position: registrationData.orgRole,
+                role_detail: registrationData.orgRoleDetail,
+                cuit: registrationData.cuit,
+                expiry_date: registrationData.expiryDate === 'No aplica' ? null : registrationData.expiryDate,
+                legal_file_url: registrationData.legalDocURL || null,
+                terms_accepted_version: registrationData.acceptedTCVersion,
+                terms_accepted_date: registrationData.acceptedTCTimestamp
+            });
+
             // Audit Log in consent_logs
             try {
                 await addDoc(collection(db, "consent_logs"), {
@@ -1844,8 +1891,16 @@ async function recordUserActivity(buttonName, hasAccess) {
             timestamp: new Date().toISOString()
         };
         
+        // 1. Firestore (Legacy)
         await addDoc(collection(db, "user_tracking"), logData);
-        console.log("[Tracking] Activity recorded successfully.");
+
+        // 2. MySQL (Nuevo Backend)
+        await callApi('/api/log-actividad', 'POST', {
+            action: hasAccess ? 'view_dashboard' : 'access_denied',
+            details: logData
+        });
+
+        console.log("[Tracking] Activity recorded successfully in Firestore and MySQL.");
     } catch (e) {
         console.error("[Tracking] Error recording activity:", e);
     }
@@ -1921,6 +1976,15 @@ feedbackForm?.addEventListener('submit', async (e) => {
             pageUrl: window.location.pathname,
             timestamp: new Date().toISOString(),
             createdAt: serverTimestamp()
+        });
+
+        // 2. MySQL (Nuevo Backend)
+        await callApi('/api/feedback', 'POST', {
+            user_uid: auth.currentUser ? auth.currentUser.uid : null,
+            is_useful: false,
+            comment: comment,
+            name_provided: name,
+            email_provided: email
         });
 
         feedbackForm.classList.add('hidden');
@@ -2089,6 +2153,15 @@ if (feedbackYesBtn) {
                 page: window.location.pathname,
                 timestamp: serverTimestamp(),
                 userAgent: navigator.userAgent
+            });
+
+            // 2. MySQL (Nuevo Backend)
+            await callApi('/api/feedback', 'POST', {
+                user_uid: auth.currentUser ? auth.currentUser.uid : null,
+                is_useful: true,
+                comment: 'Voto: Sí me fue útil',
+                name_provided: auth.currentUser ? auth.currentUser.displayName : 'Anónimo',
+                email_provided: auth.currentUser ? auth.currentUser.email : null
             });
             
             // Show thanks toast

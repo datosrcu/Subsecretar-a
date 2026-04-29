@@ -1,5 +1,27 @@
 import { db, collection, addDoc, serverTimestamp, auth, onAuthStateChanged, storage, ref, uploadBytes, getDownloadURL } from "./firebase-config.js";
 
+// --- Helper para llamar a la API del Backend ---
+async function callApi(endpoint, method = 'POST', body = null) {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Usuario no autenticado");
+
+    const token = await user.getIdToken();
+    const response = await fetch(endpoint, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: body ? JSON.stringify(body) : null
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Error en la API: ${response.status}`);
+    }
+    return await response.json();
+}
+
 // DOM Elements
 const requestModal = document.getElementById('request-modal');
 const openRequestBtn = document.getElementById('open-request-modal');
@@ -210,6 +232,35 @@ async function handleSubmit(e) {
 
         const docRef = await addDoc(collection(db, 'statistical_requests'), data);
         console.log("Documento enviado con ID:", docRef.id);
+
+        // 2. Guardar en MySQL (Nuevo Backend)
+        try {
+            await callApi('/api/pedido-estadistico', 'POST', {
+                client_name: data.clientName,
+                client_email: data.clientEmail,
+                client_phone: data.clientPhone,
+                client_position: data.clientPosition,
+                jurisdictions: data.jurisdictions,
+                area: data.clientArea,
+                product_types: data.productTypes,
+                title: data.requestTitle,
+                periodicity: data.periodicity,
+                due_date: data.dueDate,
+                description: data.description,
+                formats: data.formats,
+                has_tech_contact: data.hasTechContact === 'si',
+                tech_contact_name: data.techContactName || null,
+                tech_contact_email: data.techContactEmail || null,
+                tech_contact_phone: data.techContactPhone || null,
+                additional_info: data.additionalInfo || null,
+                attachment_urls: data.attachments
+            });
+            console.log("Pedido guardado en MySQL.");
+        } catch (mysqlErr) {
+            console.error("Error al guardar pedido en MySQL:", mysqlErr);
+            // No alertamos al usuario porque el de Firestore ya funcionó, 
+            // pero lo dejamos en consola para el técnico.
+        }
 
         alert('¡Solicitud enviada con éxito! El equipo técnico se pondrá en contacto pronto.');
         closeModal();
