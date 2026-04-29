@@ -18,7 +18,7 @@ try {
 }
 
 const app = express();
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 8080;
 
 // Middleware para verificar el Token de Firebase
 const verifyToken = async (req, res, next) => {

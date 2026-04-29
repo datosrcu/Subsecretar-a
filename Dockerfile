@@ -13,7 +13,7 @@ RUN npm install --production
 COPY . .
 
 # Exponer el puerto
-EXPOSE 80
+EXPOSE 8080
 
 # Comando para iniciar el servidor
 CMD ["node", "server.js"]
