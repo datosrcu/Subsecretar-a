@@ -341,27 +341,34 @@ app.post('/api/perfil', verifyToken, async (req, res) => {
         terms_accepted_version, terms_accepted_date 
     } = req.body;
 
+    // Parse dates safely — MySQL DATETIME rejects ISO 8601 strings with T/Z
+    const parsedTermsDate = terms_accepted_date ? new Date(terms_accepted_date) : null;
+    const parsedExpiryDate = (expiry_date && expiry_date !== 'No aplica' && expiry_date !== '') ? new Date(expiry_date) : null;
+
     try {
         const connection = await getDbConnection();
+        // Use email as the conflict key so re-registration after admin delete works
+        // regardless of whether the Firebase UID changed or not
         const sql = `
-            INSERT INTO usuarios_perfiles 
+            INSERT INTO usuarios_perfiles
             (uid, email, full_name, dni, sector_group, organization_type, organization_name, role_position, role_detail, cuit, expiry_date, legal_file_url, terms_accepted_version, terms_accepted_date)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE 
-            full_name=VALUES(full_name), dni=VALUES(dni), sector_group=VALUES(sector_group), 
-            organization_type=VALUES(organization_type), organization_name=VALUES(organization_name), 
-            role_position=VALUES(role_position), role_detail=VALUES(role_detail), 
+            ON DUPLICATE KEY UPDATE
+            uid=VALUES(uid),
+            full_name=VALUES(full_name), dni=VALUES(dni), sector_group=VALUES(sector_group),
+            organization_type=VALUES(organization_type), organization_name=VALUES(organization_name),
+            role_position=VALUES(role_position), role_detail=VALUES(role_detail),
             cuit=VALUES(cuit), expiry_date=VALUES(expiry_date), legal_file_url=VALUES(legal_file_url),
             terms_accepted_version=VALUES(terms_accepted_version), terms_accepted_date=VALUES(terms_accepted_date)
         `;
-        
+
         await connection.execute(sql, [
-            uid, req.user.email, full_name, dni, sector_group, organization_type, 
-            organization_name, role_position, role_detail, 
-            cuit, expiry_date, legal_file_url, 
-            terms_accepted_version, terms_accepted_date
+            uid, req.user.email, full_name, dni, sector_group, organization_type,
+            organization_name, role_position, role_detail,
+            cuit, parsedExpiryDate, legal_file_url,
+            terms_accepted_version, parsedTermsDate
         ]);
-        
+
         await connection.end();
         res.json({ message: 'Perfil actualizado correctamente en MySQL.' });
     } catch (error) {
@@ -425,7 +432,7 @@ app.post('/api/pedido-estadistico', verifyToken, async (req, res) => {
 
 // 4. Registrar logs de actividad
 app.post('/api/log-actividad', verifyToken, async (req, res) => {
-    const { uid } = req.user;
+    const { email } = req.user;
     const { action, details } = req.body;
     const ip_address = req.ip || req.headers['x-forwarded-for'];
 
@@ -433,7 +440,7 @@ app.post('/api/log-actividad', verifyToken, async (req, res) => {
         const connection = await getDbConnection();
         await connection.execute(
             'INSERT INTO logs_actividad (user_uid, action, details, ip_address) VALUES (?, ?, ?, ?)',
-            [uid, action, JSON.stringify(details), ip_address]
+            [email, action, JSON.stringify(details), ip_address]
         );
         await connection.end();
         res.json({ status: 'ok' });
@@ -642,6 +649,20 @@ app.get('/api/contactos', async (req, res) => {
 // Ruta principal: Cargar el Observatorio por defecto
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'observatorio-gestion.html'));
+});
+
+// Eliminar usuario de MySQL (llamado desde admin.js al borrar un usuario)
+app.delete('/api/usuarios/:email', verifyToken, async (req, res) => {
+    try {
+        const email = decodeURIComponent(req.params.email).toLowerCase();
+        const connection = await getDbConnection();
+        await connection.execute('DELETE FROM usuarios_perfiles WHERE email = ?', [email]);
+        await connection.end();
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error eliminando usuario de MySQL:', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // Ruta para el Admin

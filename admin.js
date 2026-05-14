@@ -527,7 +527,18 @@ async function deleteUser(id) {
                 }
             }
 
-            // 3. Delete the user document
+            // 3. Delete from MySQL
+            try {
+                const token = await auth.currentUser.getIdToken();
+                await fetch(`/api/usuarios/${encodeURIComponent(id)}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+            } catch (e) {
+                console.warn('No se pudo eliminar de MySQL:', e);
+            }
+
+            // 4. Delete the user document from Firestore
             await deleteDoc(doc(db, "users", id));
             loadUsers();
         } catch (error) {
