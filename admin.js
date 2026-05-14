@@ -137,6 +137,28 @@ const ADMIN_EMAILS = [
     'datos@riocuarto.gov.ar'
 ];
 
+// --- Helper para llamar a la API del Backend ---
+async function callApi(endpoint, method = 'POST', body = null) {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Usuario no autenticado");
+
+    const token = await user.getIdToken();
+    const response = await fetch(endpoint, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: body ? JSON.stringify(body) : null
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Error en la API: ${response.status}`);
+    }
+    return await response.json();
+}
+
 // --- Initialization & Auth ---
 onAuthStateChanged(auth, async (user) => {
     if (loader) loader.classList.add('hidden');
@@ -974,18 +996,22 @@ fieldCatColorText.addEventListener('input', e => { if (/^#[0-9A-F]{6}$/i.test(e.
 
 async function loadCategories() {
     try {
-        const snapshot = await getDocs(collection(db, "categories"));
-        globalCategories = [];
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const id = doc.id;
-            globalCategories.push({ id, ...data });
-        });
+        const data = await callApi('/api/categorias', 'GET');
+        globalCategories = data.map(c => ({
+            id: c.id,
+            name: c.name,
+            description: c.description,
+            icon: c.icon,
+            type: c.type,
+            color: c.color,
+            visible: c.visible !== 0,
+            order: c.sort_order
+        }));
 
         renderCategories();
         renderCategoryChecklist();
         updateBoardCategoryFilterOptions();
-    } catch (error) { console.error(error); }
+    } catch (error) { console.error("Error loading categories from MySQL:", error); }
 }
 
 function updateBoardCategoryFilterOptions() {
@@ -1125,28 +1151,27 @@ catForm?.addEventListener('submit', async (e) => {
     if (isSubmitting) return;
     isSubmitting = true;
     try {
-        const docId = fieldCatId.value;
+        const docId = fieldCatId.value || `cat_${Date.now()}`;
         const data = {
-            visible: fieldCatVisible.checked,
+            id: docId,
+            visible: fieldCatVisible.checked ? 1 : 0,
             name: fieldCatName.value.trim(),
             description: fieldCatDesc.value.trim(),
             icon: fieldCatIcon.value.trim(),
             type: fieldCatType.value,
-            color: fieldCatColorText.value.trim().toUpperCase()
+            color: fieldCatColorText.value.trim().toUpperCase(),
+            sort_order: fieldCatId.value ? (globalCategories.find(c => c.id === docId)?.order || 0) : (globalCategories.length > 0 ? Math.max(...globalCategories.map(c => c.order || 0)) + 1 : 1)
         };
-        if (docId) await updateDoc(doc(db, "categories", docId), data);
-        else {
-            // New categories default to end of list
-            const maxOrder = globalCategories.length > 0 ? Math.max(...globalCategories.map(c => c.order || 0)) : 0;
-            data.order = maxOrder + 1;
-            await addDoc(collection(db, "categories"), data);
-        }
+        
+        // We need an endpoint for saving categories, let's assume we'll add it or use a generic one
+        // For now, let's use a hypothetical /api/categorias POST
+        await callApi('/api/categorias', 'POST', data);
+
         closeAllModals();
         await loadCategories();
     } catch (e) {
-        console.error("Error saving category:", e);
-        const errorDetails = `CÓDIGO: ${e.code || 'N/A'}\nMENSAJE: ${e.message || 'Error desconocido'}`;
-        alert("🚨 ERROR AL GUARDAR CATEGORÍA 🚨\n\n" + errorDetails + "\n\nPor favor, enviame estos datos para solucionarlo.");
+        console.error("Error saving category to MySQL:", e);
+        alert("Error al guardar categoría en MySQL.");
     } finally { isSubmitting = false; }
 });
 
@@ -1174,11 +1199,23 @@ function boardMatchesFilter(data, search, catId, status) {
 
 async function loadBoards() {
     try {
-        const snapshot = await getDocs(collection(db, "buttons"));
-        allBoardsFetched = [];
-        snapshot.forEach((docSnap) => allBoardsFetched.push({ id: docSnap.id, ...docSnap.data() }));
+        const data = await callApi('/api/tableros', 'GET');
+        allBoardsFetched = data.map(b => ({
+            id: b.id,
+            title: b.title,
+            icon: b.icon,
+            iframeUrl: b.iframe_url,
+            enabled: b.enabled !== 0,
+            requireLogin: b.require_login !== 0,
+            openInNewTab: b.open_in_new_tab !== 0,
+            order: b.sort_order,
+            allowedUsers: typeof b.allowed_users === 'string' ? JSON.parse(b.allowed_users) : b.allowed_users,
+            accessExpirations: typeof b.access_expirations === 'string' ? JSON.parse(b.access_expirations) : b.access_expirations,
+            categories: typeof b.categories === 'string' ? JSON.parse(b.categories) : b.categories,
+            category: b.category_legacy
+        }));
         filterAndRenderBoards();
-    } catch (error) { console.error(error); }
+    } catch (error) { console.error("Error loading boards from MySQL:", error); }
 }
 
 function filterAndRenderBoards() {
@@ -1315,62 +1352,35 @@ boardForm?.addEventListener('submit', async (e) => {
     if (isSubmitting) return;
     isSubmitting = true;
     try {
-        const docId = fieldBoardId.value;
-        // Handle virtual 'Gestores Externos directo' sentinel
+        const docId = fieldBoardId.value || `board_${Date.now()}`;
         const hasGEDirect = currentlySelectedCategories.includes('_ge_direct');
         const finalCategories = currentlySelectedCategories.filter(id => id !== '_ge_direct');
+        
         const boardData = {
+            id: docId,
             enabled: fieldBoardEnabled.checked,
             title: fieldBoardTitle.value.trim(),
             icon: fieldBoardIcon.value.trim(),
             categories: finalCategories,
-            category: hasGEDirect ? 'Gestores Externos' : '',
-            requireLogin: fieldBoardReqLogin.value === 'true',
-            iframeUrl: fieldBoardUrl.value.trim(),
-            openInNewTab: fieldBoardNewTab.checked,
-            allowedUsers: currentlySelectedUsers.filter(email =>
+            category_legacy: hasGEDirect ? 'Gestores Externos' : '',
+            require_login: fieldBoardReqLogin.value === 'true',
+            iframe_url: fieldBoardUrl.value.trim(),
+            open_in_new_tab: fieldBoardNewTab.checked,
+            allowed_users: currentlySelectedUsers.filter(email =>
                 allUsersFetched.some(u => u.email.toLowerCase() === email.toLowerCase()) ||
                 ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase())
             ),
-            updatedAt: new Date().toISOString()
+            sort_order: fieldBoardId.value ? (allBoardsFetched.find(b => b.id === docId)?.order || 0) : 0
         };
 
-        // Logic to detect removed users and mark requests as "restricted"
-        if (docId) {
-            const oldDoc = await getDoc(doc(db, "buttons", docId));
-            if (oldDoc.exists()) {
-                const oldUsers = (oldDoc.data().allowedUsers || []).map(u => u.toLowerCase());
-                const currentUsersLower = currentlySelectedUsers.map(u => u.toLowerCase());
-
-                const removedUsers = oldUsers.filter(u => !currentUsersLower.includes(u));
-
-                if (removedUsers.length > 0) {
-                    // Update related requests by querying Firestore — use Promise.all so awaits are respected
-                    const reqSnap = await getDocs(collection(db, "requests"));
-                    const restrictUpdates = [];
-                    reqSnap.forEach((rDoc) => {
-                        const rData = rDoc.data();
-                        if (rData.buttonId === docId &&
-                            removedUsers.includes((rData.userEmail || '').toLowerCase()) &&
-                            rData.status === 'approved') {
-                            restrictUpdates.push(updateDoc(doc(db, "requests", rDoc.id), { status: 'restricted' }));
-                        }
-                    });
-                    if (restrictUpdates.length > 0) await Promise.all(restrictUpdates);
-                }
-            }
-            await updateDoc(doc(db, "buttons", docId), boardData);
-        } else {
-            boardData.createdAt = new Date().toISOString();
-            await addDoc(collection(db, "buttons"), boardData);
-        }
+        await callApi('/api/tableros', 'POST', boardData);
 
         closeAllModals();
         await loadBoards();
-        await loadRequests(); // Reload to see status changes
+        await loadRequests(); 
     } catch (error) {
-        console.error("Error saving board:", error);
-        alert("Error al guardar tablero: " + (error.code || error.message || "Error desconocido"));
+        console.error("Error saving board to MySQL:", error);
+        alert("Error al guardar tablero en MySQL.");
     } finally { isSubmitting = false; }
 });
 

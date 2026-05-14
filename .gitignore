@@ -1,0 +1,9 @@
+node_modules/
+.env
+firebase-debug.log
+.gemini/
+dist/
+build/
+.DS_Store
+*.txt
+!robots.txt

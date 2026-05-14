@@ -308,46 +308,66 @@ async function loadUserPermissions(user) {
             }
         }
 
-        // 2. Load boards and personal requests safely
-        let buttonsSnapshot, reqSnapshot;
+        // 2. Load categories, boards and personal requests safely
+        let categoriesData, boardsData, requestsData;
         try {
-            [buttonsSnapshot, reqSnapshot] = await Promise.all([
-                getDocs(collection(db, "buttons")),
-                getDocs(query(collection(db, "requests"), where("userEmail", "==", userEmail)))
+            // Fetch everything from our MySQL API via callApi
+            [categoriesData, boardsData] = await Promise.all([
+                callApi('/api/categorias', 'GET'),
+                callApi('/api/tableros', 'GET')
             ]);
+            
+            // For requests, we still use Firestore for now or we can migrate it later
+            // But let's try to keep it consistent
+            const reqSnap = await getDocs(query(collection(db, "requests"), where("userEmail", "==", userEmail)));
+            requestsData = [];
+            reqSnap.forEach(d => requestsData.push({ id: d.id, ...d.data() }));
+
         } catch (e) {
-            console.warn("Error loading boards/requests, trying without request filter:", e.message);
-            // Fallback: load buttons only, skip requests
-            buttonsSnapshot = await getDocs(collection(db, "buttons"));
-            reqSnapshot = { forEach: () => {} }; // empty stub
+            console.warn("Error loading data from MySQL API:", e.message);
+            throw e;
         }
 
         // Cache user requests
-        currentUserRequests = [];
-        reqSnapshot.forEach(d => {
-            const data = d.data();
-            if (data.userEmail && data.userEmail.toLowerCase() === userEmail) {
-                currentUserRequests.push({ id: d.id, ...data });
-            }
-        });
+        currentUserRequests = requestsData;
 
         // Cache categories and sort by order
-        allCategories = [];
-        catSnapshot.forEach(d => allCategories.push({ id: d.id, ...d.data() }));
+        allCategories = categoriesData.map(c => ({
+            id: c.id,
+            name: c.name,
+            description: c.description,
+            icon: c.icon,
+            type: c.type,
+            color: c.color,
+            visible: c.visible,
+            order: c.sort_order
+        }));
         allCategories.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
 
         // Cache all enabled boards and flag those with access
         allAccessibleBoards = [];
-        buttonsSnapshot.forEach((d) => {
-            const data = d.data();
-            const buttonId = d.id;
+        boardsData.forEach((data) => {
             if (data.enabled) {
-                const hasAccess = checkUserAccess(user, data);
-                allAccessibleBoards.push({ id: buttonId, ...data, hasAccess });
+                const boardObj = {
+                    id: data.id,
+                    title: data.title,
+                    icon: data.icon,
+                    iframeUrl: data.iframe_url,
+                    enabled: data.enabled,
+                    requireLogin: data.require_login,
+                    openInNewTab: data.open_in_new_tab,
+                    sort_order: data.sort_order,
+                    allowedUsers: typeof data.allowed_users === 'string' ? JSON.parse(data.allowed_users) : data.allowed_users,
+                    accessExpirations: typeof data.access_expirations === 'string' ? JSON.parse(data.access_expirations) : data.access_expirations,
+                    categories: typeof data.categories === 'string' ? JSON.parse(data.categories) : data.categories,
+                    category: data.category_legacy
+                };
+                const hasAccess = checkUserAccess(user, boardObj);
+                allAccessibleBoards.push({ ...boardObj, hasAccess });
             }
         });
 
-        console.log("Loaded", allCategories.length, "categories,", allAccessibleBoards.length, "boards");
+        console.log("Loaded (MySQL)", allCategories.length, "categories,", allAccessibleBoards.length, "boards");
         renderDashboard();
 
 
@@ -921,7 +941,7 @@ document.getElementById('ogb-form-terms')?.addEventListener('click', (e) => {
 
 function openTermsModalForAcceptance(readOnly = false) {
     const tModal = document.getElementById('terms-modal');
-    const confirmBtn = document.getElementById('close-terms-btn');
+    const confirmBtn = document.getElementById('confirm-terms-btn');
     if (!tModal) return;
 
     // Reset confirm button to disabled state or hide it if readOnly
@@ -1040,8 +1060,8 @@ closeTermsBtn?.addEventListener('click', () => {
     if (submitBtn) submitBtn.disabled = false;
 });
 
-// 3. Cancel / close X / overlay → just close modal, don't check checkbox
-['close-terms-x', 'cancel-terms-btn', 'close-terms-overlay'].forEach(id => {
+// 3. Cancel / close X / overlay / Cerrar btn → just close modal, don't check checkbox
+['close-terms-x', 'cancel-terms-btn', 'close-terms-overlay', 'close-terms-btn'].forEach(id => {
     document.getElementById(id)?.addEventListener('click', async () => {
         const tModal = document.getElementById('terms-modal');
         if (tModal?.dataset.reacceptance === 'true') {
@@ -1532,7 +1552,6 @@ if (registrationForm) {
     const termsContent = document.getElementById('terms-content-container');
     const termsBody = document.getElementById('terms-content-body');
     const confirmTermsBtn = document.getElementById('confirm-terms-btn');
-    const closeTermsBtn = document.getElementById('close-terms-btn');
     const regTermsCheck = document.getElementById('reg-terms');
     const regSubmitBtn = document.getElementById('reg-submit-btn');
 

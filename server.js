@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 const admin = require('firebase-admin');
 require('dotenv').config();
@@ -44,6 +45,21 @@ app.use(helmet({
 }));
 app.use(cors());
 app.use(express.json());
+
+// Limitador de tasa (Rate Limiting) para prevenir scraping y abusos
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 100, // Limita cada IP a 100 peticiones por ventana (cada 15 min)
+    message: {
+        error: 'Demasiadas peticiones desde esta IP. Por favor, intente de nuevo más tarde.',
+        code: 'TOO_MANY_REQUESTS'
+    },
+    standardHeaders: true, // Retorna info de límite en las cabeceras `RateLimit-*`
+    legacyHeaders: false, // Desactiva las cabeceras `X-RateLimit-*`
+});
+
+// Aplicar el limitador a todas las rutas de la API
+app.use('/api/', limiter);
 
 // Configuración de la base de datos MySQL
 const getDbConnection = async () => {
@@ -154,6 +170,83 @@ const initializeTables = async () => {
                 email_provided VARCHAR(255),
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
+        `);
+
+        // 6. Tabla de Categorías
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS categorias (
+                id VARCHAR(128) PRIMARY KEY,
+                name VARCHAR(255),
+                description TEXT,
+                icon VARCHAR(50),
+                type VARCHAR(100),
+                color VARCHAR(7),
+                visible BOOLEAN DEFAULT TRUE,
+                sort_order INT DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // 7. Tabla de Tableros (Buttons)
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS tableros (
+                id VARCHAR(128) PRIMARY KEY,
+                title VARCHAR(255),
+                icon VARCHAR(50),
+                iframe_url TEXT,
+                enabled BOOLEAN DEFAULT TRUE,
+                require_login BOOLEAN DEFAULT TRUE,
+                open_in_new_tab BOOLEAN DEFAULT FALSE,
+                sort_order INT DEFAULT 0,
+                allowed_users JSON, -- Array de emails
+                access_expirations JSON, -- Objeto { email: date }
+                categories JSON, -- Array de IDs de categorías
+                category_legacy VARCHAR(255), -- Para compatibilidad con campo 'category' antiguo
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        `);
+
+        // 8. Tabla de Mensajes/Reportes (Contacts)
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS mensajes_contacto (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255),
+                email VARCHAR(255),
+                reason VARCHAR(255),
+                message TEXT,
+                type ENUM('general', 'incident') DEFAULT 'general',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // 9. Tabla de Consentimientos (RCE)
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS rce_consentimientos (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_uid VARCHAR(128),
+                user_email VARCHAR(255),
+                user_name VARCHAR(255),
+                dni VARCHAR(20),
+                ip_address VARCHAR(45),
+                terms_version VARCHAR(20),
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // 10. Tabla de Configuración (T&C)
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS config_sistema (
+                config_key VARCHAR(128) PRIMARY KEY,
+                config_value TEXT,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Insertar versión por defecto si no existe
+        await connection.query(`
+            INSERT IGNORE INTO config_sistema (config_key, config_value) 
+            VALUES ('terms_version', '1.2.0')
         `);
 
         console.log('Estructura de base de datos lista.');
@@ -335,6 +428,106 @@ app.post('/api/feedback', async (req, res) => {
     } catch (error) {
         console.error('Error al guardar feedback:', error);
         res.status(500).json({ error: 'Error al guardar feedback.' });
+    }
+});
+
+// 6. Obtener categorías
+app.get('/api/categorias', async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        const [rows] = await connection.query('SELECT * FROM categorias ORDER BY sort_order ASC');
+        await connection.end();
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 6b. Guardar/Actualizar categoría (Admin)
+app.post('/api/categorias', verifyToken, async (req, res) => {
+    const { id, name, description, icon, type, color, visible, sort_order } = req.body;
+    try {
+        const connection = await getDbConnection();
+        const sql = `
+            INSERT INTO categorias (id, name, description, icon, type, color, visible, sort_order)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE 
+            name=VALUES(name), description=VALUES(description), icon=VALUES(icon), 
+            type=VALUES(type), color=VALUES(color), visible=VALUES(visible), sort_order=VALUES(sort_order)
+        `;
+        await connection.execute(sql, [id, name, description, icon, type, color, visible, sort_order]);
+        await connection.end();
+        res.json({ message: 'Categoría guardada.' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 7. Obtener tableros
+app.get('/api/tableros', async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        const [rows] = await connection.query('SELECT * FROM tableros ORDER BY sort_order ASC');
+        await connection.end();
+        res.json(rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 8. Guardar/Actualizar tablero (Admin)
+app.post('/api/tableros', verifyToken, async (req, res) => {
+    // Aquí podrías validar que req.user.email sea admin
+    const { id, title, icon, iframe_url, enabled, require_login, open_in_new_tab, sort_order, allowed_users, access_expirations, categories, category_legacy } = req.body;
+    try {
+        const connection = await getDbConnection();
+        const sql = `
+            INSERT INTO tableros (id, title, icon, iframe_url, enabled, require_login, open_in_new_tab, sort_order, allowed_users, access_expirations, categories, category_legacy)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE 
+            title=VALUES(title), icon=VALUES(icon), iframe_url=VALUES(iframe_url), enabled=VALUES(enabled), 
+            require_login=VALUES(require_login), open_in_new_tab=VALUES(open_in_new_tab), sort_order=VALUES(sort_order),
+            allowed_users=VALUES(allowed_users), access_expirations=VALUES(access_expirations), categories=VALUES(categories), category_legacy=VALUES(category_legacy)
+        `;
+        await connection.execute(sql, [
+            id, title, icon, iframe_url, enabled, require_login, open_in_new_tab, sort_order, 
+            JSON.stringify(allowed_users), JSON.stringify(access_expirations), JSON.stringify(categories), category_legacy
+        ]);
+        await connection.end();
+        res.json({ message: 'Tablero guardado.' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 9. Registrar consentimiento RCE
+app.post('/api/rce', verifyToken, async (req, res) => {
+    const { user_uid } = req.user;
+    const { user_email, user_name, dni, terms_version } = req.body;
+    const ip_address = req.ip || req.headers['x-forwarded-for'];
+
+    try {
+        const connection = await getDbConnection();
+        await connection.execute(
+            'INSERT INTO rce_consentimientos (user_uid, user_email, user_name, dni, ip_address, terms_version) VALUES (?, ?, ?, ?, ?, ?)',
+            [user_uid, user_email, user_name, dni, ip_address, terms_version]
+        );
+        await connection.end();
+        res.json({ message: 'Consentimiento registrado.' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 10. Obtener versión actual de T&C
+app.get('/api/config/terms-version', async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        const [rows] = await connection.query('SELECT config_value FROM config_sistema WHERE config_key = "terms_version"');
+        await connection.end();
+        res.json({ version: rows[0]?.config_value || '1.0.0' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 
