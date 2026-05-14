@@ -24,7 +24,7 @@ async function migrate() {
     let connection;
     try {
         connection = await getDbConnection();
-        console.log('--- Iniciando Migración Total ---');
+        console.log('--- Iniciando Migración TOTAL (10 Tablas) ---');
 
         // 1. CATEGORÍAS
         console.log('Migrando Categorías...');
@@ -86,7 +86,7 @@ async function migrate() {
             );
         }
 
-        // 6. MENSAJES DE CONTACTO
+        // 6. CONTACTOS
         console.log('Migrando Contactos...');
         const contactSnap = await dbFirestore.collection('contacts').get();
         for (const doc of contactSnap.docs) {
@@ -131,7 +131,18 @@ async function migrate() {
             );
         }
 
-        console.log('--- Migración Completada con Éxito ---');
+        // 10. LOGS DE ACTIVIDAD
+        console.log('Migrando Logs de Actividad (Este puede tardar)...');
+        const logsSnap = await dbFirestore.collection('activity_logs').get();
+        for (const doc of logsSnap.docs) {
+            const data = doc.data();
+            await connection.execute(
+                'INSERT IGNORE INTO logs_actividad (user_uid, action, details, ip_address, created_at) VALUES (?, ?, ?, ?, ?)',
+                [data.userId || '', data.action || '', JSON.stringify(data.details || {}), data.ip || '', data.timestamp?.toDate ? data.timestamp.toDate() : new Date()]
+            );
+        }
+
+        console.log('--- Migración TOTAL Completada con Éxito ---');
     } catch (error) {
         console.error('Error durante la migración:', error);
     } finally {
