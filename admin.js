@@ -390,13 +390,27 @@ function filterAndRenderUsers() {
 }
 
 async function loadUsers() {
-    console.log("Admin JS v1.2.1 - Loading users...");
     try {
-        const snapshot = await getDocs(collection(db, "users"));
-        allUsersFetched = [];
-        snapshot.forEach(userDoc => {
-            allUsersFetched.push({ id: userDoc.id, ...userDoc.data() });
-        });
+        const data = await callApi('/api/usuarios', 'GET');
+        allUsersFetched = data.map(u => ({
+            id: u.email,
+            email: u.email,
+            name: u.full_name,
+            dni: u.dni,
+            orgGroup: u.sector_group,
+            orgType: u.organization_type,
+            orgName: u.organization_name,
+            orgRole: u.role_position,
+            orgRoleDetail: u.role_detail,
+            cuit: u.cuit,
+            expiryDate: u.expiry_date,
+            legalDocURL: u.legal_file_url,
+            acceptedTCVersion: u.terms_accepted_version,
+            role: u.role || 'usuario',
+            lastLogin: u.last_login,
+            createdAt: u.created_at,
+            photoURL: null
+        }));
         filterAndRenderUsers();
         renderUserChecklist();
     } catch (error) {
@@ -484,7 +498,7 @@ function renderUsersTable(users) {
             try {
                 saveBtn.disabled = true;
                 saveBtn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
-                await updateDoc(doc(db, "users", u.id), { role: newRole });
+                await callApi(`/api/usuarios/${encodeURIComponent(u.id)}/role`, 'PATCH', { role: newRole });
                 alert("Rol actualizado correctamente.");
                 await loadUsers(); // Refresh the table
             } catch (err) {

@@ -108,10 +108,9 @@ const initializeTables = async () => {
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
         `);
-        // Agregar last_login si no existe en BBDDs previas
-        await connection.query(`
-            ALTER TABLE usuarios_perfiles ADD COLUMN IF NOT EXISTS last_login DATETIME
-        `).catch(() => {}); // Ignorar si ya existe
+        // Agregar columnas que pueden no existir en BBDDs previas
+        await connection.query(`ALTER TABLE usuarios_perfiles ADD COLUMN IF NOT EXISTS last_login DATETIME`).catch(() => {});
+        await connection.query(`ALTER TABLE usuarios_perfiles ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'usuario'`).catch(() => {});
 
         // 2. Tabla de Solicitudes de Acceso
         await connection.query(`
@@ -650,6 +649,39 @@ app.get('/api/contactos', async (req, res) => {
 // Ruta principal: Cargar el Observatorio por defecto
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'observatorio-gestion.html'));
+});
+
+// Listar todos los usuarios (admin)
+app.get('/api/usuarios', verifyToken, async (_req, res) => {
+    try {
+        const connection = await getDbConnection();
+        const [rows] = await connection.query(
+            'SELECT * FROM usuarios_perfiles ORDER BY created_at DESC'
+        );
+        await connection.end();
+        res.json(rows);
+    } catch (error) {
+        console.error('Error obteniendo usuarios:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Actualizar rol de usuario
+app.patch('/api/usuarios/:email/role', verifyToken, async (req, res) => {
+    try {
+        const email = decodeURIComponent(req.params.email).toLowerCase();
+        const { role } = req.body;
+        const connection = await getDbConnection();
+        await connection.execute(
+            'UPDATE usuarios_perfiles SET role = ? WHERE email = ?',
+            [role, email]
+        );
+        await connection.end();
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error actualizando rol:', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // Eliminar usuario de MySQL (llamado desde admin.js al borrar un usuario)
