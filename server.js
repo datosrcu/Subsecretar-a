@@ -398,6 +398,163 @@ app.post('/api/perfil', verifyToken, async (req, res) => {
     }
 });
 
+// ── SOLICITUDES DE ACCESO ──────────────────────────────────────────────────
+
+// Listar todas las solicitudes (admin)
+app.get('/api/solicitudes', verifyToken, async (_req, res) => {
+    try {
+        const connection = await getDbConnection();
+        const [rows] = await connection.query('SELECT * FROM solicitudes_acceso ORDER BY created_at DESC');
+        await connection.end();
+        res.json(rows);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Solicitudes propias del usuario logueado
+app.get('/api/solicitudes/me', verifyToken, async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        const [rows] = await connection.execute(
+            'SELECT * FROM solicitudes_acceso WHERE user_uid = ? ORDER BY created_at DESC',
+            [req.user.email]
+        );
+        await connection.end();
+        res.json(rows);
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Actualizar estado de solicitud (reject/expire)
+app.patch('/api/solicitudes/:id/status', verifyToken, async (req, res) => {
+    try {
+        const { status, admin_comment } = req.body;
+        const connection = await getDbConnection();
+        await connection.execute(
+            'UPDATE solicitudes_acceso SET status = ?, admin_comment = ? WHERE id = ?',
+            [status, admin_comment || null, req.params.id]
+        );
+        await connection.end();
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Aprobar solicitud: actualiza solicitud + allowed_users del tablero
+app.post('/api/solicitudes/:id/aprobar', verifyToken, async (req, res) => {
+    try {
+        const { email, tablero_id, expiry_iso } = req.body;
+        const connection = await getDbConnection();
+
+        // 1. Obtener tablero (por ID o por título, para compatibilidad con datos históricos)
+        const [[tablero]] = await connection.execute(
+            'SELECT id, allowed_users, access_expirations FROM tableros WHERE id = ? OR title = ? LIMIT 1',
+            [tablero_id, tablero_id]
+        );
+        if (tablero) {
+            const allowed = JSON.parse(tablero.allowed_users || '[]');
+            const expirations = JSON.parse(tablero.access_expirations || '{}');
+            if (!allowed.map(u => u.toLowerCase()).includes(email.toLowerCase())) allowed.push(email);
+            if (expiry_iso) expirations[email.toLowerCase()] = expiry_iso;
+            await connection.execute(
+                'UPDATE tableros SET allowed_users = ?, access_expirations = ? WHERE id = ?',
+                [JSON.stringify(allowed), JSON.stringify(expirations), tablero.id]
+            );
+        }
+
+        // 2. Actualizar solicitud
+        await connection.execute(
+            "UPDATE solicitudes_acceso SET status = 'aprobado', admin_comment = ? WHERE id = ?",
+            [expiry_iso ? `Vence: ${expiry_iso}` : null, req.params.id]
+        );
+        await connection.end();
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── CONTACTOS ──────────────────────────────────────────────────────────────
+
+// Crear mensaje de contacto
+app.post('/api/contactos', async (req, res) => {
+    try {
+        const { name, email, reason, message, type } = req.body;
+        const connection = await getDbConnection();
+        await connection.execute(
+            'INSERT INTO mensajes_contacto (name, email, reason, message, type) VALUES (?, ?, ?, ?, ?)',
+            [name || '', email || '', reason || '', message || '', type || 'general']
+        );
+        await connection.end();
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Eliminar contacto
+app.delete('/api/contactos/:id', verifyToken, async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        await connection.execute('DELETE FROM mensajes_contacto WHERE id = ?', [req.params.id]);
+        await connection.end();
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── FEEDBACK ───────────────────────────────────────────────────────────────
+
+// Eliminar feedback
+app.delete('/api/feedback/:id', verifyToken, async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        await connection.execute('DELETE FROM feedback_web WHERE id = ?', [req.params.id]);
+        await connection.end();
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── CATEGORÍAS (PATCH + DELETE) ────────────────────────────────────────────
+
+app.patch('/api/categorias/:id', verifyToken, async (req, res) => {
+    try {
+        const fields = req.body; // { visible, sort_order, name, ... }
+        const sets = Object.keys(fields).map(k => `${k} = ?`).join(', ');
+        const vals = [...Object.values(fields), req.params.id];
+        const connection = await getDbConnection();
+        await connection.execute(`UPDATE categorias SET ${sets} WHERE id = ?`, vals);
+        await connection.end();
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/categorias/:id', verifyToken, async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        await connection.execute('DELETE FROM categorias WHERE id = ?', [req.params.id]);
+        await connection.end();
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── TABLEROS (PATCH + DELETE) ──────────────────────────────────────────────
+
+app.patch('/api/tableros/:id', verifyToken, async (req, res) => {
+    try {
+        const fields = req.body;
+        const sets = Object.keys(fields).map(k => `${k} = ?`).join(', ');
+        const vals = [...Object.values(fields), req.params.id];
+        const connection = await getDbConnection();
+        await connection.execute(`UPDATE tableros SET ${sets} WHERE id = ?`, vals);
+        await connection.end();
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/tableros/:id', verifyToken, async (req, res) => {
+    try {
+        const connection = await getDbConnection();
+        await connection.execute('DELETE FROM tableros WHERE id = ?', [req.params.id]);
+        await connection.end();
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ──────────────────────────────────────────────────────────────────────────
+
 // 2. Registrar solicitud de acceso a tablero
 app.post('/api/solicitud-acceso', verifyToken, async (req, res) => {
     const { uid } = req.user;
@@ -559,8 +716,24 @@ app.post('/api/tableros', verifyToken, async (req, res) => {
 });
 
 // 9. Registrar consentimiento RCE
+app.patch('/api/perfil/terms', verifyToken, async (req, res) => {
+    const email = req.user.email;
+    const { terms_version, terms_date } = req.body;
+    try {
+        const connection = await getDbConnection();
+        await connection.execute(
+            'UPDATE usuarios_perfiles SET terms_accepted_version = ?, terms_accepted_date = ? WHERE email = ?',
+            [terms_version, terms_date ? new Date(terms_date) : new Date(), email]
+        );
+        await connection.end();
+        res.json({ message: 'Términos actualizados.' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.post('/api/rce', verifyToken, async (req, res) => {
-    const { user_uid } = req.user;
+    const user_uid = req.user.email;
     const { user_email, user_name, dni, terms_version } = req.body;
     const ip_address = req.ip || req.headers['x-forwarded-for'];
 

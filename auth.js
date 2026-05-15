@@ -1,4 +1,4 @@
-import { app, auth, db, storage, provider, signInWithPopup, signOut, onAuthStateChanged, collection, getDocs, doc, getDoc, addDoc, updateDoc, setDoc, serverTimestamp, ref, uploadBytes, getDownloadURL, query, where } from './firebase-config.js';
+import { auth, storage, provider, signInWithPopup, signOut, onAuthStateChanged, ref, uploadBytes, getDownloadURL } from './firebase-config.js';
 
 // DOM Elements
 const loginBtn = document.getElementById('login-btn');
@@ -109,16 +109,17 @@ onAuthStateChanged(auth, async (user) => {
                 console.error("loadUserPermissions failed:", loadErr);
                 // Still try to show registration modal if profile is incomplete
                 try {
-                    const userDoc = await getDoc(doc(db, "users", user.email.toLowerCase()));
-                    const profile = userDoc.exists() ? userDoc.data() : null;
+                    const token = await user.getIdToken();
+                    const r = await fetch('/api/perfil/me', { headers: { 'Authorization': `Bearer ${token}` } });
+                    const { profile } = await r.json();
                     const isAdmin = ['datos@riocuarto.gov.ar'].includes(user.email.toLowerCase());
-                    if ((!profile || !profile.profileCompleted) && !isAdmin && registrationModal) {
-                        console.log("Showing registration modal (fallback path)");
+                    const profileCompleted = !!(profile?.sector_group && profile?.organization_name && profile?.role_position);
+                    if (!profileCompleted && !isAdmin && registrationModal) {
                         registrationModal.classList.remove('hidden');
                         registrationModal.classList.add('flex');
                     }
                 } catch (e2) {
-                    console.error("Even fallback user check failed:", e2);
+                    console.error("Fallback profile check failed:", e2);
                 }
                 // Show error on screen for debugging
                 const grid = document.getElementById('tableros-grid');
@@ -265,11 +266,19 @@ async function loadUserPermissions(user) {
             }
         }
 
-        // 2. Load personal requests from Firestore
+        // 2. Load personal requests from MySQL
         let requestsData = [];
         try {
-            const reqSnap = await getDocs(query(collection(db, "requests"), where("userEmail", "==", userEmail)));
-            reqSnap.forEach(d => requestsData.push({ id: d.id, ...d.data() }));
+            const rows = await callApi('/api/solicitudes/me', 'GET');
+            requestsData = rows.map(r => ({
+                id: String(r.id),
+                userEmail: r.user_uid,
+                buttonId: r.dashboard_name,
+                buttonName: r.dashboard_name,
+                reason: r.reason,
+                status: r.status,
+                createdAt: r.created_at
+            }));
         } catch (e) {
             console.warn("Error loading requests:", e.message);
         }
@@ -541,45 +550,27 @@ async function handleAccessRequest(e) {
     const submitBtn = e.target.querySelector('button[type="submit"]');
     if (submitBtn.disabled) return;
 
-    const user = auth.currentUser;
-    const userEmail = user ? user.email : 'Anónimo';
-    const buttonId = document.getElementById('ogb-form-button-id')?.value;
     const buttonName = document.getElementById('ogb-form-button-name')?.value;
-    
+
     // Capture from radio buttons
     const selectedRadio = document.querySelector('input[name="ogb-form-motivo"]:checked');
     const selectMotivo = selectedRadio ? selectedRadio.value : "";
     const detalleMotivo = document.getElementById('ogb-form-motivo-detalle')?.value;
 
-    let motivoFinal = selectMotivo;
     if (!selectMotivo) {
         alert("Por favor, selecciona un motivo de solicitud.");
         return;
     }
 
-    if (selectMotivo === "Otra") {
-        if (!detalleMotivo || !detalleMotivo.trim()) {
-            alert("Por favor, detalla el motivo de tu solicitud.");
-            return;
-        }
-        motivoFinal = `Otra: ${detalleMotivo}`;
+    if (selectMotivo === "Otra" && (!detalleMotivo || !detalleMotivo.trim())) {
+        alert("Por favor, detalla el motivo de tu solicitud.");
+        return;
     }
 
     submitBtn.disabled = true;
     submitBtn.textContent = "Enviando...";
 
     try {
-        // 1. Guardar en Firestore (Legacy)
-        await addDoc(collection(db, "requests"), {
-            userEmail: userEmail,
-            buttonId: buttonId,
-            buttonName: buttonName,
-            reason: motivoFinal,
-            status: 'pending',
-            createdAt: new Date().toISOString()
-        });
-
-        // 2. Guardar en MySQL (Nuevo Backend)
         await callApi('/api/solicitud-acceso', 'POST', {
             dashboard_name: buttonName,
             reason: selectMotivo,
@@ -1237,14 +1228,12 @@ if (contactForm) {
         submitBtn.innerHTML = '<span>Enviando...</span>';
 
         try {
-            // 1. Save to Firestore
-            await addDoc(collection(db, "contacts"), {
+            await callApi('/api/contactos', 'POST', {
                 name: name.trim(),
                 email: email.trim().toLowerCase(),
                 type: type,
                 reason: reason,
-                message: message.trim(),
-                createdAt: serverTimestamp() // Official server-side time
+                message: message.trim()
             });
 
             alert("¡Mensaje enviado con éxito! Nos pondremos en contacto pronto.");
@@ -1253,10 +1242,7 @@ if (contactForm) {
             closeContact();
         } catch (error) {
             console.error("Error sending contact:", error);
-            const errorMsg = error.code === 'permission-denied' 
-                ? "Error: No tienes permisos para enviar reportes. Intenta iniciar sesión."
-                : "Hubo un error al enviar el mensaje. Detalle: " + error.message;
-            alert(errorMsg);
+            alert("Hubo un error al enviar el mensaje. Detalle: " + error.message);
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
@@ -1650,11 +1636,11 @@ if (registrationForm) {
             regSubmitBtn.textContent = 'Guardando...';
 
             const userEmail = user.email.toLowerCase();
-            const userRef = doc(db, "users", userEmail);
 
-            // Fetch T&C Version
-            const tcSnap = await getDoc(doc(db, "config", "terms"));
-            const currentTCVersion = tcSnap.exists() ? tcSnap.data().currentVersion : "1.2.0";
+            // Fetch T&C Version from MySQL
+            const tcRes = await fetch('/api/config/terms-version');
+            const tcData = await tcRes.json();
+            const currentTCVersion = tcData.version || "1.2.0";
             const userIP = await getUserIP();
 
             let legalDocURL = null;
@@ -1686,9 +1672,6 @@ if (registrationForm) {
                 ...(legalDocURL ? { legalDocURL } : {})
             };
 
-            await setDoc(userRef, registrationData, { merge: true });
-
-            // 2. Guardar en MySQL (Nuevo Backend)
             await callApi('/api/perfil', 'POST', {
                 full_name: registrationData.name,
                 dni: registrationData.dni,
@@ -1704,16 +1687,13 @@ if (registrationForm) {
                 terms_accepted_date: registrationData.acceptedTCTimestamp
             });
 
-            // Audit Log in consent_logs
+            // Audit Log in consent_logs (MySQL)
             try {
-                await addDoc(collection(db, "consent_logs"), {
-                    userEmail: userEmail,
-                    userName: registrationData.name,
+                await callApi('/api/rce', 'POST', {
+                    user_email: userEmail,
+                    user_name: registrationData.name,
                     dni: dni,
-                    version: currentTCVersion,
-                    timestamp: registrationData.acceptedTCTimestamp,
-                    ip: userIP,
-                    action: 'register_acceptance'
+                    terms_version: currentTCVersion
                 });
             } catch (auditErr) {
                 console.warn("Audit log failed", auditErr);
@@ -1796,31 +1776,18 @@ async function showTCReacceptanceModal(newVersion) {
             confirmBtn.textContent = 'Guardando...';
 
             const user = auth.currentUser;
-            const userIP = await (async () => {
-                try {
-                    const res = await fetch('https://api.ipify.org?format=json');
-                    const d = await res.json();
-                    return d.ip;
-                } catch { return 'unknown'; }
-            })();
-
             const timestamp = new Date().toISOString();
-            const userRef = doc(db, 'users', user.email.toLowerCase());
 
-            await updateDoc(userRef, {
-                acceptedTCVersion: newVersion,
-                acceptedTCTimestamp: timestamp,
-                acceptedTCIP: userIP
+            await callApi('/api/perfil/terms', 'PATCH', {
+                terms_version: newVersion,
+                terms_date: timestamp
             });
 
-            await addDoc(collection(db, 'consent_logs'), {
-                userEmail: user.email.toLowerCase(),
-                userName: currentUserData?.name || user.displayName || user.email,
+            await callApi('/api/rce', 'POST', {
+                user_email: user.email.toLowerCase(),
+                user_name: currentUserData?.full_name || currentUserData?.name || user.displayName || user.email,
                 dni: currentUserData?.dni || null,
-                version: newVersion,
-                timestamp: timestamp,
-                ip: userIP,
-                action: 'reacceptance'
+                terms_version: newVersion
             });
 
             termsContentEl?.removeEventListener('scroll', onReacceptanceScroll);
@@ -1856,10 +1823,6 @@ async function recordUserActivity(buttonName, hasAccess) {
             timestamp: new Date().toISOString()
         };
         
-        // 1. Firestore (Legacy)
-        await addDoc(collection(db, "user_tracking"), logData);
-
-        // 2. MySQL (Nuevo Backend)
         await callApi('/api/log-actividad', 'POST', {
             action: hasAccess ? 'view_dashboard' : 'access_denied',
             details: logData
@@ -1934,16 +1897,6 @@ feedbackForm?.addEventListener('submit', async (e) => {
     submitBtn.textContent = "Enviando...";
 
     try {
-        await addDoc(collection(db, "feedback"), {
-            name: name || "Anónimo",
-            email: email || "No provisto",
-            comment: comment,
-            pageUrl: window.location.pathname,
-            timestamp: new Date().toISOString(),
-            createdAt: serverTimestamp()
-        });
-
-        // 2. MySQL (Nuevo Backend)
         await callApi('/api/feedback', 'POST', {
             user_uid: auth.currentUser ? auth.currentUser.uid : null,
             is_useful: false,
@@ -2114,13 +2067,6 @@ if (feedbackYesBtn) {
         feedbackYesBtn.innerHTML = '<span class="animate-pulse">Registrando...</span>';
         
         try {
-            await addDoc(collection(db, 'useful_votes'), {
-                page: window.location.pathname,
-                timestamp: serverTimestamp(),
-                userAgent: navigator.userAgent
-            });
-
-            // 2. MySQL (Nuevo Backend)
             await callApi('/api/feedback', 'POST', {
                 user_uid: auth.currentUser ? auth.currentUser.uid : null,
                 is_useful: true,

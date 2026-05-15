@@ -1,4 +1,4 @@
-import { db, collection, addDoc, serverTimestamp, auth, onAuthStateChanged, storage, ref, uploadBytes, getDownloadURL } from "./firebase-config.js";
+import { auth, onAuthStateChanged, storage, ref, uploadBytes, getDownloadURL } from "./firebase-config.js";
 
 // --- Helper para llamar a la API del Backend ---
 async function callApi(endpoint, method = 'POST', body = null) {
@@ -224,50 +224,35 @@ async function handleSubmit(e) {
 
         // Metadata
         data.status = 'Pendiente';
-        data.createdAt = serverTimestamp();
         data.createdBy = currentUser ? currentUser.email : 'Anónimo - Web';
-        data.userId = currentUser ? currentUser.uid : 'guest';
 
-        console.log("Datos a enviar a Firestore:", data);
-
-        const docRef = await addDoc(collection(db, 'statistical_requests'), data);
-        console.log("Documento enviado con ID:", docRef.id);
-
-        // 2. Guardar en MySQL (Nuevo Backend)
-        try {
-            await callApi('/api/pedido-estadistico', 'POST', {
-                client_name: data.clientName,
-                client_email: data.clientEmail,
-                client_phone: data.clientPhone,
-                client_position: data.clientPosition,
-                jurisdictions: data.jurisdictions,
-                area: data.clientArea,
-                product_types: data.productTypes,
-                title: data.requestTitle,
-                periodicity: data.periodicity,
-                due_date: data.dueDate,
-                description: data.description,
-                formats: data.formats,
-                has_tech_contact: data.hasTechContact === 'si',
-                tech_contact_name: data.techContactName || null,
-                tech_contact_email: data.techContactEmail || null,
-                tech_contact_phone: data.techContactPhone || null,
-                additional_info: data.additionalInfo || null,
-                attachment_urls: data.attachments
-            });
-            console.log("Pedido guardado en MySQL.");
-        } catch (mysqlErr) {
-            console.error("Error al guardar pedido en MySQL:", mysqlErr);
-            // No alertamos al usuario porque el de Firestore ya funcionó, 
-            // pero lo dejamos en consola para el técnico.
-        }
+        await callApi('/api/pedido-estadistico', 'POST', {
+            client_name: data.clientName,
+            client_email: data.clientEmail,
+            client_phone: data.clientPhone,
+            client_position: data.clientPosition,
+            jurisdictions: data.jurisdictions,
+            area: data.clientArea,
+            product_types: data.productTypes,
+            title: data.requestTitle,
+            periodicity: data.periodicity,
+            due_date: data.dueDate,
+            description: data.description,
+            formats: data.formats,
+            has_tech_contact: data.hasTechContact === 'si',
+            tech_contact_name: data.techContactName || null,
+            tech_contact_email: data.techContactEmail || null,
+            tech_contact_phone: data.techContactPhone || null,
+            additional_info: data.additionalInfo || null,
+            attachment_urls: data.attachments
+        });
 
         alert('¡Solicitud enviada con éxito! El equipo técnico se pondrá en contacto pronto.');
         closeModal();
-        
+
     } catch (error) {
-        console.error("Error detallado al enviar solicitud:", error);
-        alert(`❌ Error de permisos o conexión al enviar la solicitud:\n\nFirebase devolvió: "${error.message}"\n\nPor favor, asegurate de que las reglas de Firestore y/o Storage (en Firebase Console) permitan escritura para usuarios anónimos o no logueados.`);
+        console.error("Error al enviar solicitud:", error);
+        alert(`❌ Error al enviar la solicitud: ${error.message}`);
     } finally {
         btnSubmit.disabled = false;
         btnSubmit.textContent = 'Enviar Solicitud';
@@ -282,7 +267,7 @@ closeRequestBg?.addEventListener('click', closeModal);
 btnNext?.addEventListener('click', nextStep);
 btnPrev?.addEventListener('click', prevStep);
 requestForm?.addEventListener('submit', handleSubmit);
-btnSubmit?.addEventListener('click', (e) => {
+btnSubmit?.addEventListener('click', () => {
     // Manually trigger form submit if it's the last step
     if (currentStep === totalSteps) {
         requestForm?.requestSubmit();

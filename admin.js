@@ -1,4 +1,4 @@
-import { app, auth, db, provider, signInWithPopup, signOut, onAuthStateChanged, collection, getDocs, doc, getDoc, addDoc, updateDoc, setDoc, deleteDoc, serverTimestamp } from './firebase-config.js';
+import { auth, provider, signInWithPopup, signOut, onAuthStateChanged } from './firebase-config.js';
 
 // --- DOM Elements ---
 const loader = document.getElementById('auth-loader');
@@ -170,19 +170,14 @@ onAuthStateChanged(auth, async (user) => {
         if (isAdminExact) { 
             showAdminUI(user);
 
-            // Auto-register/update admin user in the directory
+            // Auto-register/update admin user in MySQL
             try {
-                await setDoc(doc(db, "users", userEmail), {
-                    email: userEmail,
-                    name: user.displayName || user.email.split('@')[0],
-                    photoURL: user.photoURL || '',
-                    lastLogin: new Date().toISOString(),
-                    role: 'admin',
-                    profileCompleted: true,
-                    orgType: 'Administración',
-                    orgName: 'Municipalidad',
-                    orgRole: 'Administrador'
-                }, { merge: true });
+                const token = await user.getIdToken();
+                await fetch('/api/usuarios/sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ email: userEmail, full_name: user.displayName || userEmail.split('@')[0], is_admin: true })
+                });
             } catch (e) {
                 console.warn("Could not auto-register admin user", e);
             }
@@ -517,47 +512,11 @@ function renderUsersTable(users) {
 async function deleteUser(id) {
     if (confirm("¿Estás seguro que querés eliminar este usuario?")) {
         try {
-            // 1. Get user details before deleting to have the email
-            const userDoc = await getDoc(doc(db, "users", id));
-            if (userDoc.exists()) {
-                const userEmail = userDoc.data().email.toLowerCase();
-
-                // 2. Remove user from all buttons/boards permissions
-                const buttonsSnapshot = await getDocs(collection(db, "buttons"));
-                const updatePromises = [];
-
-                buttonsSnapshot.forEach(buttonDoc => {
-                    const data = buttonDoc.data();
-                    const allowedUsers = data.allowedUsers || [];
-                    if (allowedUsers.map(e => e.toLowerCase()).includes(userEmail)) {
-                        const newAllowedUsers = allowedUsers.filter(e => e.toLowerCase() !== userEmail);
-                        updatePromises.push(updateDoc(buttonDoc.ref, { allowedUsers: newAllowedUsers }));
-                    }
-                });
-
-                if (updatePromises.length > 0) {
-                    await Promise.all(updatePromises);
-                    console.log(`User ${userEmail} removed from ${updatePromises.length} boards.`);
-                }
-            }
-
-            // 3. Delete from MySQL
-            try {
-                const token = await auth.currentUser.getIdToken();
-                await fetch(`/api/usuarios/${encodeURIComponent(id)}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-            } catch (e) {
-                console.warn('No se pudo eliminar de MySQL:', e);
-            }
-
-            // 4. Delete the user document from Firestore
-            await deleteDoc(doc(db, "users", id));
+            await callApi(`/api/usuarios/${encodeURIComponent(id)}`, 'DELETE');
             loadUsers();
         } catch (error) {
             console.error("Error deleting user:", error);
-            alert("No se pudo eliminar el usuario completamente.");
+            alert("No se pudo eliminar el usuario.");
         }
     }
 }
@@ -565,51 +524,33 @@ async function deleteUser(id) {
 // --- REQUESTS LOGIC ---
 async function loadRequests() {
     try {
-        const querySnapshot = await getDocs(collection(db, "requests"));
-        allRequestsFetched = [];
+        const rows = await callApi('/api/solicitudes', 'GET');
         const now = new Date();
-        const updatePromises = [];
 
-        querySnapshot.forEach((docSnap) => {
-            const data = docSnap.data();
-            // Passive auto-expire check
-            if (data.status === 'approved' && data.expiryDate) {
-                const expiry = new Date(data.expiryDate);
-                if (now > expiry) {
-                    console.log(`Auto-expiring request ${docSnap.id}`);
-                    data.status = 'expired';
-                    updatePromises.push(updateDoc(doc(db, "requests", docSnap.id), { status: 'expired' }));
-                    
-                    // Also remove from button's allowedUsers
-                    if (data.buttonId && data.userEmail) {
-                        const bRef = doc(db, "buttons", data.buttonId);
-                        getDoc(bRef).then(bSnap => {
-                            if (bSnap.exists()) {
-                                const bData = bSnap.data();
-                                const allowed = bData.allowedUsers || [];
-                                const newAllowed = allowed.filter(u => u.toLowerCase() !== data.userEmail.toLowerCase());
-                                if (allowed.length !== newAllowed.length) {
-                                    updateDoc(bRef, { allowedUsers: newAllowed });
-                                }
-                            }
-                        });
-                    }
-                }
-            }
-            allRequestsFetched.push({ id: docSnap.id, ...data });
-        });
+        allRequestsFetched = rows.map(r => ({
+            id: String(r.id),
+            userEmail: r.user_uid,
+            buttonId: r.dashboard_name,
+            buttonName: r.dashboard_name,
+            reason: r.reason,
+            status: r.status,
+            expiryDate: r.admin_comment?.startsWith('Vence:') ? r.admin_comment.replace('Vence: ', '') : null,
+            createdAt: r.created_at
+        }));
 
-        if (updatePromises.length > 0) {
-            await Promise.all(updatePromises);
-        }
+        // Passive auto-expire: mark expired in MySQL if past expiry
+        const expirePromises = allRequestsFetched
+            .filter(r => r.status === 'aprobado' && r.expiryDate && now > new Date(r.expiryDate))
+            .map(async r => {
+                r.status = 'expirado';
+                await callApi(`/api/solicitudes/${r.id}/status`, 'PATCH', { status: 'expirado' }).catch(() => {});
+            });
+        if (expirePromises.length > 0) await Promise.all(expirePromises);
 
-        // Sort by date desc
-        allRequestsFetched.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-        const pendingCount = allRequestsFetched.filter(r => r.status === 'pending').length;
+        const pendingCount = allRequestsFetched.filter(r => r.status === 'pendiente').length;
         const badge = document.getElementById('requests-badge');
         const innerBadge = document.getElementById('requests-badge-inner');
-        
+
         if (badge) {
             badge.textContent = pendingCount;
             badge.classList.toggle('hidden', pendingCount === 0);
@@ -752,7 +693,7 @@ function renderRequests(requests) {
 
 async function updateRequestStatus(requestId, newStatus) {
     try {
-        await updateDoc(doc(db, "requests", requestId), { status: newStatus });
+        await callApi(`/api/solicitudes/${requestId}/status`, 'PATCH', { status: newStatus });
         await loadRequests();
     } catch (e) { console.error(e); }
 }
@@ -765,90 +706,54 @@ async function approveRequest(requestId, email, buttonId) {
     roleExpiryWarning.classList.add('hidden');
     optRoleExpiry.classList.remove('hidden');
 
-    // Fetch user info to check expiry date
-    try {
-        console.log("Fetching user profile for approval:", email);
-        const userSnap = await getDoc(doc(db, "users", email.toLowerCase()));
-        if (userSnap.exists()) {
-            const userData = userSnap.data();
-            const expiry = userData.expiryDate; // Can be ISO string or "No aplica"
-
-            if (expiry && expiry !== 'No aplica' && expiry !== '') {
-                const expiryDate = new Date(expiry);
-                const now = new Date();
-
-                if (now > expiryDate) {
-                    // Already expired - Hide option
-                    optRoleExpiry.classList.add('hidden');
-                } else {
-                    const daysRemaining = Math.max(0, Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24)));
-                    userRoleDateLabel.textContent = `${expiryDate.toLocaleDateString()} (vence en ${daysRemaining} días)`;
-                    userRoleDateLabel.classList.remove('hidden');
-                    pendingApproval.userExpiryDate = expiry;
-                }
-            } else {
-                // No expiry date or "No aplica" - Hide option
+    // Look up user from already-loaded allUsersFetched
+    const userData = allUsersFetched.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (userData) {
+        const expiry = userData.expiryDate;
+        if (expiry && expiry !== 'No aplica' && expiry !== '') {
+            const expiryDate = new Date(expiry);
+            const now = new Date();
+            if (now > expiryDate) {
                 optRoleExpiry.classList.add('hidden');
+            } else {
+                const daysRemaining = Math.max(0, Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24)));
+                userRoleDateLabel.textContent = `${expiryDate.toLocaleDateString()} (vence en ${daysRemaining} días)`;
+                userRoleDateLabel.classList.remove('hidden');
+                pendingApproval.userExpiryDate = expiry;
             }
+        } else {
+            optRoleExpiry.classList.add('hidden');
         }
-    } catch (error) {
-        console.error("Error fetching user data for modal:", error);
+    } else {
+        optRoleExpiry.classList.add('hidden');
     }
-    
+
     durationModal?.classList.remove('hidden');
     durationModal?.classList.add('flex');
 }
 
 // Handle Expiration Selections
 async function processApproval(type) {
-    console.log("Iniciando proceso de aprobación:", type);
-    if (!pendingApproval) {
-        console.warn("Error: No hay solicitud pendiente de aprobación en memoria.");
-        return;
-    }
+    if (!pendingApproval) return;
     const { requestId, email, buttonId, userExpiryDate } = pendingApproval;
-    console.log("Contexto de aprobación:", { requestId, email, buttonId, userExpiryDate });
     const now = new Date();
     let expiryISO = "";
 
-    // Disable buttons
     optOneYear.disabled = true;
     optRoleExpiry.disabled = true;
 
     if (type === '1year') {
-        const expiryDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
-        expiryISO = expiryDate.toISOString();
+        expiryISO = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString();
     } else if (type === 'role') {
         if (!userExpiryDate) return;
         expiryISO = userExpiryDate;
     }
 
     try {
-        // 1. Get the button doc
-        const buttonRef = doc(db, "buttons", buttonId);
-        const buttonSnap = await getDoc(buttonRef);
-
-        if (buttonSnap.exists()) {
-            const data = buttonSnap.data();
-            const allowedUsers = data.allowedUsers || [];
-            const accessExpirations = data.accessExpirations || {};
-
-            // Add/Update email
-            if (!allowedUsers.map(u => u.toLowerCase()).includes(email.toLowerCase())) {
-                allowedUsers.push(email);
-            }
-            
-            // Set expiration
-            accessExpirations[email.toLowerCase()] = expiryISO;
-
-            await updateDoc(buttonRef, { allowedUsers, accessExpirations });
-        }
-
-        // 2. Update request status
-        await updateDoc(doc(db, "requests", requestId), { 
-            status: 'approved',
-            expiryDate: expiryISO,
-            approvedAt: now.toISOString()
+        await callApi(`/api/solicitudes/${requestId}/aprobar`, 'POST', {
+            email,
+            tablero_id: buttonId,
+            expiry_iso: expiryISO
         });
 
         closeDurationModal();
@@ -1120,7 +1025,7 @@ function renderCategories() {
 
         tr.querySelector('.toggle-cat-visibility').addEventListener('click', async () => {
             try {
-                await updateDoc(doc(db, "categories", id), { visible: !(data.visible !== false) });
+                await callApi(`/api/categorias/${id}`, 'PATCH', { visible: data.visible !== false ? 0 : 1 });
                 await loadCategories();
             } catch (e) { console.error(e); }
         });
@@ -1129,8 +1034,7 @@ function renderCategories() {
         tr.querySelector('.cat-order-input').addEventListener('change', async (e) => {
             const newOrder = parseInt(e.target.value) || 0;
             try {
-                await updateDoc(doc(db, "categories", id), { order: newOrder });
-                // Optionally alert or just refresh
+                await callApi(`/api/categorias/${id}`, 'PATCH', { sort_order: newOrder });
                 await loadCategories();
             } catch (err) {
                 console.error("Error updating order:", err);
@@ -1293,14 +1197,14 @@ function filterAndRenderBoards() {
         `;
         boardsTbody.appendChild(tr);
         tr.querySelector(`[data-toggle="${id}"]`).addEventListener('click', async () => {
-            try { await updateDoc(doc(db, "buttons", id), { enabled: !data.enabled }); loadBoards(); }
+            try { await callApi(`/api/tableros/${id}`, 'PATCH', { enabled: !data.enabled }); loadBoards(); }
             catch (e) { console.error(e); }
         });
         // Auto-save order on change
         tr.querySelector('.board-order-input').addEventListener('change', async (e) => {
             const newOrder = parseInt(e.target.value) || 0;
             try {
-                await updateDoc(doc(db, "buttons", id), { order: newOrder });
+                await callApi(`/api/tableros/${id}`, 'PATCH', { sort_order: newOrder });
                 await loadBoards();
             } catch (err) { console.error("Error updating board order:", err); }
         });
@@ -1421,11 +1325,13 @@ document.querySelectorAll('[data-close]')?.forEach(btn => btn?.addEventListener(
 async function deleteDocReq(collectionName, id) {
     if (confirm("¿Estás seguro que querés eliminar esto permanentemente?")) {
         try {
-            await deleteDoc(doc(db, collectionName, id));
-            if (collectionName === 'buttons') await loadBoards();
-            if (collectionName === 'categories') await loadCategories();
-            // Solicitudes no se eliminan más por tracking, pero dejamos el catch por si se usa en otro lado
-            if (collectionName === 'requests') await loadRequests();
+            if (collectionName === 'buttons') {
+                await callApi(`/api/tableros/${id}`, 'DELETE');
+                await loadBoards();
+            } else if (collectionName === 'categories') {
+                await callApi(`/api/categorias/${id}`, 'DELETE');
+                await loadCategories();
+            }
         } catch (error) { console.error(error); alert("No se pudo eliminar."); }
     }
 }
@@ -1741,7 +1647,7 @@ function renderFeedbackTable(feedbackList) {
         tr.querySelector('.btn-del-feedback').addEventListener('click', async () => {
             if (confirm("¿Eliminar este feedback?")) {
                 try {
-                    await deleteDoc(doc(db, "feedback", fb.id));
+                    await callApi(`/api/feedback/${fb.id}`, 'DELETE');
                     loadFeedback();
                 } catch (err) {
                     console.error("Error deleting feedback:", err);
@@ -1752,9 +1658,8 @@ function renderFeedbackTable(feedbackList) {
         feedbackTbody.appendChild(tr);
     });
 }
-// Background notifications
+// Background notifications (uses MySQL)
 async function checkBackgroundNotifications() {
-    console.log("Checking background notifications for badges...");
     try {
         const lastSeenUsers = localStorage.getItem('ogb_last_seen_users');
         const lastSeenFeedback = localStorage.getItem('ogb_last_seen_feedback');
@@ -1763,57 +1668,36 @@ async function checkBackgroundNotifications() {
         const activeTab = document.querySelector('.nav-tab.text-obelisco-blue');
         const currentTarget = activeTab ? activeTab.getAttribute('data-target') : '';
 
-        const getSafeDate = (val) => {
-            if (!val) return null;
-            if (val.seconds) return val.toDate(); // Firestore Timestamp
-            return new Date(val); // ISO String or other
+        const isNewer = (dateVal, lastSeen) => {
+            if (!dateVal) return false;
+            const d = new Date(dateVal);
+            return !lastSeen || d.getTime() > new Date(lastSeen).getTime();
         };
 
-        // 1. Users Badge
+        const [users, feedback, contacts] = await Promise.all([
+            callApi('/api/usuarios', 'GET').catch(() => []),
+            callApi('/api/feedback', 'GET').catch(() => []),
+            callApi('/api/contactos', 'GET').catch(() => [])
+        ]);
+
         const usersBadge = document.getElementById('users-badge');
         if (usersBadge && currentTarget !== 'tab-usuarios') {
-            const usersSnap = await getDocs(collection(db, "users"));
-            let hasNewUser = false;
-            usersSnap.forEach(doc => {
-                const data = doc.data();
-                const userDate = getSafeDate(data.updatedAt || data.createdAt);
-                if (userDate && (!lastSeenUsers || userDate.getTime() > new Date(lastSeenUsers).getTime())) {
-                    hasNewUser = true;
-                }
-            });
-            if (hasNewUser) usersBadge.classList.remove('hidden');
+            const hasNew = users.some(u => isNewer(u.created_at, lastSeenUsers));
+            if (hasNew) usersBadge.classList.remove('hidden');
         }
 
-        // 2. Feedback Badge
         const feedbackBadge = document.getElementById('feedback-badge');
         if (feedbackBadge && currentTarget !== 'tab-feedback') {
-            const feedbackSnap = await getDocs(collection(db, "feedback"));
-            let newCount = 0;
-            feedbackSnap.forEach(doc => {
-                const data = doc.data();
-                const feedbackDate = getSafeDate(data.timestamp);
-                if (feedbackDate && (!lastSeenFeedback || feedbackDate.getTime() > new Date(lastSeenFeedback).getTime())) {
-                    newCount++;
-                }
-            });
+            const newCount = feedback.filter(f => isNewer(f.created_at, lastSeenFeedback)).length;
             if (newCount > 0) {
                 feedbackBadge.textContent = newCount;
                 feedbackBadge.classList.remove('hidden');
             }
         }
 
-        // 3. Contact/Incident Badge
         const contactBadge = document.getElementById('contacto-badge');
         if (contactBadge && currentTarget !== 'tab-contacto') {
-            const contactsSnap = await getDocs(collection(db, "contacts"));
-            let newCount = 0;
-            contactsSnap.forEach(doc => {
-                const data = doc.data();
-                const contactDate = getSafeDate(data.createdAt);
-                if (contactDate && (!lastSeenContacto || contactDate.getTime() > new Date(lastSeenContacto).getTime())) {
-                    newCount++;
-                }
-            });
+            const newCount = contacts.filter(c => isNewer(c.created_at, lastSeenContacto)).length;
             if (newCount > 0) {
                 contactBadge.textContent = newCount;
                 contactBadge.classList.remove('hidden');
@@ -1916,7 +1800,7 @@ function renderContactsTable() {
         tr.querySelector('.btn-del-contact').addEventListener('click', async () => {
             if (confirm("¿Eliminar este reporte permanentemente?")) {
                 try {
-                    await deleteDoc(doc(db, "contacts", c.id));
+                    await callApi(`/api/contactos/${c.id}`, 'DELETE');
                     loadContacts();
                 } catch (err) {
                     console.error("Error deleting contact:", err);
