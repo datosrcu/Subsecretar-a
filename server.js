@@ -312,16 +312,17 @@ app.get('/api/protected-test', verifyToken, (req, res) => {
 
 // 0. Sincronizar usuario al hacer login (reemplaza Firestore)
 app.post('/api/usuarios/sync', verifyToken, async (req, res) => {
-    const { uid, email, full_name, photo_url, is_admin } = req.body;
+    const { email, full_name } = req.body;
     try {
         const connection = await getDbConnection();
         await connection.execute(
             `INSERT INTO usuarios_perfiles (uid, email, full_name, last_login)
              VALUES (?, ?, ?, NOW())
              ON DUPLICATE KEY UPDATE
+               uid = VALUES(uid),
                full_name = COALESCE(NULLIF(?, ''), full_name),
                last_login = NOW()`,
-            [uid, email, full_name, full_name]
+            [email, email, full_name, full_name]
         );
         await connection.end();
         res.json({ success: true });
@@ -333,7 +334,7 @@ app.post('/api/usuarios/sync', verifyToken, async (req, res) => {
 
 // 1. Guardar o actualizar perfil de usuario
 app.post('/api/perfil', verifyToken, async (req, res) => {
-    const { uid } = req.user;
+    const { email: uid } = req.user; // use email as uid for readability
     const { 
         full_name, dni, sector_group, organization_type, 
         organization_name, role_position, role_detail, 
