@@ -194,6 +194,8 @@ onAuthStateChanged(auth, async (user) => {
             await loadFeedback();
             await loadTCConfig();
             checkBackgroundNotifications();
+            // Consultar nuevas notificaciones periódicamente en tiempo real (cada 15 segundos)
+            setInterval(checkBackgroundNotifications, 15000);
         } else {
             showError("No tienes privilegios de administrador para ver o editar.");
             await signOut(auth);
