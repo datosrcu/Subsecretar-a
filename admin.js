@@ -1158,9 +1158,27 @@ async function loadBoards() {
             requireLogin: b.require_login !== 0,
             openInNewTab: b.open_in_new_tab !== 0,
             order: b.sort_order,
-            allowedUsers: typeof b.allowed_users === 'string' ? JSON.parse(b.allowed_users) : b.allowed_users,
-            accessExpirations: typeof b.access_expirations === 'string' ? JSON.parse(b.access_expirations) : b.access_expirations,
-            categories: typeof b.categories === 'string' ? JSON.parse(b.categories) : b.categories,
+            allowedUsers: (() => {
+                try {
+                    const val = b.allowed_users;
+                    if (typeof val === 'string' && val.trim() !== '') return JSON.parse(val);
+                    return Array.isArray(val) ? val : [];
+                } catch (e) { return []; }
+            })(),
+            accessExpirations: (() => {
+                try {
+                    const val = b.access_expirations;
+                    if (typeof val === 'string' && val.trim() !== '') return JSON.parse(val);
+                    return (typeof val === 'object' && val !== null) ? val : {};
+                } catch (e) { return {}; }
+            })(),
+            categories: (() => {
+                try {
+                    const val = b.categories;
+                    if (typeof val === 'string' && val.trim() !== '') return JSON.parse(val);
+                    return Array.isArray(val) ? val : [];
+                } catch (e) { return []; }
+            })(),
             category: b.category_legacy
         }));
         filterAndRenderBoards();

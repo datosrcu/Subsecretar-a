@@ -312,9 +312,27 @@ async function loadUserPermissions(user) {
                     requireLogin: data.require_login,
                     openInNewTab: data.open_in_new_tab,
                     sort_order: data.sort_order,
-                    allowedUsers: typeof data.allowed_users === 'string' ? JSON.parse(data.allowed_users) : data.allowed_users,
-                    accessExpirations: typeof data.access_expirations === 'string' ? JSON.parse(data.access_expirations) : data.access_expirations,
-                    categories: typeof data.categories === 'string' ? JSON.parse(data.categories) : data.categories,
+                    allowedUsers: (() => {
+                        try {
+                            const val = data.allowed_users;
+                            if (typeof val === 'string' && val.trim() !== '') return JSON.parse(val);
+                            return Array.isArray(val) ? val : [];
+                        } catch (e) { return []; }
+                    })(),
+                    accessExpirations: (() => {
+                        try {
+                            const val = data.access_expirations;
+                            if (typeof val === 'string' && val.trim() !== '') return JSON.parse(val);
+                            return (typeof val === 'object' && val !== null) ? val : {};
+                        } catch (e) { return {}; }
+                    })(),
+                    categories: (() => {
+                        try {
+                            const val = data.categories;
+                            if (typeof val === 'string' && val.trim() !== '') return JSON.parse(val);
+                            return Array.isArray(val) ? val : [];
+                        } catch (e) { return []; }
+                    })(),
                     category: data.category_legacy
                 };
                 const hasAccess = checkUserAccess(user, boardObj);
@@ -635,8 +653,10 @@ function renderButton(container, id, data) {
     const hasAccess = data.hasAccess !== false; // handle old data
     const restrictedClass = !hasAccess ? 'opacity-75 grayscale-[0.5] border-dashed border-red-200' : '';
 
-    // Check pending request
-    const pendingRequest = currentUserRequests.find(r => r.buttonId === id && (r.status === 'pendiente' || r.status === 'pending'));
+    const pendingRequest = currentUserRequests.find(r => 
+        (r.buttonId === id || r.buttonId === data.title || r.buttonName === data.title) && 
+        (r.status === 'pendiente' || r.status === 'pending')
+    );
     const isUnderReview = !!pendingRequest;
 
     const lockIcon = !hasAccess

@@ -457,8 +457,27 @@ app.post('/api/solicitudes/:id/aprobar', verifyToken, async (req, res) => {
             [tablero_id, tablero_id]
         );
         if (tablero) {
-            const allowed = JSON.parse(tablero.allowed_users || '[]');
-            const expirations = JSON.parse(tablero.access_expirations || '{}');
+            let allowed = [];
+            try {
+                const val = (tablero.allowed_users || '').trim();
+                allowed = val ? JSON.parse(val) : [];
+            } catch (jsonErr) {
+                console.error("Error parsing allowed_users:", jsonErr);
+                allowed = [];
+            }
+
+            let expirations = {};
+            try {
+                const val = (tablero.access_expirations || '').trim();
+                expirations = val ? JSON.parse(val) : {};
+            } catch (jsonErr) {
+                console.error("Error parsing access_expirations:", jsonErr);
+                expirations = {};
+            }
+
+            if (!Array.isArray(allowed)) allowed = [];
+            if (typeof expirations !== 'object' || expirations === null) expirations = {};
+
             if (!allowed.map(u => u.toLowerCase()).includes(email.toLowerCase())) allowed.push(email);
             if (expiry_iso) expirations[email.toLowerCase()] = expiry_iso;
             await connection.execute(
