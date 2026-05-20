@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Observatorio de Gestión - Subsecretaría de Estadística</title>
+    <title>Observatorio de Gestión - Dirección de Estadística</title>
 
     <!-- Tipografía Inter de Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -72,6 +72,14 @@
                         class="bg-transparent border-none outline-none px-2 py-1 text-sm w-32 md:w-48 focus:w-64 transition-all duration-300">
                 </div>
 
+                <!-- Botón Contacto en header -->
+                <button id="open-contact-btn-header" class="hidden md:flex items-center space-x-1.5 text-sm font-semibold text-obelisco-dark hover:text-obelisco-blue transition border border-obelisco-border rounded-lg px-3 py-1.5 hover:border-obelisco-blue hover:bg-blue-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span>Contacto</span>
+                </button>
+
                 <!-- Authentication UI -->
                 <div id="auth-section" class="flex items-center space-x-3 ml-4 border-l pl-4 border-gray-300">
                     <button id="login-btn"
@@ -107,7 +115,7 @@
                 <!-- Breadcrumb -->
                 <nav class="mb-6">
                     <ol class="flex items-center space-x-2 text-sm font-medium text-obelisco-blue">
-                        <li><a href="index.html" class="hover:underline">Subsecretaría de Estadística</a></li>
+                        <li><a href="index.html" class="hover:underline">Dirección de Estadística</a></li>
                         <li class="flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mx-1 text-gray-400" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
@@ -318,23 +326,8 @@
                     <div>
                         <h2 class="text-3xl font-bold text-obelisco-dark mb-6">Información institucional</h2>
 
-                        <!-- Tarjetas de Autoridades -->
-                        <div class="space-y-4 mb-8">
-                            <!-- Roger Fabre -->
-                            <div
-                                class="flex items-center p-4 bg-white border border-obelisco-border rounded-xl shadow-sm">
-                                <div
-                                    class="w-20 h-20 rounded-lg bg-gray-100 overflow-hidden border border-obelisco-border mr-4 flex-shrink-0">
-                                    <img src="https://placehold.co/80x80/f3f6f9/212529?text=RF" alt="Roger Fabre"
-                                        class="w-full h-full object-cover">
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-bold text-obelisco-dark">Roger Fabre</h3>
-                                    <p class="text-obelisco-gray text-sm">Subsecretario de Estadística</p>
-                                    <p class="text-obelisco-blue text-xs mt-1">rfabre@riocuarto.gov.ar</p>
-                                </div>
-                            </div>
-
+                        <!-- Tarjeta de Autoridades -->
+                        <div class="mb-8">
                             <!-- Mónica Anelo -->
                             <div
                                 class="flex items-center p-4 bg-white border border-obelisco-border rounded-xl shadow-sm">
@@ -344,9 +337,8 @@
                                         class="w-full h-full object-cover">
                                 </div>
                                 <div>
-                                    <h4 class="text-lg font-bold text-obelisco-dark">Mónica Anelo</h4>
-                                    <p class="text-obelisco-gray text-sm">Dir.ª de Estadística, Control de Calidad y
-                                        Procesos</p>
+                                    <h3 class="text-lg font-bold text-obelisco-dark">Mónica Anelo</h3>
+                                    <p class="text-obelisco-gray text-sm">Directora de Estadística, Control de Calidad y Procesos</p>
                                     <p class="text-obelisco-blue text-xs mt-1">manelo@riocuarto.gov.ar</p>
                                 </div>
                             </div>
@@ -489,7 +481,7 @@
 
                 <!-- Centro: Créditos -->
                 <div class="text-[11px] font-medium text-gray-400 tracking-wide text-center">
-                    Desarrollado por la <span class="text-white font-bold opacity-80">Subsecretaría de Estadística</span>
+                    Desarrollado por la <span class="text-white font-bold opacity-80">Dirección de Estadística</span>
                 </div>
 
                 <!-- Derecha: Copyright y Branding -->

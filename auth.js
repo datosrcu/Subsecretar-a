@@ -1169,12 +1169,12 @@ const closeContactBtn = document.getElementById('close-contact-modal');
 const closeContactOverlay = document.getElementById('close-contact-overlay');
 const contactForm = document.getElementById('contact-form');
 
-openContactBtn?.addEventListener('click', (e) => {
-    e.preventDefault();
+function openContactModal(e) {
+    e?.preventDefault();
     contactModal?.classList.remove('hidden');
     contactModal?.classList.add('flex');
     document.body.style.overflow = 'hidden';
-    
+
     // Autofill user info if logged in
     if (auth.currentUser) {
         const nameField = document.getElementById('contact-name');
@@ -1182,7 +1182,13 @@ openContactBtn?.addEventListener('click', (e) => {
         if (nameField) nameField.value = auth.currentUser.displayName || (auth.currentUser.email ? auth.currentUser.email.split('@')[0] : '');
         if (emailField) emailField.value = auth.currentUser.email || '';
     }
-});
+}
+
+openContactBtn?.addEventListener('click', openContactModal);
+
+// Botón Contacto del encabezado (header)
+const openContactBtnHeader = document.getElementById('open-contact-btn-header');
+openContactBtnHeader?.addEventListener('click', openContactModal);
 
 // Dynamic Contact Form Logic
 const contactTypeSelect = document.getElementById('contact-type');
