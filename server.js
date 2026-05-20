@@ -19,6 +19,7 @@ try {
 }
 
 const app = express();
+app.set('trust proxy', true); // Permitir capturar la IP real del cliente detrás del proxy inverso Nginx/Docker
 const PORT = process.env.PORT || 8080;
 
 // Servir archivos estáticos desde la raíz
