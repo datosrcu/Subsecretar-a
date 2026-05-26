@@ -769,7 +769,8 @@ function openModal(title, url) {
     }
 
     // Chrome's PDF viewer is disabled if the iframe has ANY sandbox attribute
-    if (finalSrc.toLowerCase().includes('.pdf')) {
+    const isPdf = finalSrc.toLowerCase().includes('.pdf');
+    if (isPdf) {
         modalIframe.removeAttribute('sandbox');
     }
 
@@ -794,6 +795,15 @@ function openModal(title, url) {
         // Even if it loads, we hide fallback just in case it was showing
         if (iframeFallback) iframeFallback.classList.add('hidden');
     };
+
+    // If it's a PDF, Chrome might not fire the onload event for the plugin, so we force visibility.
+    if (isPdf) {
+        setTimeout(() => {
+            clearTimeout(fallbackTimeout);
+            modalLoader.style.display = 'none';
+            modalIframe.style.opacity = '1';
+        }, 1000);
+    }
 
     // Show modal
     modal.classList.remove('hidden');
