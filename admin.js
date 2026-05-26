@@ -1992,7 +1992,7 @@ function renderInformesTable(informes) {
 
     tbody.innerHTML = informes.map(inf => {
         const cats = (() => { try { return typeof inf.categories === 'string' ? JSON.parse(inf.categories) : (Array.isArray(inf.categories) ? inf.categories : []); } catch(e) { return []; } })();
-        const catNames = cats.map(id => allCategoriesFetched?.find(c => c.id === id)?.name || id).join(', ') || '—';
+        const catNames = cats.map(id => globalCategories?.find(c => c.id === id)?.name || id).join(', ') || '—';
         const enabled = inf.enabled;
 
         return `<tr class="hover:bg-gray-50 transition">
@@ -2103,7 +2103,7 @@ function populateInformeCategories(selectedIds = []) {
     const container = document.getElementById('informe-categories-checklist');
     if (!container) return;
 
-    const cats = allCategoriesFetched || [];
+    const cats = globalCategories || [];
     if (cats.length === 0) {
         container.innerHTML = '<p class="text-xs text-center text-gray-400 py-4">No hay categorías disponibles.</p>';
         return;
