@@ -858,9 +858,24 @@ app.post('/api/tableros', verifyToken, async (req, res) => {
             require_login=VALUES(require_login), open_in_new_tab=VALUES(open_in_new_tab), sort_order=VALUES(sort_order),
             allowed_users=VALUES(allowed_users), access_expirations=VALUES(access_expirations), categories=VALUES(categories), category_legacy=VALUES(category_legacy)
         `;
+        
+        // Sanitizar rigurosamente todos los campos para evitar cualquier valor undefined
+        const safeId = id || `board_${Date.now()}`;
+        const safeTitle = title || '';
+        const safeIcon = icon || '';
+        const safeIframeUrl = iframe_url || '';
+        const safeEnabled = (enabled === true || enabled === 1 || enabled === 'true') ? 1 : 0;
+        const safeRequireLogin = (require_login === true || require_login === 1 || require_login === 'true') ? 1 : 0;
+        const safeOpenInNewTab = (open_in_new_tab === true || open_in_new_tab === 1 || open_in_new_tab === 'true') ? 1 : 0;
+        const safeSortOrder = parseInt(sort_order) || 0;
+        const safeAllowedUsers = JSON.stringify(allowed_users || []);
+        const safeAccessExpirations = JSON.stringify(access_expirations || {});
+        const safeCategories = JSON.stringify(categories || []);
+        const safeCategoryLegacy = category_legacy || '';
+
         await connection.execute(sql, [
-            id, title, icon, iframe_url, enabled, require_login, open_in_new_tab, sort_order, 
-            JSON.stringify(allowed_users || []), JSON.stringify(access_expirations || {}), JSON.stringify(categories || []), category_legacy
+            safeId, safeTitle, safeIcon, safeIframeUrl, safeEnabled, safeRequireLogin, safeOpenInNewTab, safeSortOrder, 
+            safeAllowedUsers, safeAccessExpirations, safeCategories, safeCategoryLegacy
         ]);
         await connection.end();
         res.json({ message: 'Tablero guardado.' });
@@ -895,8 +910,31 @@ app.post('/api/informes', verifyToken, uploadInformes.single('archivo'), async (
         let fileType = 'url';
 
         if (req.file) {
-            filePath = `/uploads/informes/${req.file.filename}`;
-            finalUrl = filePath;
+            try {
+                const bucket = admin.storage().bucket('web-subse.firebasestorage.app');
+                const destination = `informes/${req.file.filename}`;
+                
+                await bucket.upload(req.file.path, {
+                    destination: destination,
+                    metadata: {
+                        contentType: req.file.mimetype,
+                    }
+                });
+                
+                // Hacer el archivo público
+                await bucket.file(destination).makePublic();
+                
+                finalUrl = `https://storage.googleapis.com/web-subse.firebasestorage.app/${destination}`;
+                filePath = finalUrl;
+                
+                // Eliminar archivo temporal
+                fs.unlinkSync(req.file.path);
+            } catch (storageErr) {
+                console.error("Error al subir a Firebase Storage, usando almacenamiento local de respaldo:", storageErr);
+                filePath = `/uploads/informes/${req.file.filename}`;
+                finalUrl = filePath;
+            }
+            
             const ext = path.extname(req.file.originalname).toLowerCase();
             if (ext === '.pdf') fileType = 'pdf';
             else if (['.html', '.htm'].includes(ext)) fileType = 'html';
@@ -945,8 +983,29 @@ app.patch('/api/informes/:id', verifyToken, uploadInformes.single('archivo'), as
         const fields = { ...req.body };
 
         if (req.file) {
-            fields.file_path = `/uploads/informes/${req.file.filename}`;
-            fields.url = fields.file_path;
+            try {
+                const bucket = admin.storage().bucket('web-subse.firebasestorage.app');
+                const destination = `informes/${req.file.filename}`;
+                
+                await bucket.upload(req.file.path, {
+                    destination: destination,
+                    metadata: {
+                        contentType: req.file.mimetype,
+                    }
+                });
+                
+                await bucket.file(destination).makePublic();
+                
+                fields.url = `https://storage.googleapis.com/web-subse.firebasestorage.app/${destination}`;
+                fields.file_path = fields.url;
+                
+                fs.unlinkSync(req.file.path);
+            } catch (storageErr) {
+                console.error("Error al subir a Firebase Storage en PATCH, usando almacenamiento local de respaldo:", storageErr);
+                fields.file_path = `/uploads/informes/${req.file.filename}`;
+                fields.url = fields.file_path;
+            }
+            
             const ext = path.extname(req.file.originalname).toLowerCase();
             if (ext === '.pdf') fields.file_type = 'pdf';
             else if (['.html', '.htm'].includes(ext)) fields.file_type = 'html';
