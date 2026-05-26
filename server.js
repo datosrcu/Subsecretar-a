@@ -860,7 +860,7 @@ app.post('/api/tableros', verifyToken, async (req, res) => {
         `;
         await connection.execute(sql, [
             id, title, icon, iframe_url, enabled, require_login, open_in_new_tab, sort_order, 
-            JSON.stringify(allowed_users), JSON.stringify(access_expirations), JSON.stringify(categories), category_legacy
+            JSON.stringify(allowed_users || []), JSON.stringify(access_expirations || {}), JSON.stringify(categories || []), category_legacy
         ]);
         await connection.end();
         res.json({ message: 'Tablero guardado.' });
@@ -1162,12 +1162,82 @@ app.patch('/api/usuarios/:email/role', verifyToken, async (req, res) => {
     }
 });
 
-// Eliminar usuario de MySQL (llamado desde admin.js al borrar un usuario)
 app.delete('/api/usuarios/:email', verifyToken, async (req, res) => {
     try {
         const email = decodeURIComponent(req.params.email).toLowerCase();
         const connection = await getDbConnection();
+        
+        // 1. Eliminar usuario de la tabla de perfiles
         await connection.execute('DELETE FROM usuarios_perfiles WHERE email = ?', [email]);
+        
+        // 2. Quitar accesos de los tableros
+        const [tableros] = await connection.query('SELECT id, allowed_users, access_expirations FROM tableros');
+        for (const t of tableros) {
+            let allowed = [];
+            let expirations = {};
+            
+            try {
+                allowed = typeof t.allowed_users === 'string' ? JSON.parse(t.allowed_users || '[]') : (t.allowed_users || []);
+            } catch (e) { allowed = []; }
+            
+            try {
+                expirations = typeof t.access_expirations === 'string' ? JSON.parse(t.access_expirations || '{}') : (t.access_expirations || {});
+            } catch (e) { expirations = {}; }
+            
+            if (!Array.isArray(allowed)) allowed = [];
+            if (typeof expirations !== 'object' || expirations === null) expirations = {};
+            
+            const lowerAllowed = allowed.map(u => u.toLowerCase());
+            if (lowerAllowed.includes(email)) {
+                const newAllowed = allowed.filter(u => u.toLowerCase() !== email);
+                const newExpirations = { ...expirations };
+                delete newExpirations[email];
+                for (const key of Object.keys(newExpirations)) {
+                    if (key.toLowerCase() === email) {
+                        delete newExpirations[key];
+                    }
+                }
+                await connection.execute(
+                    'UPDATE tableros SET allowed_users = ?, access_expirations = ? WHERE id = ?',
+                    [JSON.stringify(newAllowed), JSON.stringify(newExpirations), t.id]
+                );
+            }
+        }
+
+        // 3. Quitar accesos de los informes
+        const [informes] = await connection.query('SELECT id, allowed_users, access_expirations FROM informes');
+        for (const inf of informes) {
+            let allowed = [];
+            let expirations = {};
+            
+            try {
+                allowed = typeof inf.allowed_users === 'string' ? JSON.parse(inf.allowed_users || '[]') : (inf.allowed_users || []);
+            } catch (e) { allowed = []; }
+            
+            try {
+                expirations = typeof inf.access_expirations === 'string' ? JSON.parse(inf.access_expirations || '{}') : (inf.access_expirations || {});
+            } catch (e) { expirations = {}; }
+            
+            if (!Array.isArray(allowed)) allowed = [];
+            if (typeof expirations !== 'object' || expirations === null) expirations = {};
+            
+            const lowerAllowed = allowed.map(u => u.toLowerCase());
+            if (lowerAllowed.includes(email)) {
+                const newAllowed = allowed.filter(u => u.toLowerCase() !== email);
+                const newExpirations = { ...expirations };
+                delete newExpirations[email];
+                for (const key of Object.keys(newExpirations)) {
+                    if (key.toLowerCase() === email) {
+                        delete newExpirations[key];
+                    }
+                }
+                await connection.execute(
+                    'UPDATE informes SET allowed_users = ?, access_expirations = ? WHERE id = ?',
+                    [JSON.stringify(newAllowed), JSON.stringify(newExpirations), inf.id]
+                );
+            }
+        }
+        
         await connection.end();
         res.json({ success: true });
     } catch (error) {

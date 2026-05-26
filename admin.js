@@ -1325,6 +1325,24 @@ boardForm?.addEventListener('submit', async (e) => {
         const hasGEDirect = currentlySelectedCategories.includes('_ge_direct');
         const finalCategories = currentlySelectedCategories.filter(id => id !== '_ge_direct');
         
+        const allowedUsersList = currentlySelectedUsers.filter(email =>
+            allUsersFetched.some(u => u.email.toLowerCase() === email.toLowerCase()) ||
+            ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase())
+        );
+
+        // Preservar expiraciones de accesos previas que sigan autorizadas
+        const accessExpirations = {};
+        if (fieldBoardId.value) {
+            const existingBoard = allBoardsFetched.find(b => b.id === docId);
+            const existingExpirations = existingBoard?.accessExpirations || {};
+            const allowedUsersLower = allowedUsersList.map(u => u.toLowerCase());
+            for (const [email, expDate] of Object.entries(existingExpirations)) {
+                if (allowedUsersLower.includes(email.toLowerCase())) {
+                    accessExpirations[email.toLowerCase()] = expDate;
+                }
+            }
+        }
+
         const boardData = {
             id: docId,
             enabled: fieldBoardEnabled.checked,
@@ -1335,10 +1353,8 @@ boardForm?.addEventListener('submit', async (e) => {
             require_login: fieldBoardReqLogin.value === 'true',
             iframe_url: fieldBoardUrl.value.trim(),
             open_in_new_tab: fieldBoardNewTab.checked,
-            allowed_users: currentlySelectedUsers.filter(email =>
-                allUsersFetched.some(u => u.email.toLowerCase() === email.toLowerCase()) ||
-                ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase())
-            ),
+            allowed_users: allowedUsersList,
+            access_expirations: accessExpirations,
             sort_order: fieldBoardId.value ? (allBoardsFetched.find(b => b.id === docId)?.order || 0) : 0
         };
 
