@@ -241,17 +241,24 @@ async function loadUserPermissions(user) {
             const informesData = await fetch('/api/informes').then(r => r.json());
             allInformes = informesData
                 .filter(i => i.enabled)
-                .map(i => ({
-                    id: i.id,
-                    title: i.title,
-                    description: i.description || '',
-                    categories: (() => { try { const v = i.categories; return typeof v === 'string' ? JSON.parse(v) : (Array.isArray(v) ? v : []); } catch(e) { return []; } })(),
-                    url: i.url,
-                    fileType: i.file_type || 'url',
-                    period: i.period || '',
-                    year: i.year,
-                    sort_order: i.sort_order || 0
-                }));
+                .map(i => {
+                    const informeObj = {
+                        id: i.id,
+                        title: i.title,
+                        description: i.description || '',
+                        categories: (() => { try { const v = i.categories; return typeof v === 'string' ? JSON.parse(v) : (Array.isArray(v) ? v : []); } catch(e) { return []; } })(),
+                        url: i.url,
+                        fileType: i.file_type || 'url',
+                        period: i.period || '',
+                        year: i.year,
+                        sort_order: i.sort_order || 0,
+                        requireLogin: i.require_login === 1,
+                        allowedUsers: (() => { try { const v = i.allowed_users; return typeof v === 'string' && v.trim() !== '' ? JSON.parse(v) : (Array.isArray(v) ? v : []); } catch(e) { return []; } })(),
+                        accessExpirations: (() => { try { const v = i.access_expirations; return typeof v === 'string' && v.trim() !== '' ? JSON.parse(v) : (typeof v === 'object' && v !== null ? v : {}); } catch(e) { return {}; } })()
+                    };
+                    const hasAccess = checkUserAccess(user, informeObj);
+                    return { ...informeObj, hasAccess };
+                });
         } catch (e) {
             console.warn('Error cargando informes:', e.message);
             allInformes = [];
@@ -493,7 +500,7 @@ function renderDashboard() {
         });
 
         // Render informes for this category
-        const informesToRender = allInformes.filter(i => i.categories && i.categories.includes(currentSelectedCategory));
+        const informesToRender = allInformes.filter(i => i.categories && i.categories.includes(currentSelectedCategory) && i.hasAccess);
         if (informesToRender.length > 0) {
             if (renderedCount > 0) {
                 // Divider between tableros and informes
@@ -521,7 +528,7 @@ function renderDashboard() {
         catsToRender.forEach(cat => {
             // Count accessible boards + informes in this category
             const accessibleInCat = allAccessibleBoards.filter(b => b.categories && b.categories.includes(cat.id)).length;
-            const informesInCat = allInformes.filter(i => i.categories && i.categories.includes(cat.id)).length;
+            const informesInCat = allInformes.filter(i => i.categories && i.categories.includes(cat.id) && i.hasAccess).length;
             renderCategoryCard(gridContainer, cat, accessibleInCat, informesInCat);
             renderedCount++;
         });

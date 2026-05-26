@@ -311,10 +311,24 @@ const initializeTables = async () => {
                 year INT,
                 enabled BOOLEAN DEFAULT TRUE,
                 sort_order INT DEFAULT 0,
+                require_login BOOLEAN DEFAULT FALSE,
+                allowed_users JSON,
+                access_expirations JSON,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
         `);
+
+        // Asegurar que las columnas nuevas existan si la tabla ya había sido creada sin ellas
+        try {
+            await connection.query('ALTER TABLE informes ADD COLUMN require_login BOOLEAN DEFAULT FALSE');
+        } catch (e) { /* ignore if exists */ }
+        try {
+            await connection.query('ALTER TABLE informes ADD COLUMN allowed_users JSON');
+        } catch (e) { /* ignore if exists */ }
+        try {
+            await connection.query('ALTER TABLE informes ADD COLUMN access_expirations JSON');
+        } catch (e) { /* ignore if exists */ }
 
         console.log('Estructura de base de datos lista.');
         await connection.end();
@@ -872,7 +886,8 @@ app.post('/api/informes', verifyToken, uploadInformes.single('archivo'), async (
     try {
         const {
             id, title, description, categories, url,
-            period, year, enabled, sort_order
+            period, year, enabled, sort_order,
+            require_login, allowed_users, access_expirations
         } = req.body;
 
         let finalUrl = url || null;
@@ -893,12 +908,16 @@ app.post('/api/informes', verifyToken, uploadInformes.single('archivo'), async (
         const informeId = id || ('inf-' + Date.now());
         const connection = await getDbConnection();
         const sql = `
-            INSERT INTO informes (id, title, description, categories, url, file_path, file_type, period, year, enabled, sort_order)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO informes (
+                id, title, description, categories, url, file_path, file_type, 
+                period, year, enabled, sort_order, require_login, allowed_users, access_expirations
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE
             title=VALUES(title), description=VALUES(description), categories=VALUES(categories),
             url=VALUES(url), file_path=VALUES(file_path), file_type=VALUES(file_type),
-            period=VALUES(period), year=VALUES(year), enabled=VALUES(enabled), sort_order=VALUES(sort_order)
+            period=VALUES(period), year=VALUES(year), enabled=VALUES(enabled), sort_order=VALUES(sort_order),
+            require_login=VALUES(require_login), allowed_users=VALUES(allowed_users), access_expirations=VALUES(access_expirations)
         `;
         await connection.execute(sql, [
             informeId, title, description || null,
@@ -906,7 +925,10 @@ app.post('/api/informes', verifyToken, uploadInformes.single('archivo'), async (
             finalUrl, filePath, fileType,
             period || null, year ? parseInt(year) : null,
             enabled !== undefined ? (enabled === 'true' || enabled === true ? 1 : 0) : 1,
-            sort_order ? parseInt(sort_order) : 0
+            sort_order ? parseInt(sort_order) : 0,
+            require_login === 'true' || require_login === true ? 1 : 0,
+            allowed_users || null,
+            access_expirations || null
         ]);
         await connection.end();
         res.json({ success: true, id: informeId, url: finalUrl });
@@ -938,6 +960,7 @@ app.patch('/api/informes/:id', verifyToken, uploadInformes.single('archivo'), as
 
         // Coerce booleans
         if ('enabled' in fields) fields.enabled = (fields.enabled === 'true' || fields.enabled === true) ? 1 : 0;
+        if ('require_login' in fields) fields.require_login = (fields.require_login === 'true' || fields.require_login === true) ? 1 : 0;
         if ('year' in fields) fields.year = parseInt(fields.year) || null;
         if ('sort_order' in fields) fields.sort_order = parseInt(fields.sort_order) || 0;
 

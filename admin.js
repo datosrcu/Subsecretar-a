@@ -1962,6 +1962,7 @@ function renderRCE() {
 
 let allInformesAdmin = [];
 let editingInformeId = null;
+let informeSelectedUsers = [];
 
 async function loadInformes() {
     const tbody = document.getElementById('informes-tbody');
@@ -2029,6 +2030,8 @@ function openInformeModal(id = null) {
     document.getElementById('field-informe-url').value = '';
     document.getElementById('field-informe-order').value = '0';
     document.getElementById('field-informe-file').value = '';
+    document.getElementById('field-informe-req-login').value = 'false';
+    document.getElementById('informe-user-search').value = '';
     document.getElementById('informe-file-label').textContent = 'Arrastrá o hacé clic (PDF, imagen o HTML — máx 50MB)';
     const currentFileEl = document.getElementById('informe-current-file');
     if (currentFileEl) { currentFileEl.textContent = ''; currentFileEl.classList.add('hidden'); }
@@ -2037,6 +2040,9 @@ function openInformeModal(id = null) {
     document.getElementById('informe-type-url').checked = true;
     document.getElementById('informe-url-wrap').classList.remove('hidden');
     document.getElementById('informe-file-wrap').classList.add('hidden');
+
+    informeSelectedUsers = [];
+    renderInformeUserChecklist();
 
     // Populate categories checklist
     populateInformeCategories([]);
@@ -2054,6 +2060,14 @@ function openInformeModal(id = null) {
         document.getElementById('field-informe-period').value = informe.period || '';
         document.getElementById('field-informe-year').value = informe.year || '';
         document.getElementById('field-informe-order').value = informe.sort_order ?? 0;
+        document.getElementById('field-informe-req-login').value = informe.require_login ? 'true' : 'false';
+
+        // Load users
+        informeSelectedUsers = (informe.allowed_users || []).map(u => u.toLowerCase()).filter(email =>
+            allUsersFetched.some(u => u.email.toLowerCase() === email) ||
+            ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email)
+        );
+        renderInformeUserChecklist();
 
         // Set source type
         if (informe.file_path) {
@@ -2099,6 +2113,54 @@ function populateInformeCategories(selectedIds = []) {
     `).join('');
 }
 
+function renderInformeUserChecklist(filterText = '') {
+    const list = document.getElementById('informe-users-checklist');
+    if (!list) return;
+    list.innerHTML = '';
+    const filtered = allUsersFetched.filter(u => u.email.toLowerCase().includes(filterText.toLowerCase()) || u.name.toLowerCase().includes(filterText.toLowerCase()));
+    if (filtered.length === 0) {
+        list.innerHTML = `<p class="text-xs text-center text-gray-500 py-4">No se encontraron usuarios.</p>`;
+        return;
+    }
+    filtered.forEach(u => {
+        const userEmail = u.email.toLowerCase();
+        const isAdmin = ADMIN_EMAILS.map(e => e.toLowerCase()).includes(userEmail);
+        const isLector = u.role === 'lector';
+
+        const isChecked = isAdmin || isLector || informeSelectedUsers.includes(userEmail) ? 'checked' : '';
+        const disabledAttr = (isAdmin || isLector) ? 'disabled' : '';
+
+        let badgeHtml = '';
+        if (isAdmin) badgeHtml = '<span class="ml-auto text-[9px] bg-amber-100 text-amber-700 px-1 rounded font-bold uppercase">Admin (Acceso Total)</span>';
+        else if (isLector) badgeHtml = '<span class="ml-auto text-[9px] bg-green-100 text-green-700 px-1 rounded font-bold uppercase">Lector (Acceso Total)</span>';
+
+        const div = document.createElement('div');
+        div.className = `flex items-center space-x-2 p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200 cursor-pointer transition ${(isAdmin || isLector) ? 'opacity-70' : ''}`;
+        
+        div.innerHTML = `
+            <input type="checkbox" class="w-3.5 h-3.5 text-teal-600 rounded focus:ring-teal-500" value="${userEmail}" ${isChecked} ${disabledAttr}>
+            <div class="flex flex-col">
+                <span class="text-xs font-bold text-gray-800">${u.name}</span>
+                <span class="text-[10px] text-gray-500">${userEmail}</span>
+            </div>
+            ${badgeHtml}
+        `;
+
+        if (!isAdmin && !isLector) {
+            const checkbox = div.querySelector('input');
+            div.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'INPUT') checkbox.checked = !checkbox.checked;
+                if (checkbox.checked) {
+                    if (!informeSelectedUsers.includes(userEmail)) informeSelectedUsers.push(userEmail);
+                } else {
+                    informeSelectedUsers = informeSelectedUsers.filter(e => e.toLowerCase() !== userEmail);
+                }
+            });
+        }
+        list.appendChild(div);
+    });
+}
+
 async function saveInforme() {
     const saveBtn = document.getElementById('save-informe-btn');
     const title = document.getElementById('field-informe-title').value.trim();
@@ -2115,6 +2177,7 @@ async function saveInforme() {
     const selectedCats = Array.from(document.querySelectorAll('input[name="informe-cat"]:checked')).map(c => c.value);
     const informeId = document.getElementById('informe-id').value || null;
     const enabled = document.getElementById('field-informe-enabled').checked;
+    const requireLogin = document.getElementById('field-informe-req-login').value === 'true';
 
     saveBtn.disabled = true;
     saveBtn.textContent = 'Guardando...';
@@ -2130,6 +2193,11 @@ async function saveInforme() {
         formData.append('categories', JSON.stringify(selectedCats));
         formData.append('enabled', enabled ? 'true' : 'false');
         formData.append('sort_order', document.getElementById('field-informe-order').value || '0');
+        formData.append('require_login', requireLogin ? 'true' : 'false');
+        formData.append('allowed_users', JSON.stringify(informeSelectedUsers.filter(email =>
+            allUsersFetched.some(u => u.email.toLowerCase() === email.toLowerCase()) ||
+            ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email.toLowerCase())
+        )));
 
         if (sourceType === 'url') {
             formData.append('url', urlVal);
@@ -2225,6 +2293,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('#informe-categories-checklist label').forEach(label => {
             label.style.display = label.textContent.toLowerCase().includes(q) ? '' : 'none';
         });
+    });
+
+    // Búsqueda de usuarios en el modal de informe
+    document.getElementById('informe-user-search')?.addEventListener('input', (e) => {
+        renderInformeUserChecklist(e.target.value);
     });
 });
 
