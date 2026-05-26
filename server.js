@@ -33,8 +33,11 @@ const uploadInformes = multer({
     }
 });
 
-// Inicializar Resend para envío de emails
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Inicializar Resend para envío de emails (Condicional para evitar crasheos si falta la API Key)
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+if (!resend) {
+    console.warn("⚠️ RESEND_API_KEY no configurada. El envío de emails estará deshabilitado.");
+}
 
 // Inicializar Firebase Admin
 try {
@@ -476,7 +479,12 @@ app.post('/api/enviar-bienvenida', verifyToken, async (req, res) => {
         const termsPath = path.join(__dirname, 'normativas', 'Terminos', 'Terminos_y_Condiciones_OGM_RioCuarto_v1.htm');
         const termsContent = fs.readFileSync(termsPath);
 
-        // 4. Enviar email con Resend
+        // 4. Enviar email con Resend (si está configurado)
+        if (!resend) {
+            console.log(`[Simulación] Email de bienvenida a ${email} no enviado (Resend no configurado).`);
+            return res.json({ success: true, message: 'Simulación: Email de bienvenida omitido por falta de API Key.', emailId: 'simulated' });
+        }
+
         const { data, error } = await resend.emails.send({
             from: process.env.RESEND_FROM_EMAIL || 'OGM Río Cuarto <onboarding@resend.dev>',
             to: [email],
