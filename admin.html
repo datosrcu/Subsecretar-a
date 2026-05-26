@@ -584,7 +584,7 @@
                             <h2 class="text-2xl font-bold mb-1">Gestión de Informes</h2>
                             <p class="text-obelisco-gray text-sm">Cargá, editá y eliminá informes por categoría.</p>
                         </div>
-                        <button id="add-informe-btn"
+                        <button id="add-informe-btn" onclick="if(window.openInformeModal) window.openInformeModal(null); else alert('Cargando o error en JS. Por favor espera.');"
                             class="bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition flex items-center text-sm shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
@@ -1108,7 +1108,7 @@
 
     <!-- Application Scripts -->
     <script type="module" src="firebase-config.js"></script>
-    <script type="module" src="admin.js?v=1.2.3"></script>
+    <script type="module" src="admin.js?v=1.2.4"></script>
     <!-- Modal Selección de Duración Acceso -->
     <div id="duration-modal" class="fixed inset-0 hidden items-center justify-center z-[1000] p-4">
         <div class="absolute inset-0 bg-obelisco-dark/60 backdrop-blur-sm" id="close-duration-overlay"></div>
