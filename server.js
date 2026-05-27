@@ -149,8 +149,8 @@ const initializeTables = async () => {
             )
         `);
         // Agregar columnas que pueden no existir en BBDDs previas
-        await connection.query(`ALTER TABLE usuarios_perfiles ADD COLUMN IF NOT EXISTS last_login DATETIME`).catch(() => {});
-        await connection.query(`ALTER TABLE usuarios_perfiles ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'usuario'`).catch(() => {});
+        await connection.query(`ALTER TABLE usuarios_perfiles ADD COLUMN last_login DATETIME`).catch(() => {});
+        await connection.query(`ALTER TABLE usuarios_perfiles ADD COLUMN role VARCHAR(50) DEFAULT 'usuario'`).catch(() => {});
 
         // 2. Tabla de Solicitudes de Acceso
         await connection.query(`
@@ -612,6 +612,41 @@ app.post('/api/solicitudes/:id/aprobar', verifyToken, async (req, res) => {
                 'UPDATE tableros SET allowed_users = ?, access_expirations = ? WHERE id = ?',
                 [JSON.stringify(allowed), JSON.stringify(expirations), tablero.id]
             );
+        } else {
+            // Si no es un tablero, buscar en informes
+            const [[informe]] = await connection.execute(
+                'SELECT id, allowed_users, access_expirations FROM informes WHERE id = ? OR title = ? LIMIT 1',
+                [tablero_id, tablero_id]
+            );
+            if (informe) {
+                let allowed = [];
+                try {
+                    const val = (informe.allowed_users || '').trim();
+                    allowed = val ? JSON.parse(val) : [];
+                } catch (jsonErr) {
+                    console.error("Error parsing allowed_users for informe:", jsonErr);
+                    allowed = [];
+                }
+
+                let expirations = {};
+                try {
+                    const val = (informe.access_expirations || '').trim();
+                    expirations = val ? JSON.parse(val) : {};
+                } catch (jsonErr) {
+                    console.error("Error parsing access_expirations for informe:", jsonErr);
+                    expirations = {};
+                }
+
+                if (!Array.isArray(allowed)) allowed = [];
+                if (typeof expirations !== 'object' || expirations === null) expirations = {};
+
+                if (!allowed.map(u => u.toLowerCase()).includes(email.toLowerCase())) allowed.push(email);
+                if (expiry_iso) expirations[email.toLowerCase()] = expiry_iso;
+                await connection.execute(
+                    'UPDATE informes SET allowed_users = ?, access_expirations = ? WHERE id = ?',
+                    [JSON.stringify(allowed), JSON.stringify(expirations), informe.id]
+                );
+            }
         }
 
         // 2. Actualizar solicitud
