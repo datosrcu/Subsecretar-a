@@ -265,7 +265,7 @@ async function loadUserPermissions(user) {
                         period: i.period || '',
                         year: i.year,
                         sort_order: i.sort_order || 0,
-                        requireLogin: i.require_login === 1,
+                        requireLogin: i.require_login === 1 || i.require_login === true || i.require_login === 'true' || i.require_login === '1',
                         allowedUsers: (() => { try { const v = i.allowed_users; return typeof v === 'string' && v.trim() !== '' ? JSON.parse(v) : (Array.isArray(v) ? v : []); } catch(e) { return []; } })(),
                         accessExpirations: (() => { try { const v = i.access_expirations; return typeof v === 'string' && v.trim() !== '' ? JSON.parse(v) : (typeof v === 'object' && v !== null ? v : {}); } catch(e) { return {}; } })()
                     };

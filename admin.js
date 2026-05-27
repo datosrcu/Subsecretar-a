@@ -2080,7 +2080,14 @@ function openInformeModal(id = null) {
             document.getElementById('field-informe-req-login').value = informe.require_login ? 'true' : 'false';
 
             // Load users
-            informeSelectedUsers = (informe.allowed_users || []).map(u => u.toLowerCase()).filter(email =>
+            const allowedUsersRaw = informe.allowed_users;
+            const parsedAllowedUsers = (() => {
+                try {
+                    if (typeof allowedUsersRaw === 'string' && allowedUsersRaw.trim() !== '') return JSON.parse(allowedUsersRaw);
+                    return Array.isArray(allowedUsersRaw) ? allowedUsersRaw : [];
+                } catch (e) { return []; }
+            })();
+            informeSelectedUsers = parsedAllowedUsers.map(u => u.toLowerCase()).filter(email =>
                 allUsersFetched.some(u => u.email.toLowerCase() === email) ||
                 ADMIN_EMAILS.map(e => e.toLowerCase()).includes(email)
             );
