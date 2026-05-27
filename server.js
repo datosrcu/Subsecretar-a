@@ -122,6 +122,7 @@ const limiter = rateLimit({
     },
     standardHeaders: true, // Retorna info de límite en las cabeceras `RateLimit-*`
     legacyHeaders: false, // Desactiva las cabeceras `X-RateLimit-*`
+    validate: { trustProxy: false } // Desactivar advertencia permisiva sobre trust proxy en VPS
 });
 
 // Aplicar el limitador a todas las rutas de la API
@@ -366,8 +367,30 @@ const initializeTables = async () => {
     }
 };
 
-// Ejecutar inicialización al arrancar
-initializeTables();
+const initializeTablesWithRetry = async (retries = 6, delay = 4000) => {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            const connection = await getDbConnection();
+            await connection.ping();
+            await connection.end();
+            
+            // Si conecta bien, procedemos a inicializar tablas
+            await initializeTables();
+            return;
+        } catch (error) {
+            console.error(`[DB init] Intento ${attempt}/${retries} fallido: la base de datos no responde (${error.message})`);
+            if (attempt === retries) {
+                console.error('[DB init] No se pudo establecer conexión con la base de datos tras varios intentos.');
+            } else {
+                console.log(`[DB init] Reintentando en ${delay / 1000} segundos...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+    }
+};
+
+// Ejecutar inicialización al arrancar con reintentos
+initializeTablesWithRetry();
 
 // Endpoint de prueba de conexión
 app.get('/api/status', async (req, res) => {
