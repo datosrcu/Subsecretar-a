@@ -1156,6 +1156,7 @@ async function loadBoards() {
             title: b.title,
             icon: b.icon,
             iframeUrl: b.iframe_url,
+            filePath: b.file_path,
             enabled: b.enabled !== 0,
             requireLogin: b.require_login !== 0,
             openInNewTab: b.open_in_new_tab !== 0,
@@ -1253,7 +1254,6 @@ function filterAndRenderBoards() {
             fieldBoardId.value = id;
             fieldBoardEnabled.checked = data.enabled !== false;
             fieldBoardTitle.value = data.title || '';
-            fieldBoardUrl.value = data.iframeUrl || '';
             fieldBoardIcon.value = data.icon || '';
             fieldBoardReqLogin.value = data.requireLogin !== false ? 'true' : 'false';
             fieldBoardNewTab.checked = data.openInNewTab === true;
@@ -1275,6 +1275,39 @@ function filterAndRenderBoards() {
                 }
             }
             renderCategoryChecklist();
+
+            // Set file upload reset
+            const fileInputEl = document.getElementById('field-board-file');
+            if (fileInputEl) fileInputEl.value = '';
+            const fileLabelEl = document.getElementById('board-file-label');
+            if (fileLabelEl) fileLabelEl.textContent = 'Arrastrá o hacé clic (HTML, PDF, imagen — máx 50MB)';
+            
+            const currentFileEl = document.getElementById('board-current-file');
+            const typeUrlEl = document.getElementById('board-type-url');
+            const typeFileEl = document.getElementById('board-type-file');
+            const urlWrapEl = document.getElementById('board-url-wrap');
+            const fileWrapEl = document.getElementById('board-file-wrap');
+
+            if (data.filePath) {
+                if (typeFileEl) typeFileEl.checked = true;
+                if (urlWrapEl) urlWrapEl.classList.add('hidden');
+                if (fileWrapEl) fileWrapEl.classList.remove('hidden');
+                if (currentFileEl) {
+                    currentFileEl.textContent = `Archivo actual: ${data.filePath}`;
+                    currentFileEl.classList.remove('hidden');
+                }
+                fieldBoardUrl.value = '';
+            } else {
+                if (typeUrlEl) typeUrlEl.checked = true;
+                if (urlWrapEl) urlWrapEl.classList.remove('hidden');
+                if (fileWrapEl) fileWrapEl.classList.add('hidden');
+                if (currentFileEl) {
+                    currentFileEl.textContent = '';
+                    currentFileEl.classList.add('hidden');
+                }
+                fieldBoardUrl.value = data.iframeUrl || '';
+            }
+
             boardModal.classList.remove('hidden');
             boardModal.classList.add('flex');
         });
@@ -1311,6 +1344,20 @@ addBoardBtn?.addEventListener('click', () => {
     currentlySelectedCategories = [];
     renderCategoryChecklist();
 
+    // Reset source type to URL
+    const typeUrlEl = document.getElementById('board-type-url');
+    if (typeUrlEl) typeUrlEl.checked = true;
+    const urlWrapEl = document.getElementById('board-url-wrap');
+    if (urlWrapEl) urlWrapEl.classList.remove('hidden');
+    const fileWrapEl = document.getElementById('board-file-wrap');
+    if (fileWrapEl) fileWrapEl.classList.add('hidden');
+    const fileInputEl = document.getElementById('field-board-file');
+    if (fileInputEl) fileInputEl.value = '';
+    const fileLabelEl = document.getElementById('board-file-label');
+    if (fileLabelEl) fileLabelEl.textContent = 'Arrastrá o hacé clic (HTML, PDF, imagen — máx 50MB)';
+    const currentFileEl = document.getElementById('board-current-file');
+    if (currentFileEl) { currentFileEl.textContent = ''; currentFileEl.classList.add('hidden'); }
+
     boardModalTitle.textContent = 'Nuevo Tablero';
     boardModal.classList.remove('hidden');
     boardModal.classList.add('flex');
@@ -1343,29 +1390,54 @@ boardForm?.addEventListener('submit', async (e) => {
             }
         }
 
-        const boardData = {
-            id: docId,
-            enabled: fieldBoardEnabled.checked,
-            title: fieldBoardTitle.value.trim(),
-            icon: fieldBoardIcon.value.trim(),
-            categories: finalCategories,
-            category_legacy: hasGEDirect ? 'Gestores Externos' : '',
-            require_login: fieldBoardReqLogin.value === 'true',
-            iframe_url: fieldBoardUrl.value.trim(),
-            open_in_new_tab: fieldBoardNewTab.checked,
-            allowed_users: allowedUsersList,
-            access_expirations: accessExpirations,
-            sort_order: fieldBoardId.value ? (allBoardsFetched.find(b => b.id === docId)?.order || 0) : 0
-        };
+        const sourceType = document.querySelector('input[name="board-source-type"]:checked')?.value || 'url';
+        const urlVal = fieldBoardUrl.value.trim();
+        const fileInput = document.getElementById('field-board-file');
 
-        await callApi('/api/tableros', 'POST', boardData);
+        if (sourceType === 'url' && !urlVal && !fieldBoardId.value) {
+            alert('Por favor ingresá una URL para el tablero.');
+            isSubmitting = false;
+            return;
+        }
+
+        const token = await getCurrentUserToken();
+        const formData = new FormData();
+        formData.append('id', docId);
+        formData.append('title', fieldBoardTitle.value.trim());
+        formData.append('icon', fieldBoardIcon.value.trim());
+        formData.append('categories', JSON.stringify(finalCategories));
+        formData.append('category_legacy', hasGEDirect ? 'Gestores Externos' : '');
+        formData.append('enabled', fieldBoardEnabled.checked ? 'true' : 'false');
+        formData.append('require_login', fieldBoardReqLogin.value === 'true' ? 'true' : 'false');
+        formData.append('open_in_new_tab', fieldBoardNewTab.checked ? 'true' : 'false');
+        formData.append('allowed_users', JSON.stringify(allowedUsersList));
+        formData.append('access_expirations', JSON.stringify(accessExpirations));
+        formData.append('sort_order', fieldBoardId.value ? (allBoardsFetched.find(b => b.id === docId)?.order || 0) : 0);
+        formData.append('source_type', sourceType);
+
+        if (sourceType === 'url') {
+            formData.append('iframe_url', urlVal);
+        } else if (fileInput && fileInput.files[0]) {
+            formData.append('archivo', fileInput.files[0]);
+        }
+
+        const response = await fetch('/api/tableros', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Error al guardar tablero');
+        }
 
         closeAllModals();
         await loadBoards();
         await loadRequests(); 
     } catch (error) {
         console.error("Error saving board to MySQL:", error);
-        alert("Error al guardar tablero en MySQL.");
+        alert("Error al guardar tablero en MySQL: " + error.message);
     } finally { isSubmitting = false; }
 });
 
@@ -2296,7 +2368,6 @@ document.getElementById('delete-informe-btn')?.addEventListener('click', () => {
 document.querySelectorAll('[data-close="informe"]')?.forEach(btn => {
     btn.addEventListener('click', closeInformeModal);
 });
-
 // Mostrar/ocultar URL vs File según radio
 document.querySelectorAll('input[name="informe-source-type"]')?.forEach(radio => {
     radio.addEventListener('change', () => {
@@ -2332,6 +2403,22 @@ document.querySelectorAll('.nav-tab[data-target="tab-informes"]')?.forEach(btn =
     btn.addEventListener('click', () => {
         setTimeout(loadInformes, 50);
     });
+});
+
+// Mostrar/ocultar URL vs File en Tableros según radio
+document.querySelectorAll('input[name="board-source-type"]')?.forEach(radio => {
+    radio.addEventListener('change', () => {
+        const isUrl = document.getElementById('board-type-url').checked;
+        document.getElementById('board-url-wrap').classList.toggle('hidden', !isUrl);
+        document.getElementById('board-file-wrap').classList.toggle('hidden', isUrl);
+    });
+});
+
+// Actualizar label del input file de Tableros
+document.getElementById('field-board-file')?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    const label = document.getElementById('board-file-label');
+    if (file && label) label.textContent = `✓ ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
 });
 
 window.openInformeModal = openInformeModal;

@@ -34,6 +34,29 @@ const uploadInformes = multer({
     }
 });
 
+// --- MULTER: Configuración de uploads para tableros ---
+const TABLEROS_DIR = path.join(UPLOADS_PATH, 'tableros');
+if (!fs.existsSync(TABLEROS_DIR)) fs.mkdirSync(TABLEROS_DIR, { recursive: true });
+
+const tablerosStorage = multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, TABLEROS_DIR),
+    filename: (_req, file, cb) => {
+        const unique = Date.now() + '-' + Math.round(Math.random() * 1e6);
+        const ext = path.extname(file.originalname);
+        cb(null, unique + ext);
+    }
+});
+const uploadTableros = multer({
+    storage: tablerosStorage,
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
+    fileFilter: (_req, file, cb) => {
+        const allowed = ['.pdf', '.png', '.jpg', '.jpeg', '.gif', '.webp', '.html', '.htm'];
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (allowed.includes(ext)) cb(null, true);
+        else cb(new Error('Tipo de archivo no permitido. Se aceptan: PDF, imágenes y HTML.'));
+    }
+});
+
 // Inicializar Resend para envío de emails (Condicional para evitar crasheos si falta la API Key)
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 if (!resend) {
@@ -243,6 +266,7 @@ const initializeTables = async () => {
                 title VARCHAR(255),
                 icon VARCHAR(50),
                 iframe_url TEXT,
+                file_path VARCHAR(500),
                 enabled BOOLEAN DEFAULT TRUE,
                 require_login BOOLEAN DEFAULT TRUE,
                 open_in_new_tab BOOLEAN DEFAULT FALSE,
@@ -329,6 +353,9 @@ const initializeTables = async () => {
         } catch (e) { /* ignore if exists */ }
         try {
             await connection.query('ALTER TABLE informes ADD COLUMN access_expirations JSON');
+        } catch (e) { /* ignore if exists */ }
+        try {
+            await connection.query('ALTER TABLE tableros ADD COLUMN file_path VARCHAR(500)');
         } catch (e) { /* ignore if exists */ }
 
         console.log('Estructura de base de datos lista.');
@@ -737,6 +764,13 @@ app.patch('/api/tableros/:id', verifyToken, async (req, res) => {
 app.delete('/api/tableros/:id', verifyToken, async (req, res) => {
     try {
         const connection = await getDbConnection();
+        const [[row]] = await connection.execute('SELECT file_path FROM tableros WHERE id = ?', [req.params.id]);
+        if (row && row.file_path) {
+            const absPath = path.join(__dirname, row.file_path);
+            if (fs.existsSync(absPath)) {
+                try { fs.unlinkSync(absPath); } catch (e) { console.error('Error deleting file on board delete:', e); }
+            }
+        }
         await connection.execute('DELETE FROM tableros WHERE id = ?', [req.params.id]);
         await connection.end();
         res.json({ success: true });
@@ -881,41 +915,90 @@ app.get('/api/tableros', async (req, res) => {
 });
 
 // 8. Guardar/Actualizar tablero (Admin)
-app.post('/api/tableros', verifyToken, async (req, res) => {
+app.post('/api/tableros', verifyToken, uploadTableros.single('archivo'), async (req, res) => {
     // Aquí podrías validar que req.user.email sea admin
-    const { id, title, icon, iframe_url, enabled, require_login, open_in_new_tab, sort_order, allowed_users, access_expirations, categories, category_legacy } = req.body;
+    const { id, title, icon, iframe_url, enabled, require_login, open_in_new_tab, sort_order, allowed_users, access_expirations, categories, category_legacy, source_type } = req.body;
     try {
+        const safeId = id || `board_${Date.now()}`;
         const connection = await getDbConnection();
+        
+        // Obtener tablero existente para ver si ya tiene un archivo
+        const [[existing]] = await connection.execute('SELECT file_path, iframe_url FROM tableros WHERE id = ?', [safeId]);
+
+        let finalIframeUrl = iframe_url || '';
+        let filePath = null;
+
+        if (existing) {
+            filePath = existing.file_path;
+            finalIframeUrl = existing.iframe_url;
+        }
+
+        if (req.file) {
+            // Eliminar archivo viejo si existe
+            if (existing && existing.file_path) {
+                const oldPath = path.join(__dirname, existing.file_path);
+                if (fs.existsSync(oldPath)) {
+                    try { fs.unlinkSync(oldPath); } catch (e) { console.error('Error deleting old file:', e); }
+                }
+            }
+            filePath = `/uploads/tableros/${req.file.filename}`;
+            finalIframeUrl = filePath;
+        } else if (source_type === 'url') {
+            // Eliminar archivo viejo si cambia a URL
+            if (existing && existing.file_path) {
+                const oldPath = path.join(__dirname, existing.file_path);
+                if (fs.existsSync(oldPath)) {
+                    try { fs.unlinkSync(oldPath); } catch (e) { console.error('Error deleting old file on source switch:', e); }
+                }
+            }
+            filePath = null;
+            finalIframeUrl = iframe_url || '';
+        }
+
         const sql = `
-            INSERT INTO tableros (id, title, icon, iframe_url, enabled, require_login, open_in_new_tab, sort_order, allowed_users, access_expirations, categories, category_legacy)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO tableros (id, title, icon, iframe_url, file_path, enabled, require_login, open_in_new_tab, sort_order, allowed_users, access_expirations, categories, category_legacy)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE 
-            title=VALUES(title), icon=VALUES(icon), iframe_url=VALUES(iframe_url), enabled=VALUES(enabled), 
+            title=VALUES(title), icon=VALUES(icon), iframe_url=VALUES(iframe_url), file_path=VALUES(file_path), enabled=VALUES(enabled), 
             require_login=VALUES(require_login), open_in_new_tab=VALUES(open_in_new_tab), sort_order=VALUES(sort_order),
             allowed_users=VALUES(allowed_users), access_expirations=VALUES(access_expirations), categories=VALUES(categories), category_legacy=VALUES(category_legacy)
         `;
         
-        // Sanitizar rigurosamente todos los campos para evitar cualquier valor undefined
-        const safeId = id || `board_${Date.now()}`;
         const safeTitle = title || '';
         const safeIcon = icon || '';
-        const safeIframeUrl = iframe_url || '';
         const safeEnabled = (enabled === true || enabled === 1 || enabled === 'true') ? 1 : 0;
         const safeRequireLogin = (require_login === true || require_login === 1 || require_login === 'true') ? 1 : 0;
         const safeOpenInNewTab = (open_in_new_tab === true || open_in_new_tab === 1 || open_in_new_tab === 'true') ? 1 : 0;
         const safeSortOrder = parseInt(sort_order) || 0;
-        const safeAllowedUsers = JSON.stringify(allowed_users || []);
-        const safeAccessExpirations = JSON.stringify(access_expirations || {});
-        const safeCategories = JSON.stringify(categories || []);
+        
+        let parsedAllowedUsers = [];
+        try {
+            parsedAllowedUsers = typeof allowed_users === 'string' ? JSON.parse(allowed_users) : (allowed_users || []);
+        } catch (e) { parsedAllowedUsers = []; }
+        const safeAllowedUsers = JSON.stringify(parsedAllowedUsers);
+
+        let parsedAccessExpirations = {};
+        try {
+            parsedAccessExpirations = typeof access_expirations === 'string' ? JSON.parse(access_expirations) : (access_expirations || {});
+        } catch (e) { parsedAccessExpirations = {}; }
+        const safeAccessExpirations = JSON.stringify(parsedAccessExpirations);
+
+        let parsedCategories = [];
+        try {
+            parsedCategories = typeof categories === 'string' ? JSON.parse(categories) : (categories || []);
+        } catch (e) { parsedCategories = []; }
+        const safeCategories = JSON.stringify(parsedCategories);
+
         const safeCategoryLegacy = category_legacy || '';
 
         await connection.execute(sql, [
-            safeId, safeTitle, safeIcon, safeIframeUrl, safeEnabled, safeRequireLogin, safeOpenInNewTab, safeSortOrder, 
+            safeId, safeTitle, safeIcon, finalIframeUrl, filePath, safeEnabled, safeRequireLogin, safeOpenInNewTab, safeSortOrder, 
             safeAllowedUsers, safeAccessExpirations, safeCategories, safeCategoryLegacy
         ]);
         await connection.end();
-        res.json({ message: 'Tablero guardado.' });
+        res.json({ message: 'Tablero guardado.', id: safeId, iframe_url: finalIframeUrl });
     } catch (error) {
+        console.error('Error saving board:', error);
         res.status(500).json({ error: error.message });
     }
 });

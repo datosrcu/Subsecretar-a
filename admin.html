@@ -805,7 +805,7 @@
                 </button>
             </div>
 
-            <form id="board-form" class="p-6 overflow-y-auto space-y-4 text-sm">
+            <form id="board-form" class="p-6 overflow-y-auto space-y-4 text-sm" enctype="multipart/form-data">
                 <input type="hidden" id="board-id">
 
                 <div class="flex items-center space-x-2 mb-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -853,11 +853,47 @@
                     </div>
                 </div>
 
+                <!-- Tipo de contenido -->
                 <div>
-                    <label class="block font-medium mb-1">URL del Iframe (Looker, PowerBI, Sheets)</label>
+                    <label class="block font-medium mb-2">Tipo de contenido</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 has-[:checked]:border-obelisco-blue has-[:checked]:bg-blue-50/20">
+                            <input type="radio" name="board-source-type" value="url" id="board-type-url" checked class="text-obelisco-blue focus:ring-obelisco-blue">
+                            <div>
+                                <div class="font-medium text-xs">🔗 URL / Enlace web</div>
+                                <div class="text-[10px] text-gray-400">Looker, PowerBI, Sheets, etc.</div>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 has-[:checked]:border-obelisco-blue has-[:checked]:bg-blue-50/20">
+                            <input type="radio" name="board-source-type" value="file" id="board-type-file" class="text-obelisco-blue focus:ring-obelisco-blue">
+                            <div>
+                                <div class="font-medium text-xs">📄 Subir archivo</div>
+                                <div class="text-[10px] text-gray-400">HTML u otros archivos</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- URL input -->
+                <div id="board-url-wrap">
+                    <label class="block font-medium mb-1">URL del Iframe (Looker, PowerBI, Sheets) <span class="text-red-500">*</span></label>
                     <input type="url" id="field-board-url"
                         class="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-obelisco-blue"
                         placeholder="https://...">
+                </div>
+
+                <!-- File upload -->
+                <div id="board-file-wrap" class="hidden">
+                    <label class="block font-medium mb-1">Archivo (HTML, PDF o imagen)</label>
+                    <div class="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center hover:border-obelisco-blue transition relative bg-gray-50">
+                        <input type="file" id="field-board-file" name="archivo" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.html,.htm"
+                            class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                        <svg class="w-8 h-8 mx-auto text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                        <p id="board-file-label" class="text-xs text-gray-500">Arrastrá o hacé clic (HTML, PDF, imagen — máx 50MB)</p>
+                    </div>
+                    <p id="board-current-file" class="text-[10px] text-obelisco-blue mt-1 hidden"></p>
                 </div>
 
                 <div class="flex items-center space-x-2 p-3 bg-blue-50/50 rounded-lg border border-blue-100">
