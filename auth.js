@@ -249,34 +249,6 @@ async function loadUserPermissions(user) {
             throw e;
         }
 
-        // Cargar informes en paralelo (no bloquea si falla)
-        try {
-            const informesData = await fetch('/api/informes').then(r => r.json());
-            allInformes = informesData
-                .filter(i => i.enabled)
-                .map(i => {
-                    const informeObj = {
-                        id: i.id,
-                        title: i.title,
-                        description: i.description || '',
-                        categories: (() => { try { const v = i.categories; return typeof v === 'string' ? JSON.parse(v) : (Array.isArray(v) ? v : []); } catch(e) { return []; } })(),
-                        url: i.file_path || i.url,
-                        fileType: i.file_type || 'url',
-                        period: i.period || '',
-                        year: i.year,
-                        sort_order: i.sort_order || 0,
-                        requireLogin: i.require_login === 1 || i.require_login === true || i.require_login === 'true' || i.require_login === '1',
-                        allowedUsers: (() => { try { const v = i.allowed_users; return typeof v === 'string' && v.trim() !== '' ? JSON.parse(v) : (Array.isArray(v) ? v : []); } catch(e) { return []; } })(),
-                        accessExpirations: (() => { try { const v = i.access_expirations; return typeof v === 'string' && v.trim() !== '' ? JSON.parse(v) : (typeof v === 'object' && v !== null ? v : {}); } catch(e) { return {}; } })()
-                    };
-                    const hasAccess = checkUserAccess(user, informeObj);
-                    return { ...informeObj, hasAccess };
-                });
-        } catch (e) {
-            console.warn('Error cargando informes:', e.message);
-            allInformes = [];
-        }
-
         const profile = perfilData.profile;
         const globalTermsVersion = perfilData.termsVersion || '1.2.0';
 
@@ -306,6 +278,34 @@ async function loadUserPermissions(user) {
                 console.log("Re-acceptance required: user has", profile.terms_accepted_version, "but current is", globalTermsVersion);
                 showTCReacceptanceModal(globalTermsVersion);
             }
+        }
+
+        // Cargar informes en paralelo (no bloquea si falla)
+        try {
+            const informesData = await fetch('/api/informes').then(r => r.json());
+            allInformes = informesData
+                .filter(i => i.enabled)
+                .map(i => {
+                    const informeObj = {
+                        id: i.id,
+                        title: i.title,
+                        description: i.description || '',
+                        categories: (() => { try { const v = i.categories; return typeof v === 'string' ? JSON.parse(v) : (Array.isArray(v) ? v : []); } catch(e) { return []; } })(),
+                        url: i.file_path || i.url,
+                        fileType: i.file_type || 'url',
+                        period: i.period || '',
+                        year: i.year,
+                        sort_order: i.sort_order || 0,
+                        requireLogin: i.require_login === 1 || i.require_login === true || i.require_login === 'true' || i.require_login === '1',
+                        allowedUsers: (() => { try { const v = i.allowed_users; return typeof v === 'string' && v.trim() !== '' ? JSON.parse(v) : (Array.isArray(v) ? v : []); } catch(e) { return []; } })(),
+                        accessExpirations: (() => { try { const v = i.access_expirations; return typeof v === 'string' && v.trim() !== '' ? JSON.parse(v) : (typeof v === 'object' && v !== null ? v : {}); } catch(e) { return {}; } })()
+                    };
+                    const hasAccess = checkUserAccess(user, informeObj);
+                    return { ...informeObj, hasAccess };
+                });
+        } catch (e) {
+            console.warn('Error cargando informes:', e.message);
+            allInformes = [];
         }
 
         // 2. Load personal requests from MySQL
