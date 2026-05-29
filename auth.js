@@ -31,7 +31,7 @@ const ADMIN_EMAILS = [
 // Configuration for Dynamic Registration Form
 const REG_FORM_CONFIG = {
     "Sector Público Estatal": {
-        types: ["Municipalidad", "Gobierno Provincial", "Gobierno Nacional"],
+        types: ["Municipalidad", "Municipalidad de Río Cuarto", "Gobierno Provincial", "Gobierno Nacional"],
         roles: ["Autoridad política", "Jefe de área / Coordinador", "Técnico / Profesional", "Analista de datos / Estadístico", "Personal administrativo", "Comunicador / Prensa institucional", "Desarrollador / Soporte TI", "Consultor externo", "Otro"],
         requiresCUIT: ["Autoridad política", "Jefe de área / Coordinador"]
     },
@@ -73,7 +73,7 @@ async function callApi(endpoint, method = 'POST', body = null) {
     return await response.json();
 }
 
-console.log("Auth JS v1.3 - Backend Connected");
+console.log("Auth JS v1 - Backend Connected");
 
 // Navigation State
 let currentViewLevel = 'categories'; // 'categories' or 'boards'
@@ -250,7 +250,7 @@ async function loadUserPermissions(user) {
         }
 
         const profile = perfilData.profile;
-        const globalTermsVersion = perfilData.termsVersion || '1.2.0';
+        const globalTermsVersion = perfilData.termsVersion || '1';
 
         // Cache role and profile status from MySQL
         let hasProfileInfo = false;
@@ -657,7 +657,7 @@ async function handleAccessRequest(e) {
             dashboard_name: buttonName,
             reason: selectMotivo,
             reason_detail: detalleMotivo,
-            terms_version: currentUserAcceptedTCVersion || '1.2.0'
+            terms_version: currentUserAcceptedTCVersion || '1'
         });
 
         document.getElementById('ogb-form-ok').classList.remove('hidden');
@@ -1605,6 +1605,33 @@ if (registrationForm) {
     const regNoExpiryCheck = document.getElementById('reg-no-expiry');
     const regExpiryDateInput = document.getElementById('reg-expiry-date');
 
+    function updateCuitFieldState() {
+        const group = regGroupSelect.value;
+        const orgType = regTypeSelect.value;
+        const role = regRoleSelect.value;
+        const config = REG_FORM_CONFIG[group];
+        const regCuitInput = document.getElementById('reg-cuit');
+
+        if (!regCuitInput) return;
+
+        if (config && config.requiresCUIT.includes(role)) {
+            if (group === "Sector Público Estatal" && orgType === "Municipalidad de Río Cuarto") {
+                regCuitInput.value = "30999050685";
+                regCuitInput.disabled = true;
+                regCuitInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+            } else {
+                if (regCuitInput.disabled) {
+                    regCuitInput.disabled = false;
+                    regCuitInput.value = "";
+                    regCuitInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                }
+            }
+        } else {
+            regCuitInput.disabled = false;
+            regCuitInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+        }
+    }
+
     // 1. Group Change -> Populate Types
     regGroupSelect?.addEventListener('change', () => {
         const group = regGroupSelect.value;
@@ -1623,6 +1650,7 @@ if (registrationForm) {
         regRoleSelect.innerHTML = '<option value="" disabled selected>Primero seleccioná el tipo de organización</option>';
         regExtraFields.classList.add('hidden');
         regRoleDetailWrap.classList.add('hidden');
+        updateCuitFieldState();
     });
 
     // 2. Type Change -> Populate Roles
@@ -1641,6 +1669,7 @@ if (registrationForm) {
         regRoleSelect.disabled = false;
         regExtraFields.classList.add('hidden');
         regRoleDetailWrap.classList.add('hidden');
+        updateCuitFieldState();
     });
 
     // 3. Role Change -> Conditional Fields
@@ -1664,6 +1693,7 @@ if (registrationForm) {
             regRoleDetailWrap.classList.add('hidden');
             document.getElementById('reg-role-detail').required = false;
         }
+        updateCuitFieldState();
     });
 
     // 4. No Expiry Check logic
@@ -1845,7 +1875,7 @@ if (registrationForm) {
             // Fetch T&C Version from MySQL
             const tcRes = await fetch('/api/config/terms-version');
             const tcData = await tcRes.json();
-            const currentTCVersion = tcData.version || "1.2.0";
+            const currentTCVersion = tcData.version || "1";
             const userIP = await getUserIP();
 
             let legalDocURL = null;

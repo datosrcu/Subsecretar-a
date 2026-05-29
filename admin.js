@@ -131,7 +131,7 @@ let trackingSearchQuery = "";
 let trackingStatusFilter = "all";
 let allContactsFetched = [];
 let allRCEFetched = [];
-let globalTermsVersion = "1.2.0";
+let globalTermsVersion = "1";
 
 const ADMIN_EMAILS = [
     'datos@riocuarto.gov.ar'

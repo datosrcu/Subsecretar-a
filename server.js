@@ -320,8 +320,9 @@ const initializeTables = async () => {
 
         // Insertar versión por defecto si no existe
         await connection.query(`
-            INSERT IGNORE INTO config_sistema (config_key, config_value) 
-            VALUES ('terms_version', '1.2.0')
+            INSERT INTO config_sistema (config_key, config_value) 
+            VALUES ('terms_version', '1')
+            ON DUPLICATE KEY UPDATE config_value = '1'
         `);
 
         // 11. Tabla de Informes
@@ -470,7 +471,7 @@ app.get('/api/perfil/me', verifyToken, async (req, res) => {
         await connection.end();
         res.json({
             profile: profile || null,
-            termsVersion: configRow?.config_value || '1.2.0'
+            termsVersion: configRow?.config_value || '1'
         });
     } catch (error) {
         console.error('Error obteniendo perfil:', error);
@@ -1280,7 +1281,7 @@ app.get('/api/config/terms-version', async (req, res) => {
         const connection = await getDbConnection();
         const [rows] = await connection.query('SELECT config_value FROM config_sistema WHERE config_key = "terms_version"');
         await connection.end();
-        res.json({ version: rows[0]?.config_value || '1.0.0' });
+        res.json({ version: rows[0]?.config_value || '1' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
